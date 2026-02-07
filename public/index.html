@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InkedMayhem — Unapologetically Bold</title>
+    <meta name="description" content="InkedMayhem - Exclusive content, bold vibes, and raw creativity. Subscribe for the full experience.">
+    <meta property="og:title" content="InkedMayhem">
+    <meta property="og:description" content="Unapologetically Bold — Exclusive content & premium drops">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://inkedmayhem.netlify.app">
+    <meta property="og:image" content="https://inkedmayhem.netlify.app/images/gallery/pool-leopard-palms.jpg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="InkedMayhem">
+    <meta name="twitter:description" content="Unapologetically Bold — Exclusive content & premium drops">
+    <meta name="twitter:image" content="https://inkedmayhem.netlify.app/images/gallery/pool-leopard-palms.jpg">
+    <meta name="theme-color" content="#0a0a0a">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔥</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <!-- NOISE TEXTURE OVERLAY -->
+    <div class="noise-overlay"></div>
+
+    <!-- NAVIGATION -->
+    <nav id="navbar">
+        <a href="#" class="nav-logo">INKED<span>MAYHEM</span></a>
+        <ul class="nav-links" id="navLinks">
+            <li><a href="#gallery">Gallery</a></li>
+            <li><a href="#exclusive">Exclusive</a></li>
+            <li><a href="#blog">Blog</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#contact">Contact</a></li>
+            <li><a class='nav-members' href='/members'>Members</a></li>
+            <li><a href="https://instagram.com/x_tina_d" target="_blank" rel="noopener" class="nav-ig">IG</a></li>
+        </ul>
+        <div class="nav-right">
+            <button class="btn-login" id="btnLogin">Sign In</button>
+            <div class="hamburger" id="hamburger" aria-label="Toggle menu">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- MOBILE MENU -->
+    <div class="mobile-menu" id="mobileMenu">
+        <ul>
+            <li><a href="#gallery">Gallery</a></li>
+            <li><a href="#exclusive">Exclusive</a></li>
+            <li><a href="#blog">Blog</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#contact">Contact</a></li>
+            <li><a href='/members'>Members Area</a></li>
+            <li><a href="https://instagram.com/x_tina_d" target="_blank" rel="noopener">Instagram</a></li>
+        </ul>
+    </div>
+
+    <!-- HERO SECTION -->
+    <section class="hero" id="hero">
+        <div class="hero-bg-lines"></div>
+        <div class="hero-content">
+            <p class="hero-subtitle">— est. 2026 —</p>
+            <h1 class="hero-title">
+                <span class="line1">INKED</span>
+                <span class="line2"><span class="outline">MAY</span><span class="red">HEM</span></span>
+            </h1>
+            <p class="hero-tagline">Unapologetically bold</p>
+            <div class="hero-actions">
+                <a href="#gallery" class="btn-primary">See More</a>
+                <a href="#exclusive" class="btn-outline">Exclusive Content →</a>
+            </div>
+        </div>
+        <div class="scroll-indicator">
+            <span>scroll</span>
+            <div class="scroll-line"></div>
+        </div>
+    </section>
+
+    <!-- GALLERY SECTION -->
+    <section class="section gallery-section" id="gallery">
+        <div class="section-header">
+            <span class="section-tag">001</span>
+            <h2 class="section-title">The Vibes</h2>
+            <p class="section-sub">A taste of what's behind the curtain</p>
+        </div>
+        <div class="gallery-filters">
+            <button class="filter-btn active" data-filter="all">All</button>
+            <button class="filter-btn" data-filter="photos">Photos</button>
+            <button class="filter-btn" data-filter="selfies">Selfies</button>
+            <button class="filter-btn" data-filter="lifestyle">Lifestyle</button>
+        </div>
+        <div class="gallery-grid" id="galleryGrid">
+            <!-- ROW 1: Hero shots -->
+            <div class="gallery-item large" data-category="photos">
+                <img src="/images/gallery/pool-leopard-palms.jpg" alt="Pool vibes" loading="lazy">
+            </div>
+            <div class="gallery-item" data-category="selfies">
+                <img src="/images/gallery/pink-tank-coffee.jpg" alt="Pink vibes" loading="lazy">
+            </div>
+            <div class="gallery-item" data-category="selfies">
+                <img src="/images/gallery/rainbow-leopard-wpb.jpg" alt="West Palm Beach" loading="lazy">
+            </div>
+            <!-- ROW 2 -->
+            <div class="gallery-item" data-category="photos">
+                <img src="/images/gallery/beach-green-bikini.jpg" alt="Beach day" loading="lazy">
+            </div>
+            <div class="gallery-item" data-category="selfies">
+                <img src="/images/gallery/dino-print-selfie.jpg" alt="Dino vibes" loading="lazy">
+            </div>
+            <div class="gallery-item large" data-category="selfies">
+                <img src="/images/gallery/neon-wave-beach.jpg" alt="Neon beach" loading="lazy">
+            </div>
+            <!-- ROW 3 -->
+            <div class="gallery-item" data-category="photos">
+                <img src="/images/gallery/neon-leopard-pool.jpg" alt="Poolside" loading="lazy">
+            </div>
+            <div class="gallery-item" data-category="selfies">
+                <img src="/images/gallery/jamaica-mirror.jpg" alt="Jamaica vibes" loading="lazy">
+            </div>
+            <div class="gallery-item" data-category="photos">
+                <img src="/images/gallery/white-bikini-sunday.jpg" alt="Sunday snoooze" loading="lazy">
+            </div>
+            <!-- ROW 4 -->
+            <div class="gallery-item" data-category="selfies">
+                <img src="/images/gallery/olive-cozy-selfie.jpg" alt="Cozy night" loading="lazy">
+            </div>
+            <div class="gallery-item large" data-category="photos">
+                <img src="/images/gallery/poolside-leopard-feet.jpg" alt="Pool chill" loading="lazy">
+            </div>
+            <div class="gallery-item" data-category="selfies">
+                <img src="/images/gallery/pink-top-closeup.jpg" alt="Close up" loading="lazy">
+            </div>
+            <!-- ROW 5 -->
+            <div class="gallery-item" data-category="lifestyle">
+                <img src="/images/gallery/pink-tube-river-back.jpg" alt="River float" loading="lazy">
+            </div>
+            <div class="gallery-item" data-category="selfies">
+                <img src="/images/gallery/neon-green-bikini.jpg" alt="Neon green" loading="lazy">
+            </div>
+            <div class="gallery-item" data-category="photos">
+                <img src="/images/gallery/mirror-black-art.jpg" alt="Art vibes" loading="lazy">
+            </div>
+            <!-- ROW 6 -->
+            <div class="gallery-item large" data-category="lifestyle">
+                <img src="/images/gallery/river-tubing.jpg" alt="River day" loading="lazy">
+            </div>
+            <div class="gallery-item" data-category="selfies">
+                <img src="/images/gallery/pink-dogwalk.jpg" alt="Dog walk vibes" loading="lazy">
+            </div>
+            <div class="gallery-item" data-category="photos">
+                <img src="/images/gallery/orange-bikini-pool.jpg" alt="Orange poolside" loading="lazy">
+            </div>
+            <!-- ROW 7 -->
+            <div class="gallery-item" data-category="selfies">
+                <img src="/images/gallery/black-bandeau-mirror.jpg" alt="Mirror mood" loading="lazy">
+            </div>
+            <div class="gallery-item" data-category="lifestyle">
+                <img src="/images/gallery/bulldog-cuddles.jpg" alt="Cuddle time" loading="lazy">
+            </div>
+            <div class="gallery-item" data-category="photos">
+                <img src="/images/gallery/pool-skull-bikini.jpg" alt="Pool day" loading="lazy">
+            </div>
+            <!-- ROW 8 -->
+            <div class="gallery-item" data-category="lifestyle">
+                <img src="/images/gallery/halloween-scream-dog.jpg" alt="Halloween vibes" loading="lazy">
+            </div>
+            <div class="gallery-item" data-category="selfies">
+                <img src="/images/gallery/black-outfit-mirror.jpg" alt="Mirror selfie" loading="lazy">
+            </div>
+            <div class="gallery-item" data-category="photos">
+                <img src="/images/gallery/poolside-leaf-top.jpg" alt="Poolside chill" loading="lazy">
+            </div>
+            <!-- ROW 9 -->
+            <div class="gallery-item" data-category="lifestyle">
+                <img src="/images/gallery/pink-tube-river-side.jpg" alt="Float life" loading="lazy">
+            </div>
+            <div class="gallery-item" data-category="selfies">
+                <img src="/images/gallery/teal-bikini-selfie.jpg" alt="Teal vibes" loading="lazy">
+            </div>
+            <div class="gallery-item" data-category="lifestyle">
+                <img src="/images/gallery/dog-mom-selfie.jpg" alt="Dog mom life" loading="lazy">
+            </div>
+            <!-- ROW 10 -->
+            <div class="gallery-item" data-category="photos">
+                <img src="/images/gallery/river-tubing-back.jpg" alt="Float life" loading="lazy">
+            </div>
+            <div class="gallery-item" data-category="selfies">
+                <img src="/images/gallery/pink-top-zoomed.jpg" alt="Pink mood" loading="lazy">
+            </div>
+            <div class="gallery-item" data-category="lifestyle">
+                <img src="/images/gallery/blue-vibes-collage.jpg" alt="Blue vibes" loading="lazy">
+            </div>
+        </div>
+    </section>
+
+    <!-- EXCLUSIVE CONTENT SECTION -->
+    <section class="section exclusive-section" id="exclusive">
+        <div class="exclusive-bg"></div>
+        <div class="section-header">
+            <span class="section-tag">002</span>
+            <h2 class="section-title">Exclusive Content</h2>
+            <p class="section-sub">Get the full, unfiltered experience</p>
+        </div>
+
+        <!-- SUBSCRIPTION TIERS -->
+        <div class="tiers-grid">
+            <div class="tier-card">
+                <div class="tier-badge">Free</div>
+                <h3 class="tier-name">Lurker</h3>
+                <div class="tier-price">$0<span>/mo</span></div>
+                <ul class="tier-features">
+                    <li>✦ Public gallery access</li>
+                    <li>✦ Blog posts</li>
+                    <li>✦ Monthly newsletter</li>
+                </ul>
+                <button class="btn-tier" onclick="document.getElementById('gallery').scrollIntoView({behavior:'smooth'})">Browse Free</button>
+            </div>
+            <div class="tier-card featured">
+                <div class="tier-popular">Most Popular</div>
+                <div class="tier-badge">VIP</div>
+                <h3 class="tier-name">Ink Insider</h3>
+                <div class="tier-price">$9.99<span>/mo</span></div>
+                <ul class="tier-features">
+                    <li>✦ Everything in Free</li>
+                    <li>✦ Exclusive photo sets</li>
+                    <li>✦ Behind-the-scenes content</li>
+                    <li>✦ Early access to drops</li>
+                    <li>✦ Members-only posts</li>
+                </ul>
+                <button class="btn-tier featured" onclick="handleSubscribe('vip')">Subscribe — $9.99/mo</button>
+            </div>
+            <div class="tier-card">
+                <div class="tier-badge">Elite</div>
+                <h3 class="tier-name">Mayhem Circle</h3>
+                <div class="tier-price">$24.99<span>/mo</span></div>
+                <ul class="tier-features">
+                    <li>✦ Everything in VIP</li>
+                    <li>✦ Premium content drops</li>
+                    <li>✦ Custom requests</li>
+                    <li>✦ Direct messaging</li>
+                    <li>✦ Priority custom requests</li>
+                </ul>
+                <button class="btn-tier" onclick="handleSubscribe('elite')">Subscribe — $24.99/mo</button>
+            </div>
+        </div>
+
+        <!-- PAY PER POST PREVIEW -->
+        <div class="ppv-section">
+            <h3 class="ppv-title">Or Unlock Individual Posts</h3>
+            <div class="ppv-grid" id="ppvGrid">
+                <div class="ppv-card">
+                    <div class="ppv-preview">
+                        <img src="/images/gallery/beach-green-bikini.jpg" alt="Preview" style="width:100%;height:100%;object-fit:cover;filter:blur(12px) brightness(0.6);position:absolute;top:0;left:0;">
+                        <div class="ppv-blur">
+                            <span class="lock-icon">🔒</span>
+                        </div>
+                    </div>
+                    <div class="ppv-info">
+                        <span class="ppv-label">Photo Set</span>
+                        <span class="ppv-price">$4.99</span>
+                    </div>
+                    <button class="btn-unlock" onclick="handleUnlock('post-1')">Unlock</button>
+                </div>
+                <div class="ppv-card">
+                    <div class="ppv-preview">
+                        <img src="/images/gallery/poolside-leopard-feet.jpg" alt="Preview" style="width:100%;height:100%;object-fit:cover;filter:blur(12px) brightness(0.6);position:absolute;top:0;left:0;">
+                        <div class="ppv-blur">
+                            <span class="lock-icon">🔒</span>
+                        </div>
+                    </div>
+                    <div class="ppv-info">
+                        <span class="ppv-label">Video</span>
+                        <span class="ppv-price">$7.99</span>
+                    </div>
+                    <button class="btn-unlock" onclick="handleUnlock('post-2')">Unlock</button>
+                </div>
+                <div class="ppv-card">
+                    <div class="ppv-preview">
+                        <img src="/images/gallery/white-bikini-sunday.jpg" alt="Preview" style="width:100%;height:100%;object-fit:cover;filter:blur(12px) brightness(0.6);position:absolute;top:0;left:0;">
+                        <div class="ppv-blur">
+                            <span class="lock-icon">🔒</span>
+                        </div>
+                    </div>
+                    <div class="ppv-info">
+                        <span class="ppv-label">Full Session</span>
+                        <span class="ppv-price">$12.99</span>
+                    </div>
+                    <button class="btn-unlock" onclick="handleUnlock('post-3')">Unlock</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- BLOG SECTION -->
+    <section class="section blog-section" id="blog">
+        <div class="section-header">
+            <span class="section-tag">003</span>
+            <h2 class="section-title">Stories & Chaos</h2>
+            <p class="section-sub">Unfiltered thoughts</p>
+        </div>
+        <div class="blog-grid">
+            <article class="blog-card">
+                <div class="blog-img">
+                    <img src="/images/gallery/pool-leopard-palms.jpg" alt="Blog" style="width:100%;height:100%;object-fit:cover;">
+                </div>
+                <div class="blog-content">
+                    <span class="blog-date">Feb 2026</span>
+                    <h3 class="blog-title">How It All Started</h3>
+                    <p class="blog-excerpt">Everyone's got a beginning. This is mine — raw, unfiltered, and probably TMI...</p>
+                    <a href="/blog/how-it-all-started" class="blog-link">Read More →</a>
+                </div>
+            </article>
+            <article class="blog-card">
+                <div class="blog-img">
+                    <img src="/images/gallery/mirror-black-art.jpg" alt="Blog" style="width:100%;height:100%;object-fit:cover;">
+                </div>
+                <div class="blog-content">
+                    <span class="blog-date">Feb 2026</span>
+                    <h3 class="blog-title">Tattoos, Judgment & Learning to Not Care</h3>
+                    <p class="blog-excerpt">People have opinions about your body. Here's how I stopped letting them matter...</p>
+                    <a href="/blog/tattoos-judgment-not-caring" class="blog-link">Read More →</a>
+                </div>
+            </article>
+            <article class="blog-card">
+                <div class="blog-img">
+                    <img src="/images/gallery/jamaica-mirror.jpg" alt="Blog" style="width:100%;height:100%;object-fit:cover;">
+                </div>
+                <div class="blog-content">
+                    <span class="blog-date">Feb 2026</span>
+                    <h3 class="blog-title">Things Nobody Tells You About Content Creation</h3>
+                    <p class="blog-excerpt">The internet has opinions. Here's what it's actually like behind the scenes...</p>
+                    <a href="/blog/content-creation-truths" class="blog-link">Read More →</a>
+                </div>
+            </article>
+            <article class="blog-card">
+                <div class="blog-img">
+                    <img src="/images/gallery/bulldog-cuddles.jpg" alt="Blog" style="width:100%;height:100%;object-fit:cover;">
+                </div>
+                <div class="blog-content">
+                    <span class="blog-date">Feb 2026</span>
+                    <h3 class="blog-title">Dog Mom Energy Is a Whole Personality</h3>
+                    <p class="blog-excerpt">My dog has more followers than most people's main accounts. Here's the chaos...</p>
+                    <a href="/blog/dog-mom-energy" class="blog-link">Read More →</a>
+                </div>
+            </article>
+            <article class="blog-card">
+                <div class="blog-img">
+                    <img src="/images/gallery/halloween-scream-dog.jpg" alt="Blog" style="width:100%;height:100%;object-fit:cover;">
+                </div>
+                <div class="blog-content">
+                    <span class="blog-date">Feb 2026</span>
+                    <h3 class="blog-title">Real Talk: Setting Boundaries Online</h3>
+                    <p class="blog-excerpt">Dealing with trolls, DMs, and keeping it real without losing yourself...</p>
+                    <a href="/blog/setting-boundaries-online" class="blog-link">Read More →</a>
+                </div>
+            </article>
+        </div>
+    </section>
+
+    <!-- ABOUT SECTION -->
+    <section class="section about-section" id="about">
+        <div class="section-header">
+            <span class="section-tag">004</span>
+            <h2 class="section-title">About</h2>
+        </div>
+        <div class="about-grid">
+            <div class="about-image">
+                <img src="/images/gallery/dino-print-selfie.jpg" alt="InkedMayhem" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">
+            </div>
+            <div class="about-text">
+                <h3 class="about-name">InkedMayhem</h3>
+                <p class="about-bio">
+                    Bold, unapologetic, and done playing by everyone else's rules. 
+                    This is my space — no algorithm deciding who sees me, no platform 
+                    taking a cut. Just me, unfiltered. Welcome to the mayhem.
+                </p>
+                <div class="about-stats">
+                    <div class="stat">
+                        <span class="stat-num">2026</span>
+                        <span class="stat-label">Creating Since</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-num">30+</span>
+                        <span class="stat-label">Gallery Posts</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-num">3</span>
+                        <span class="stat-label">Tiers Available</span>
+                    </div>
+                </div>
+                <a href="https://instagram.com/x_tina_d" target="_blank" rel="noopener" class="btn-outline about-ig">
+                    Follow on Instagram →
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- CONTACT SECTION -->
+    <section class="section contact-section" id="contact">
+        <div class="section-header">
+            <span class="section-tag">005</span>
+            <h2 class="section-title">Say Hey</h2>
+            <p class="section-sub">Collabs, features, or just say what's up</p>
+        </div>
+        <form class="contact-form" id="contactForm">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Name</label>
+                    <input type="text" name="name" required placeholder="Your name">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" name="email" required placeholder="your@email.com">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>What's This About?</label>
+                <select name="subject">
+                    <option value="collab">Collaboration</option>
+                    <option value="custom">Custom Request</option>
+                    <option value="press">Press / Feature</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Message</label>
+                <textarea name="message" rows="5" required placeholder="Tell me what you're thinking..."></textarea>
+            </div>
+            <button type="submit" class="btn-primary">Send It →</button>
+        </form>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="footer-top">
+            <div class="footer-brand">
+                <div class="footer-logo">INKED<span>MAYHEM</span></div>
+                <p class="footer-tagline">Unapologetically bold. No middlemen.</p>
+            </div>
+            <div class="footer-links">
+                <a href="#gallery">Gallery</a>
+                <a href="#exclusive">Exclusive</a>
+                <a href="#blog">Blog</a>
+                <a href="#about">About</a>
+                <a href="#contact">Contact</a>
+                <a href="/members">Members</a>
+            </div>
+            <div class="footer-qr">
+                <img src="/images/qr-code.png" alt="Scan to visit InkedMayhem" width="120" height="120" loading="lazy" style="border-radius:4px;">
+                <span style="font-size:0.55rem;letter-spacing:2px;text-transform:uppercase;color:var(--gray);margin-top:0.5rem;display:block;text-align:center;">Scan • Share • Subscribe</span>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 InkedMayhem. All rights reserved. Independent creator platform.</p>
+            <div class="footer-legal">
+                <a href='/terms'>Terms</a>
+                <a href='/privacy'>Privacy</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- AUTH MODAL -->
+    <div class="modal-overlay" id="authModal">
+        <div class="modal">
+            <button class="modal-close" id="modalClose">&times;</button>
+            <h2 class="modal-title" id="modalTitle">Sign In</h2>
+            <form id="authForm">
+                <div class="form-group" id="nameGroup" style="display:none;">
+                    <label>Name</label>
+                    <input type="text" id="authName" placeholder="Your name">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="authEmail" required placeholder="your@email.com">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="authPassword" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="btn-primary modal-submit" id="authSubmit">Sign In</button>
+            </form>
+            <p class="modal-toggle">
+                <span id="toggleText">Don't have an account?</span>
+                <a href="#" id="toggleAuth">Sign Up</a>
+            </p>
+            <div class="modal-divider"><span>or</span></div>
+            <div class="payment-options">
+                <p class="payment-note">Subscribe to unlock exclusive content</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- LIGHTBOX -->
+    <div id="lightbox" style="display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.95);cursor:pointer;align-items:center;justify-content:center" onclick="this.style.display='none'">
+        <img id="lightboxImg" style="max-width:92vw;max-height:92vh;object-fit:contain;border-radius:4px" alt="">
+        <span style="position:absolute;top:20px;right:28px;color:#fff;font-size:2rem;font-family:var(--font-mono);opacity:.7">✕</span>
+    </div>
+
+    <script src="/js/app.js"></script>
+</body>
+</html>
