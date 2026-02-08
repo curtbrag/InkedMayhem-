@@ -208,6 +208,18 @@ export default async (req, context) => {
         }
     }
 
+    // ─── DELETE CONVERSATION ─────────────────────
+    if (path === "/conversations/delete" && req.method === "POST") {
+        try {
+            const { convKey } = await req.json();
+            const store = getStore("conversations");
+            await store.delete(convKey);
+            return new Response(JSON.stringify({ success: true }), { headers: CORS });
+        } catch (err) {
+            return new Response(JSON.stringify({ error: "Failed" }), { status: 500, headers: CORS });
+        }
+    }
+
     // ─── LIST CONVERSATIONS ──────────────────────
     if (path === "/conversations" && req.method === "GET") {
         try {
