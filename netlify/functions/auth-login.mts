@@ -27,6 +27,10 @@ export default async (req, context) => {
             return new Response(JSON.stringify({ error: "Invalid credentials" }), { status: 401 });
         }
 
+        // Track last login
+        user.lastLogin = new Date().toISOString();
+        await store.setJSON(userKey, user);
+
         const secret = Netlify.env.get("JWT_SECRET") || "inkedmayhem-dev-secret-change-me";
         const token = jwt.sign({ email: user.email, tier: user.tier }, secret, { expiresIn: "30d" });
 
