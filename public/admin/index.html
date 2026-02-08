@@ -983,7 +983,7 @@ async function loadConversations() {
                     ${c.lastFrom === 'admin' ? '<span style="color:var(--red)">You:</span> ' : ''}${esc(c.lastMessage)}
                 </td>
                 <td>${formatDate(c.lastAt)}</td>
-                <td><button class="btn-sm primary" onclick="openThread('${esc(c.key)}', '${esc(c.email)}')">Open</button></td>
+                <td><button class="btn-sm primary" onclick="openThread('${esc(c.key)}', '${esc(c.email)}')">Open</button> <button class="btn-sm" style="background:#c22020" onclick="deleteConvo('${esc(c.key)}', '${esc(c.email)}')">Delete</button></td>
             </tr>
         `).join('');
         document.getElementById('convosTable').style.display = 'block';
@@ -1029,6 +1029,15 @@ async function threadSend() {
         toast('Sent');
         openThread(currentConvKey, currentConvEmail);
     } else toast('Failed', true);
+}
+
+async function deleteConvo(key, email) {
+    if (!confirm(`Delete entire conversation with ${email}?`)) return;
+    try {
+        await api('/conversations/delete', 'POST', { convKey: key });
+        toast('Conversation deleted');
+        loadConversations();
+    } catch (e) { toast('Failed to delete', true); }
 }
 
 async function composeSend() {

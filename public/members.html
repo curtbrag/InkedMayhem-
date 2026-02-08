@@ -145,6 +145,81 @@
             border: 1px dashed var(--border);
         }
         .empty-state .placeholder-icon { font-size: 2rem; opacity: 0.3; margin-bottom: 1rem; display: block; }
+        .msg-thread {
+            background: var(--surface, #111);
+            border: 1px solid var(--border);
+            border-radius: 2px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        .msg-bubble {
+            max-width: 80%;
+            padding: 0.7rem 1rem;
+            margin-bottom: 0.8rem;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            border-radius: 2px;
+        }
+        .msg-bubble.from-user {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            margin-left: auto;
+        }
+        .msg-bubble.from-admin {
+            background: rgba(196, 18, 48, 0.15);
+            border: 1px solid rgba(196, 18, 48, 0.3);
+        }
+        .msg-bubble .msg-time {
+            display: block;
+            font-size: 0.55rem;
+            color: var(--gray);
+            margin-top: 0.4rem;
+            letter-spacing: 1px;
+        }
+        .msg-bubble .msg-from {
+            font-size: 0.55rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--red);
+            margin-bottom: 0.3rem;
+        }
+        .msg-compose {
+            display: flex;
+            gap: 0.8rem;
+            align-items: flex-end;
+        }
+        .msg-compose textarea {
+            flex: 1;
+            background: var(--surface, #111);
+            border: 1px solid var(--border);
+            color: var(--white);
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            padding: 0.8rem;
+            resize: none;
+            outline: none;
+        }
+        .msg-compose textarea:focus { border-color: var(--red); }
+        .msg-send-btn {
+            background: var(--red);
+            color: var(--white);
+            border: none;
+            padding: 0.8rem 1.5rem;
+            font-family: var(--font-display);
+            font-size: 0.9rem;
+            letter-spacing: 2px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .msg-send-btn:hover { opacity: 0.9; }
+        .msg-empty {
+            text-align: center;
+            color: var(--gray);
+            padding: 2rem;
+            font-size: 0.8rem;
+        }
     </style>
 </head>
 <body>
@@ -171,6 +246,18 @@
         <div class="members-header">
             <h1>YOUR <span>CONTENT</span></h1>
             <span class="tier-badge-display" id="userTierBadge">FREE</span>
+        </div>
+
+        <!-- MESSAGES -->
+        <div class="content-sections" id="messagesSection">
+            <h2>MESSAGES <span class="count" id="msgCount"></span></h2>
+            <div class="msg-thread" id="msgThread">
+                <div id="msgLoading" style="color:var(--gray);text-align:center;padding:2rem;">Loading messages...</div>
+            </div>
+            <div class="msg-compose">
+                <textarea id="msgInput" placeholder="Send a message to InkedMayhem..." rows="2"></textarea>
+                <button class="msg-send-btn" id="msgSendBtn" onclick="sendMsg()">Send →</button>
+            </div>
         </div>
 
         <!-- LATEST DROPS -->
@@ -272,7 +359,67 @@
                 localStorage.removeItem('im_user');
                 window.location.href = '/';
             });
+
+            // Load messages
+            if (token) loadMessages();
         });
+
+        async function loadMessages() {
+            const token = localStorage.getItem('im_token');
+            if (!token) return;
+            try {
+                const r = await fetch('/api/messages', { headers: { 'Authorization': `Bearer ${token}` }});
+                const data = await r.json();
+                const thread = document.getElementById('msgThread');
+                const msgs = data.messages || [];
+                document.getElementById('msgCount').textContent = msgs.length ? `(${msgs.length})` : '';
+                if (!msgs.length) {
+                    thread.innerHTML = '<div class="msg-empty">No messages yet. Say hi! 👋</div>';
+                    return;
+                }
+                thread.innerHTML = msgs.map(m => `
+                    <div class="msg-bubble from-${m.from}">
+                        ${m.from === 'admin' ? '<div class="msg-from">InkedMayhem</div>' : ''}
+                        ${escHtml(m.text)}
+                        <span class="msg-time">${new Date(m.at).toLocaleString()}</span>
+                    </div>
+                `).join('');
+                thread.scrollTop = thread.scrollHeight;
+            } catch (e) {
+                document.getElementById('msgThread').innerHTML = '<div class="msg-empty">Could not load messages</div>';
+            }
+        }
+
+        async function sendMsg() {
+            const input = document.getElementById('msgInput');
+            const text = input.value.trim();
+            if (!text) return;
+            const token = localStorage.getItem('im_token');
+            if (!token) return;
+            const btn = document.getElementById('msgSendBtn');
+            btn.textContent = 'Sending...';
+            btn.disabled = true;
+            try {
+                const r = await fetch('/api/messages/send', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ text })
+                });
+                const data = await r.json();
+                if (data.success) {
+                    input.value = '';
+                    loadMessages();
+                }
+            } catch (e) {}
+            btn.textContent = 'Send →';
+            btn.disabled = false;
+        }
+
+        function escHtml(s) {
+            const d = document.createElement('div');
+            d.textContent = s;
+            return d.innerHTML;
+        }
     </script>
 </body>
 </html>
