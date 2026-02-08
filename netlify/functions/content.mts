@@ -17,7 +17,7 @@ function verifyAdmin(req) {
     if (!auth) return false;
     try {
         const d = jwt.verify(auth.replace("Bearer ", ""), getSecret());
-        return d.admin === true;
+        return d.admin === true || d.isAdmin === true;
     } catch { return false; }
 }
 
