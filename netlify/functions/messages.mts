@@ -91,5 +91,5 @@ export default async (req, context) => {
 };
 
 export const config = {
-    path: "/api/messages/*"
+    path: ["/api/messages", "/api/messages/*"]
 };
