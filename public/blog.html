@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog — InkedMayhem</title>
+    <meta name="description" content="InkedMayhem — Stories, chaos, and unfiltered thoughts.">
+    <meta name="theme-color" content="#0a0a0a">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔥</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="noise-overlay"></div>
+
+    <!-- NAVIGATION -->
+    <nav id="navbar" class="scrolled">
+        <a href="/" class="nav-logo">INKED<span>MAYHEM</span></a>
+        <ul class="nav-links" id="navLinks">
+            <li><a href="/#gallery">Gallery</a></li>
+            <li><a href="/#exclusive">Exclusive</a></li>
+            <li><a href="/#blog">Blog</a></li>
+            <li><a href="/#about">About</a></li>
+            <li><a href="/#contact">Contact</a></li>
+            <li><a class="nav-members" href="/members">Members</a></li>
+            <li><a href="https://instagram.com/x_tina_d" target="_blank" rel="noopener" class="nav-ig">IG</a></li>
+        </ul>
+        <div class="nav-right">
+            <button class="btn-login" id="btnLogin" onclick="window.location.href='/'">Sign In</button>
+            <div class="hamburger" id="hamburger" aria-label="Toggle menu">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- MOBILE MENU -->
+    <div class="mobile-menu" id="mobileMenu">
+        <ul>
+            <li><a href="/#gallery">Gallery</a></li>
+            <li><a href="/#exclusive">Exclusive</a></li>
+            <li><a href="/#blog">Blog</a></li>
+            <li><a href="/#about">About</a></li>
+            <li><a href="/#contact">Contact</a></li>
+            <li><a href="/members">Members Area</a></li>
+            <li><a href="https://instagram.com/x_tina_d" target="_blank" rel="noopener">Instagram</a></li>
+        </ul>
+    </div>
+
+    <!-- BLOG POST CONTENT -->
+    <article class="blog-post-page">
+        <div class="blog-post-hero" id="blogHeroImg">
+            <div class="blog-post-hero-overlay"></div>
+            <div class="blog-post-hero-content">
+                <a href="/#blog" class="blog-back-link">&larr; Back to Stories</a>
+                <span class="blog-post-date" id="blogDate"></span>
+                <h1 class="blog-post-title" id="blogTitle"></h1>
+            </div>
+        </div>
+        <div class="blog-post-body" id="blogBody">
+        </div>
+    </article>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="footer-top">
+            <div class="footer-brand">
+                <div class="footer-logo">INKED<span>MAYHEM</span></div>
+                <p class="footer-tagline">Unapologetically bold. No middlemen.</p>
+            </div>
+            <div class="footer-links">
+                <a href="/#gallery">Gallery</a>
+                <a href="/#exclusive">Exclusive</a>
+                <a href="/#blog">Blog</a>
+                <a href="/#about">About</a>
+                <a href="/#contact">Contact</a>
+                <a href="/members">Members</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 InkedMayhem. All rights reserved. Independent creator platform.</p>
+            <div class="footer-legal">
+                <a href="/terms">Terms</a>
+                <a href="/privacy">Privacy</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+    const blogPosts = {
+        'how-it-all-started': {
+            title: 'How It All Started',
+            date: 'Feb 2026',
+            image: '/images/gallery/pool-leopard-palms.jpg',
+            content: `
+                <p>Everyone's got a beginning. Mine wasn't planned, wasn't polished, and definitely wasn't what anyone expected. But here we are.</p>
+                <p>It started with a camera roll full of pictures nobody asked for and an Instagram algorithm that couldn't care less about what I was posting. I kept showing up anyway. Not because I had some grand vision — but because creating felt like the only thing that made sense.</p>
+                <p>The first time someone I didn't know commented something genuinely kind on one of my posts, something shifted. It wasn't about the numbers. It was about connection — this weird, beautiful thing where a stranger on the internet says "this made my day" and suddenly the hours you spent getting the right angle don't feel so ridiculous.</p>
+                <p>I tried the "right" way first. Posting when the algorithm said to. Using the trending audio. Making content for the feed instead of for myself. And honestly? It worked for a minute. But it felt hollow. Like wearing someone else's clothes and pretending they fit.</p>
+                <p>So I stopped. I stopped chasing trends and started chasing what felt authentic. Messy hair, real opinions, unfiltered moments. The kind of content that makes marketing people cringe but makes real people connect.</p>
+                <p>InkedMayhem isn't just a brand name. It's the whole philosophy — that life is chaotic, bodies are art, and the best content comes from not giving a damn about what you're "supposed" to post. This is my space. No algorithm deciding who sees me, no platform taking a cut. Just me, building something real, one post at a time.</p>
+                <p>And if you're reading this — welcome to the mayhem. It's only getting started.</p>
+            `
+        },
+        'tattoos-judgment-not-caring': {
+            title: 'Tattoos, Judgment & Learning to Not Care',
+            date: 'Feb 2026',
+            image: '/images/gallery/mirror-black-art.jpg',
+            content: `
+                <p>The first tattoo I got, my mom didn't talk to me for three days. The second one, she just sighed. By the fifth, she started asking to see the design beforehand. Growth.</p>
+                <p>But it's not just family. It's the strangers at the grocery store who stare a beat too long. The job interviewer whose eyes keep drifting to your arms. The random DM that says "you'd be so pretty without all that ink." Cool, thanks, didn't ask.</p>
+                <p>Here's the thing about tattoos that people who don't have them never seem to understand: they're not for you. They're not a conversation starter, they're not a cry for attention, and they're definitely not an invitation for your opinion. They're mine. Each one marks a moment, a feeling, a decision to make my body more mine than it was before.</p>
+                <p>Learning to not care about judgment didn't happen overnight. It was a slow, messy process of unlearning everything I'd been taught about how women "should" look. Professional. Polished. Palatable. I tried that version of myself. She was miserable.</p>
+                <p>The version with ink, with edge, with a little chaos? She sleeps better at night. She walks into rooms without apologizing for taking up space. She doesn't shrink to make other people comfortable.</p>
+                <p>If you've got tattoos and you're still learning to own them — keep going. The opinions fade. The art stays. And the people who matter? They'll think you look incredible.</p>
+            `
+        },
+        'content-creation-truths': {
+            title: 'Things Nobody Tells You About Content Creation',
+            date: 'Feb 2026',
+            image: '/images/gallery/jamaica-mirror.jpg',
+            content: `
+                <p>Let me save you about six months of figuring this out the hard way. Here are the things nobody mentions when they talk about "becoming a content creator."</p>
+                <p><strong>1. You will take 47 photos to get one good one.</strong> And that's on a good day. The "effortless" photos you see? Effort. So much effort. Ring lights, golden hour calculations, propping your phone on a stack of books at exactly the right angle. It's a whole production.</p>
+                <p><strong>2. The algorithm is not your friend.</strong> It doesn't care about your best work. It cares about watch time, engagement bait, and whatever trend is happening this week. Your most thoughtful post will get 12 likes. Your most random story will go viral. Make peace with that.</p>
+                <p><strong>3. Comparison will eat you alive if you let it.</strong> Someone with half your talent and twice your followers will pop up on your explore page and ruin your whole afternoon. Close the app. Go outside. Come back when you remember why you started.</p>
+                <p><strong>4. "Just be yourself" is terrible advice.</strong> Better advice: be the version of yourself that you actually like. The one that shows up when you're with your best friend and nobody's watching. That version? That's your content goldmine.</p>
+                <p><strong>5. You need thicker skin than you think.</strong> People will say things to you online that they'd never say to your face. It stings every time. You just get faster at recovering.</p>
+                <p><strong>6. It's a real job.</strong> Shooting, editing, writing captions, responding to DMs, planning content calendars, managing brand deals, doing your own accounting. Anyone who calls this "not a real job" has never tried doing it for a week.</p>
+                <p>The truth is, content creation is simultaneously the most fun and most exhausting thing I've ever done. I wouldn't trade it. But I wish someone had told me all this before I started, so consider this your heads up.</p>
+            `
+        },
+        'dog-mom-energy': {
+            title: 'Dog Mom Energy Is a Whole Personality',
+            date: 'Feb 2026',
+            image: '/images/gallery/bulldog-cuddles.jpg',
+            content: `
+                <p>I didn't plan on becoming one of those people whose entire personality revolves around their dog. And yet, here I am, with a camera roll that's 70% bulldog face and a highlight reel called "my baby" that has more views than anything else I've ever posted.</p>
+                <p>The thing about dogs is they don't care about your follower count. They don't care if your latest post flopped. They don't care if you're having a bad hair day or an existential crisis. They just want to be near you. And honestly? In a world full of people who want something from you, that's the most refreshing thing on earth.</p>
+                <p>My bulldog has become a low-key content star without even trying. Every time I include him in a photo, engagement doubles. He's never once stressed about the algorithm. He's never compared himself to other dogs on the internet. He's just vibing. We could all learn something.</p>
+                <p>Dog mom energy isn't just about the dog, though. It's a whole vibe. It's choosing the restaurant with the patio. It's planning your entire schedule around walk times. It's having more photos of your pet than yourself on your phone. It's talking in a voice that would horrify your high school self.</p>
+                <p>And look — I know not everyone gets it. Some people hear "fur baby" and physically cringe. That's fine. But if you know, you know. The unconditional love of a dog is the one thing on the internet that isn't manufactured, curated, or filtered. It's just real. And in this space, real is everything.</p>
+            `
+        },
+        'setting-boundaries-online': {
+            title: 'Real Talk: Setting Boundaries Online',
+            date: 'Feb 2026',
+            image: '/images/gallery/halloween-scream-dog.jpg',
+            content: `
+                <p>Nobody prepares you for the DMs. The ones that start friendly and get weird fast. The ones that skip friendly altogether. The unsolicited opinions about your body, your choices, your entire existence — from people who've never met you and never will.</p>
+                <p>When I first started creating content, I tried to respond to everyone. Be nice to everyone. Give everyone the benefit of the doubt. That lasted about three months before I burned out completely.</p>
+                <p>Here's what I've learned about boundaries online:</p>
+                <p><strong>Block freely and without guilt.</strong> The block button exists for a reason. You don't owe anyone a conversation. You don't need to explain why their comment made you uncomfortable. Just block and move on. Your peace of mind is worth more than their feelings.</p>
+                <p><strong>You don't have to share everything.</strong> Being "authentic" doesn't mean being an open book. You get to choose which chapters people see. The pressure to share your whole life for engagement is a trap. Keep some things sacred.</p>
+                <p><strong>Turn off comments when you need to.</strong> Some posts attract more chaos than others. It's not weakness to close the comments — it's strategy. You're protecting your space, not running from confrontation.</p>
+                <p><strong>Create a "not today" list.</strong> Topics you won't engage with, types of messages you auto-delete, conversations you refuse to have. Having this list before you need it saves you from making emotional decisions in the moment.</p>
+                <p><strong>Log off regularly.</strong> For real. Not "log off but check notifications." Actually log off. Put the phone in another room. Go do something that has nothing to do with content. Remember who you are when nobody's watching.</p>
+                <p>Setting boundaries isn't about being cold or unapproachable. It's about staying in this game long enough to actually enjoy it. Burnout is real, trolls are relentless, and if you don't protect your energy, nobody else will.</p>
+                <p>Take care of yourself first. The content can wait. You can't be replaced.</p>
+            `
+        }
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const path = window.location.pathname;
+        const slug = path.replace('/blog/', '').replace(/\/$/, '');
+        const post = blogPosts[slug];
+
+        if (!post) {
+            window.location.href = '/#blog';
+            return;
+        }
+
+        document.title = `${post.title} — InkedMayhem`;
+        document.getElementById('blogTitle').textContent = post.title;
+        document.getElementById('blogDate').textContent = post.date;
+        document.getElementById('blogBody').innerHTML = post.content;
+        document.getElementById('blogHeroImg').style.backgroundImage = `url(${post.image})`;
+
+        // Mobile menu
+        const hamburger = document.getElementById('hamburger');
+        const mobileMenu = document.getElementById('mobileMenu');
+        hamburger.addEventListener('click', () => {
+            hamburger.classList.toggle('active');
+            mobileMenu.classList.toggle('active');
+            document.body.style.overflow = mobileMenu.classList.contains('active') ? 'hidden' : '';
+        });
+        mobileMenu.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                hamburger.classList.remove('active');
+                mobileMenu.classList.remove('active');
+                document.body.style.overflow = '';
+            });
+        });
+    });
+    </script>
+</body>
+</html>

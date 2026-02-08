@@ -73,13 +73,24 @@ function initScrollEffects() {
     style.textContent = '.visible { opacity: 1 !important; transform: translateY(0) !important; }';
     document.head.appendChild(style);
 
-    // Stagger gallery items
+    // Stagger gallery items (cap at 0.8s so last items don't wait too long)
     document.querySelectorAll('.gallery-item').forEach((item, i) => {
-        item.style.transitionDelay = `${i * 0.08}s`;
+        item.style.transitionDelay = `${Math.min(i * 0.08, 0.8)}s`;
     });
 
     document.querySelectorAll('.tier-card').forEach((card, i) => {
         card.style.transitionDelay = `${i * 0.15}s`;
+    });
+
+    // Gallery image shimmer — mark items loaded once their image finishes
+    document.querySelectorAll('.gallery-item img').forEach(img => {
+        const markLoaded = () => img.closest('.gallery-item').classList.add('loaded');
+        if (img.complete) {
+            markLoaded();
+        } else {
+            img.addEventListener('load', markLoaded);
+            img.addEventListener('error', markLoaded);
+        }
     });
 }
 
@@ -157,7 +168,7 @@ function initAuthModal() {
         document.body.style.overflow = '';
     }
 
-    btnLogin.addEventListener('click', openModal);
+    // btnLogin click is handled by updateAuthUI
     btnClose.addEventListener('click', closeModal);
 
     modal.addEventListener('click', (e) => {
@@ -226,7 +237,7 @@ function initAuthModal() {
         }
     });
 
-    // Check for existing session
+    // Check for existing session and set up login button
     const savedUser = localStorage.getItem('im_user');
     if (savedUser) {
         try {
@@ -234,23 +245,37 @@ function initAuthModal() {
         } catch (e) {
             localStorage.removeItem('im_token');
             localStorage.removeItem('im_user');
+            updateAuthUI(null);
         }
+    } else {
+        updateAuthUI(null);
     }
 }
 
 function updateAuthUI(user) {
     const btnLogin = document.getElementById('btnLogin');
+    const modal = document.getElementById('authModal');
+
+    // Remove all previous click listeners by cloning
+    const newBtn = btnLogin.cloneNode(true);
+    btnLogin.parentNode.replaceChild(newBtn, btnLogin);
+
     if (user) {
-        btnLogin.textContent = user.name || 'Account';
-        btnLogin.onclick = () => {
+        newBtn.textContent = user.name || 'Account';
+        newBtn.addEventListener('click', () => {
             if (confirm('Sign out?')) {
                 localStorage.removeItem('im_token');
                 localStorage.removeItem('im_user');
-                btnLogin.textContent = 'Sign In';
-                btnLogin.onclick = () => document.getElementById('authModal').classList.add('active');
+                updateAuthUI(null);
                 showToast('Signed out');
             }
-        };
+        });
+    } else {
+        newBtn.textContent = 'Sign In';
+        newBtn.addEventListener('click', () => {
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
     }
 }
 
@@ -328,6 +353,14 @@ function initContactForm() {
 
         const formData = new FormData(form);
         const data = Object.fromEntries(formData);
+
+        // Honeypot check — if the hidden field is filled, silently reject
+        if (data.website) {
+            showToast('Message sent! I\'ll get back to you soon.');
+            form.reset();
+            return;
+        }
+        delete data.website;
 
         try {
             const btn = form.querySelector('button[type="submit"]');

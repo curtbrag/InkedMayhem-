@@ -3,6 +3,11 @@
   functions = "netlify/functions"
 
 [[redirects]]
+  from = "/blog/*"
+  to = "/blog.html"
+  status = 200
+
+[[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/:splat"
   status = 200

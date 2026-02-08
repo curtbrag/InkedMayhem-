@@ -1114,6 +1114,158 @@ nav.scrolled {
     color: var(--gray);
 }
 
+/* ==================== BLOG POST PAGE ==================== */
+.blog-post-page {
+    padding-top: 0;
+}
+
+.blog-post-hero {
+    position: relative;
+    height: 60vh;
+    min-height: 400px;
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: flex-end;
+}
+
+.blog-post-hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, var(--black) 0%, rgba(6,6,6,0.4) 50%, rgba(6,6,6,0.6) 100%);
+}
+
+.blog-post-hero-content {
+    position: relative;
+    z-index: 2;
+    padding: 3rem 2.5rem;
+    max-width: 900px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+.blog-back-link {
+    font-size: 0.65rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--red);
+    display: inline-block;
+    margin-bottom: 1.5rem;
+    transition: color 0.3s;
+}
+
+.blog-back-link:hover {
+    color: var(--red-bright);
+}
+
+.blog-post-date {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--red);
+    display: block;
+    margin-bottom: 0.8rem;
+}
+
+.blog-post-title {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    letter-spacing: 4px;
+    color: var(--off-white);
+    line-height: 1.1;
+}
+
+.blog-post-body {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 3rem 2.5rem 6rem;
+}
+
+.blog-post-body p {
+    font-family: var(--font-serif);
+    font-size: 1.15rem;
+    line-height: 1.9;
+    color: var(--cream);
+    margin-bottom: 1.5rem;
+}
+
+.blog-post-body strong {
+    color: var(--off-white);
+    font-weight: 600;
+}
+
+/* ==================== GALLERY IMAGE SHIMMER ==================== */
+.gallery-item {
+    position: relative;
+    overflow: hidden;
+}
+
+.gallery-item::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        110deg,
+        var(--surface) 0%,
+        var(--surface) 40%,
+        rgba(255,255,255,0.04) 50%,
+        var(--surface) 60%,
+        var(--surface) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+    z-index: 1;
+    transition: opacity 0.3s;
+}
+
+.gallery-item.loaded::before {
+    opacity: 0;
+    pointer-events: none;
+}
+
+@keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* ==================== INLINE STYLE REPLACEMENTS ==================== */
+.ppv-preview-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: blur(12px) brightness(0.6);
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.blog-card-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.about-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+/* ==================== HONEYPOT ==================== */
+.form-hp {
+    position: absolute;
+    left: -9999px;
+    top: -9999px;
+    opacity: 0;
+    height: 0;
+    width: 0;
+    overflow: hidden;
+    pointer-events: none;
+    tab-index: -1;
+}
+
 /* ==================== ANIMATIONS ==================== */
 @keyframes fadeUp {
     from { opacity: 0; transform: translateY(20px); }
@@ -1194,5 +1346,11 @@ nav.scrolled {
     .footer-bottom {
         flex-direction: column;
         text-align: center;
+    }
+}
+
+@media (max-width: 400px) {
+    .gallery-grid {
+        grid-template-columns: 1fr;
     }
 }
