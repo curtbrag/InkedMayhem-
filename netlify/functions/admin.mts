@@ -290,15 +290,20 @@ export default async (req, context) => {
             const userStore = getStore("users");
             const msgStore = getStore("contacts");
             const convStore = getStore("conversations");
+            const contentStore = getStore("content");
 
-            const [userBlobs, msgBlobs, convBlobs] = await Promise.all([
-                userStore.list(), msgStore.list(), convStore.list()
+            const [userBlobs, msgBlobs, convBlobs, contentBlobs] = await Promise.all([
+                userStore.list(), msgStore.list(), convStore.list(), contentStore.list()
             ]);
 
             const tiers = { free: 0, peek: 0, vip: 0, elite: 0 };
+            const signupDates = [];
+            const loginDates = [];
             for (const blob of userBlobs.blobs) {
                 const u = await userStore.get(blob.key, { type: "json" });
                 if (u?.tier) tiers[u.tier] = (tiers[u.tier] || 0) + 1;
+                if (u?.createdAt) signupDates.push(u.createdAt);
+                if (u?.lastLogin) loginDates.push(u.lastLogin);
             }
 
             let unread = 0;
@@ -307,6 +312,11 @@ export default async (req, context) => {
                 if (m && !m.read) unread++;
             }
 
+            // Recent activity (last 7 days)
+            const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+            const recentSignups = signupDates.filter(d => d > weekAgo).length;
+            const recentLogins = loginDates.filter(d => d > weekAgo).length;
+
             return new Response(JSON.stringify({
                 success: true,
                 stats: {
@@ -314,7 +324,12 @@ export default async (req, context) => {
                     tiers,
                     totalMessages: msgBlobs.blobs.length,
                     unreadMessages: unread,
-                    totalConversations: convBlobs.blobs.length
+                    totalConversations: convBlobs.blobs.length,
+                    totalContent: contentBlobs.blobs.length,
+                    recentSignups,
+                    recentLogins,
+                    signupDates: signupDates.sort(),
+                    loginDates: loginDates.sort()
                 }
             }), { headers: CORS });
         } catch (err) {

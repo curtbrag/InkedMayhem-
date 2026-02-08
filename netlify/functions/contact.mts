@@ -1,5 +1,16 @@
 import { getStore } from "@netlify/blobs";
 
+async function notifyAdmin(type, data) {
+    const secret = Netlify.env.get("JWT_SECRET") || "inkedmayhem-dev-secret-change-me";
+    try {
+        await fetch("https://inkedmayhem.netlify.app/api/notify", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "x-internal-key": secret },
+            body: JSON.stringify({ type, data })
+        });
+    } catch {}
+}
+
 export default async (req, context) => {
     if (req.method !== "POST") {
         return new Response(JSON.stringify({ error: "Method not allowed" }), { status: 405 });
@@ -18,11 +29,14 @@ export default async (req, context) => {
         await store.setJSON(key, {
             name,
             email,
-            subject: subject || "other",
+            subject: subject || "General",
             message,
             receivedAt: new Date().toISOString(),
             read: false
         });
+
+        // Fire notification
+        notifyAdmin("contact_form", { name, email, subject, message });
 
         return new Response(JSON.stringify({ success: true }), {
             headers: { "Content-Type": "application/json" }

@@ -530,6 +530,8 @@
         <button class="tab" data-tab="users">Users</button>
         <button class="tab" data-tab="messages">Messages <span class="badge" id="unreadBadge" style="display:none">0</span></button>
         <button class="tab" data-tab="conversations">Conversations</button>
+        <button class="tab" data-tab="content">Content</button>
+        <button class="tab" data-tab="analytics">Analytics</button>
     </div>
 
     <!-- ─── OVERVIEW TAB ──────────────────── -->
@@ -668,8 +670,122 @@
             </div>
         </div>
     </div>
-</div>
 
+    <!-- ─── CONTENT TAB ──────────────────────── -->
+    <div class="tab-content" id="tab-content">
+        <div class="section-title"><span class="icon">◆</span> Content Manager</div>
+        <div style="display:flex;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap">
+            <button class="btn-sm primary" onclick="showContentEditor()" style="font-size:14px;padding:0.5rem 1.2rem">+ New Post</button>
+            <button class="btn-sm" onclick="loadContent()" style="font-size:14px;padding:0.5rem 1.2rem">Refresh</button>
+        </div>
+
+        <!-- Content editor -->
+        <div id="contentEditor" style="display:none;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);padding:1.5rem;margin-bottom:2rem">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+                <div style="font-size:1.1rem;font-weight:700;color:var(--off-white)" id="editorTitle">New Post</div>
+                <span style="cursor:pointer;color:var(--muted);font-size:18px" onclick="hideContentEditor()">✕</span>
+            </div>
+            <input type="hidden" id="contentKey" value="">
+            <label style="color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;display:block">Title</label>
+            <input type="text" id="contentTitleInput" placeholder="Post title..." style="width:100%;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.1);color:var(--off-white);padding:0.6rem;margin-bottom:1rem;font-size:14px">
+            <div style="display:flex;gap:1rem;margin-bottom:1rem;flex-wrap:wrap">
+                <div style="flex:1;min-width:120px">
+                    <label style="color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px">Access Tier</label>
+                    <select id="contentTier" style="width:100%;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.1);color:var(--off-white);padding:0.5rem">
+                        <option value="free">Free (Everyone)</option>
+                        <option value="vip">VIP ($9.99/mo)</option>
+                        <option value="elite">Elite ($24.99/mo)</option>
+                    </select>
+                </div>
+                <div style="flex:1;min-width:120px">
+                    <label style="color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px">Type</label>
+                    <select id="contentType" style="width:100%;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.1);color:var(--off-white);padding:0.5rem">
+                        <option value="post">Blog Post</option>
+                        <option value="gallery">Gallery Update</option>
+                        <option value="announcement">Announcement</option>
+                    </select>
+                </div>
+            </div>
+            <label style="color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;display:block">Image URL (optional)</label>
+            <input type="text" id="contentImage" placeholder="https://..." style="width:100%;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.1);color:var(--off-white);padding:0.6rem;margin-bottom:1rem;font-size:14px">
+            <label style="color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;display:block">Content</label>
+            <textarea id="contentBody" placeholder="Write your post content here... HTML is supported." style="width:100%;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.1);color:var(--off-white);padding:0.6rem;min-height:200px;font-size:14px;font-family:inherit;line-height:1.6;resize:vertical"></textarea>
+            <div style="display:flex;gap:1rem;margin-top:1rem;flex-wrap:wrap">
+                <button class="login-btn" style="max-width:180px;font-size:14px" onclick="saveContent(false)">Publish</button>
+                <button class="btn-sm" style="font-size:14px;padding:0.5rem 1.2rem" onclick="saveContent(true)">Save as Draft</button>
+            </div>
+        </div>
+
+        <!-- Content list -->
+        <div id="contentLoading" class="loading-text"><span class="spinner"></span> Loading content...</div>
+        <div class="table-wrap" id="contentTable" style="display:none">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Type</th>
+                        <th>Tier</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="contentBody"></tbody>
+            </table>
+        </div>
+        <div class="empty" id="contentEmpty" style="display:none">
+            <div class="icon">📝</div>
+            <p>No content yet. Click "+ New Post" to create your first one!</p>
+        </div>
+    </div>
+
+    <!-- ─── ANALYTICS TAB ────────────────────── -->
+    <div class="tab-content" id="tab-analytics">
+        <div class="section-title"><span class="icon">◆</span> Analytics</div>
+
+        <div class="stats-grid" style="margin-bottom:2rem">
+            <div class="stat-card">
+                <div class="label">Signups (7 days)</div>
+                <div class="value" id="analSignups7d">—</div>
+            </div>
+            <div class="stat-card red">
+                <div class="label">Logins (7 days)</div>
+                <div class="value" id="analLogins7d">—</div>
+            </div>
+            <div class="stat-card gold">
+                <div class="label">Content Posts</div>
+                <div class="value" id="analContent">—</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Paying Members</div>
+                <div class="value" id="analPaying">—</div>
+            </div>
+        </div>
+
+        <div class="section-title" style="font-size:1.2rem;margin-top:2rem"><span class="icon">◆</span> Tier Distribution</div>
+        <div id="tierChart" style="display:flex;gap:4px;height:40px;margin:1rem 0 0.5rem 0;max-width:600px"></div>
+        <div id="tierLegend" style="display:flex;gap:1.5rem;font-size:11px;color:var(--muted);flex-wrap:wrap;margin-bottom:2rem"></div>
+
+        <div class="section-title" style="font-size:1.2rem;margin-top:2rem"><span class="icon">◆</span> Signup Timeline</div>
+        <div id="signupChart" style="display:flex;align-items:flex-end;gap:3px;height:120px;margin:1rem 0;max-width:800px;padding-bottom:20px;position:relative"></div>
+
+        <div class="section-title" style="font-size:1.2rem;margin-top:2rem"><span class="icon">◆</span> Revenue Estimate</div>
+        <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);padding:1.5rem;max-width:400px">
+            <div style="font-size:2rem;font-weight:700;color:var(--gold)" id="analRevenue">$0</div>
+            <div style="color:var(--muted);font-size:12px;margin-top:4px">Estimated monthly recurring (VIP × $9.99 + Elite × $24.99)</div>
+        </div>
+
+        <div class="section-title" style="font-size:1.2rem;margin-top:2rem"><span class="icon">◆</span> Admin Tools</div>
+        <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-top:1rem">
+            <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);padding:1.5rem;flex:1;min-width:280px">
+                <div style="font-size:14px;font-weight:700;color:var(--off-white);margin-bottom:1rem">Reset User Password</div>
+                <input type="email" id="resetEmail" placeholder="user@example.com" style="width:100%;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.1);color:var(--off-white);padding:0.5rem;margin-bottom:0.5rem">
+                <input type="text" id="resetPass" placeholder="New password (min 6 chars)" style="width:100%;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.1);color:var(--off-white);padding:0.5rem;margin-bottom:0.5rem">
+                <button class="btn-sm primary" onclick="resetUserPassword()" style="font-size:13px;padding:0.4rem 1rem">Reset Password</button>
+            </div>
+        </div>
+    </div>
+</div>
 <script>
 // ═══════════════════════════════════════════════
 // ADMIN DASHBOARD — JavaScript
@@ -754,6 +870,8 @@ document.querySelectorAll('.tab').forEach(tab => {
         if (tab.dataset.tab === 'users') loadUsers();
         if (tab.dataset.tab === 'messages') loadMessages();
         if (tab.dataset.tab === 'conversations') loadConversations();
+        if (tab.dataset.tab === 'content') loadContent();
+        if (tab.dataset.tab === 'analytics') loadAnalytics();
         if (tab.dataset.tab === 'overview') loadStats();
     });
 });
@@ -1084,6 +1202,202 @@ function toast(msg, err = false) {
     t.textContent = msg;
     document.body.appendChild(t);
     setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 2500);
+}
+
+// ─── CONTENT MANAGEMENT ──────────────────────
+const CONTENT_API = '/api/content';
+
+async function contentApi(path, method = 'GET', body = null) {
+    const opts = { method, headers: headers() };
+    if (body) opts.body = JSON.stringify(body);
+    const r = await fetch(`${CONTENT_API}${path}`, opts);
+    return r.json();
+}
+
+async function loadContent() {
+    document.getElementById('contentLoading').style.display = 'block';
+    document.getElementById('contentTable').style.display = 'none';
+    document.getElementById('contentEmpty').style.display = 'none';
+
+    try {
+        const data = await contentApi('/admin-list');
+        document.getElementById('contentLoading').style.display = 'none';
+
+        if (!data.success || !data.content.length) {
+            document.getElementById('contentEmpty').style.display = 'block';
+            return;
+        }
+
+        const tierColors = { free: '#666', vip: 'var(--gold)', elite: '#fff' };
+        const typeIcons = { post: '📝', gallery: '🖼️', announcement: '📢' };
+        const tbody = document.getElementById('contentBody');
+        tbody.innerHTML = data.content.map(c => `
+            <tr style="${c.draft ? 'opacity:0.5' : ''}">
+                <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(c.title)}</td>
+                <td>${typeIcons[c.type] || '📝'} ${esc(c.type)}</td>
+                <td style="color:${tierColors[c.tier] || '#666'}">${(c.tier || 'free').toUpperCase()}</td>
+                <td>${c.draft ? '<span style="color:var(--muted)">Draft</span>' : '<span style="color:#4a4">Published</span>'}</td>
+                <td>${formatDate(c.createdAt)}</td>
+                <td>
+                    <button class="btn-sm primary" onclick='editContent(${JSON.stringify(JSON.stringify(c))})'>Edit</button>
+                    <button class="btn-sm danger" onclick="deleteContent('${esc(c.key)}')">Delete</button>
+                </td>
+            </tr>
+        `).join('');
+        document.getElementById('contentTable').style.display = 'block';
+    } catch (e) {
+        document.getElementById('contentLoading').style.display = 'none';
+        toast('Failed to load content', true);
+    }
+}
+
+function showContentEditor() {
+    document.getElementById('contentKey').value = '';
+    document.getElementById('contentTitleInput').value = '';
+    document.getElementById('contentBody').value = '';
+    document.getElementById('contentTier').value = 'free';
+    document.getElementById('contentType').value = 'post';
+    document.getElementById('contentImage').value = '';
+    document.getElementById('editorTitle').textContent = 'New Post';
+    document.getElementById('contentEditor').style.display = 'block';
+    document.getElementById('contentTitleInput').focus();
+}
+
+function hideContentEditor() {
+    document.getElementById('contentEditor').style.display = 'none';
+}
+
+function editContent(jsonStr) {
+    const c = JSON.parse(jsonStr);
+    document.getElementById('contentKey').value = c.key || '';
+    document.getElementById('contentTitleInput').value = c.title || '';
+    document.getElementById('contentBody').value = c.body || '';
+    document.getElementById('contentTier').value = c.tier || 'free';
+    document.getElementById('contentType').value = c.type || 'post';
+    document.getElementById('contentImage').value = c.imageUrl || '';
+    document.getElementById('editorTitle').textContent = 'Edit Post';
+    document.getElementById('contentEditor').style.display = 'block';
+    document.getElementById('contentTitleInput').focus();
+}
+
+async function saveContent(draft) {
+    const payload = {
+        key: document.getElementById('contentKey').value || undefined,
+        title: document.getElementById('contentTitleInput').value.trim(),
+        body: document.getElementById('contentBody').value.trim(),
+        tier: document.getElementById('contentTier').value,
+        type: document.getElementById('contentType').value,
+        imageUrl: document.getElementById('contentImage').value.trim(),
+        draft: draft
+    };
+
+    if (!payload.title || !payload.body) { toast('Title and content required', true); return; }
+
+    try {
+        const data = await contentApi('/save', 'POST', payload);
+        if (data.success) {
+            toast(draft ? 'Saved as draft' : 'Published!');
+            hideContentEditor();
+            loadContent();
+        } else toast(data.error || 'Save failed', true);
+    } catch { toast('Save failed', true); }
+}
+
+async function deleteContent(key) {
+    if (!confirm('Delete this content?')) return;
+    try {
+        const data = await contentApi('/delete', 'POST', { key });
+        if (data.success) { toast('Deleted'); loadContent(); }
+        else toast('Delete failed', true);
+    } catch { toast('Delete failed', true); }
+}
+
+// ─── ANALYTICS ───────────────────────────────
+async function loadAnalytics() {
+    try {
+        const data = await api('/stats');
+        if (!data.success) return;
+        const s = data.stats;
+
+        document.getElementById('analSignups7d').textContent = s.recentSignups || 0;
+        document.getElementById('analLogins7d').textContent = s.recentLogins || 0;
+        document.getElementById('analContent').textContent = s.totalContent || 0;
+
+        const paying = (s.tiers.vip || 0) + (s.tiers.elite || 0);
+        document.getElementById('analPaying').textContent = paying;
+
+        // Revenue estimate
+        const revenue = (s.tiers.vip || 0) * 9.99 + (s.tiers.elite || 0) * 24.99;
+        document.getElementById('analRevenue').textContent = `$${revenue.toFixed(2)}`;
+
+        // Tier distribution chart
+        const total = s.totalUsers || 1;
+        const tiers = [
+            { name: 'Free', count: s.tiers.free || 0, color: '#444' },
+            { name: 'Peek', count: s.tiers.peek || 0, color: 'var(--red)' },
+            { name: 'VIP', count: s.tiers.vip || 0, color: 'var(--gold)' },
+            { name: 'Elite', count: s.tiers.elite || 0, color: '#fff' }
+        ].filter(t => t.count > 0);
+
+        const chartEl = document.getElementById('tierChart');
+        chartEl.innerHTML = tiers.map(t =>
+            `<div style="flex:${t.count};background:${t.color};border-radius:4px;min-width:4px" title="${t.name}: ${t.count}"></div>`
+        ).join('');
+
+        const legendEl = document.getElementById('tierLegend');
+        legendEl.innerHTML = tiers.map(t =>
+            `<span><span style="display:inline-block;width:10px;height:10px;background:${t.color};border-radius:2px;margin-right:4px;vertical-align:middle"></span>${t.name}: ${t.count} (${Math.round(t.count/total*100)}%)</span>`
+        ).join('');
+
+        // Signup timeline (aggregate by day, last 30 days)
+        if (s.signupDates && s.signupDates.length) {
+            const days = {};
+            const now = new Date();
+            for (let i = 29; i >= 0; i--) {
+                const d = new Date(now - i * 86400000);
+                const key = d.toISOString().split('T')[0];
+                days[key] = 0;
+            }
+            s.signupDates.forEach(d => {
+                const key = d.split('T')[0];
+                if (days[key] !== undefined) days[key]++;
+            });
+
+            const maxVal = Math.max(1, ...Object.values(days));
+            const chartEl2 = document.getElementById('signupChart');
+            chartEl2.innerHTML = Object.entries(days).map(([date, count]) => {
+                const h = Math.max(2, (count / maxVal) * 100);
+                const label = date.split('-').slice(1).join('/');
+                return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end">
+                    <div style="font-size:8px;color:var(--muted);margin-bottom:2px">${count || ''}</div>
+                    <div style="width:100%;height:${h}px;background:${count > 0 ? 'var(--red)' : 'rgba(255,255,255,0.05)'};border-radius:2px 2px 0 0;min-height:2px" title="${label}: ${count} signups"></div>
+                    <div style="font-size:7px;color:var(--muted);margin-top:2px;transform:rotate(-45deg);white-space:nowrap">${label}</div>
+                </div>`;
+            }).join('');
+        }
+    } catch (e) { console.error('Analytics error:', e); }
+}
+
+// ─── ADMIN PASSWORD RESET ────────────────────
+async function resetUserPassword() {
+    const email = document.getElementById('resetEmail').value.trim();
+    const pass = document.getElementById('resetPass').value;
+    if (!email || !pass) { toast('Email and password required', true); return; }
+    if (pass.length < 6) { toast('Password must be at least 6 characters', true); return; }
+
+    try {
+        const r = await fetch('/api/me/admin-reset', {
+            method: 'POST',
+            headers: headers(),
+            body: JSON.stringify({ email, newPassword: pass })
+        });
+        const data = await r.json();
+        if (data.success) {
+            toast(`Password reset for ${email}`);
+            document.getElementById('resetEmail').value = '';
+            document.getElementById('resetPass').value = '';
+        } else toast(data.error || 'Reset failed', true);
+    } catch { toast('Reset failed', true); }
 }
 </script>
 </body>
