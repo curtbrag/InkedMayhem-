@@ -2,6 +2,13 @@ import Stripe from "stripe";
 import { getStore } from "@netlify/blobs";
 import jwt from "jsonwebtoken";
 
+const CORS = {
+    "Content-Type": "application/json",
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    "Access-Control-Allow-Methods": "POST, OPTIONS"
+};
+
 const TIERS = {
     vip: {
         name: "Ink Insider — VIP",
@@ -16,34 +23,35 @@ const TIERS = {
 };
 
 export default async (req, context) => {
+    if (req.method === "OPTIONS") return new Response("", { headers: CORS });
     if (req.method !== "POST") {
-        return new Response(JSON.stringify({ error: "Method not allowed" }), { status: 405 });
+        return new Response(JSON.stringify({ error: "Method not allowed" }), { status: 405, headers: CORS });
     }
 
     try {
         // Verify auth
         const authHeader = req.headers.get("authorization");
         if (!authHeader) {
-            return new Response(JSON.stringify({ error: "Not authenticated" }), { status: 401 });
+            return new Response(JSON.stringify({ error: "Not authenticated" }), { status: 401, headers: CORS });
         }
 
         const secret = Netlify.env.get("JWT_SECRET") || "inkedmayhem-dev-secret-change-me";
         const token = authHeader.replace("Bearer ", "");
-        
+
         let decoded;
         try {
             decoded = jwt.verify(token, secret);
         } catch (e) {
-            return new Response(JSON.stringify({ error: "Invalid token" }), { status: 401 });
+            return new Response(JSON.stringify({ error: "Invalid token" }), { status: 401, headers: CORS });
         }
 
         const { tier, type, postId } = await req.json();
         const stripeKey = Netlify.env.get("STRIPE_SECRET_KEY");
 
         if (!stripeKey) {
-            return new Response(JSON.stringify({ 
-                error: "Payment not configured yet. Set STRIPE_SECRET_KEY in Netlify env vars." 
-            }), { status: 503 });
+            return new Response(JSON.stringify({
+                error: "Payment not configured yet. Set STRIPE_SECRET_KEY in Netlify env vars."
+            }), { status: 503, headers: CORS });
         }
 
         const stripe = new Stripe(stripeKey);
@@ -71,9 +79,7 @@ export default async (req, context) => {
                 }
             });
 
-            return new Response(JSON.stringify({ url: session.url }), {
-                headers: { "Content-Type": "application/json" }
-            });
+            return new Response(JSON.stringify({ url: session.url }), { headers: CORS });
 
         } else if (type === "single" && postId) {
             // Pay-per-post checkout — look up price from content store
@@ -107,16 +113,14 @@ export default async (req, context) => {
                 }
             });
 
-            return new Response(JSON.stringify({ url: session.url }), {
-                headers: { "Content-Type": "application/json" }
-            });
+            return new Response(JSON.stringify({ url: session.url }), { headers: CORS });
         }
 
-        return new Response(JSON.stringify({ error: "Invalid request" }), { status: 400 });
+        return new Response(JSON.stringify({ error: "Invalid request" }), { status: 400, headers: CORS });
 
     } catch (err) {
         console.error("Checkout error:", err);
-        return new Response(JSON.stringify({ error: "Payment error" }), { status: 500 });
+        return new Response(JSON.stringify({ error: "Payment error" }), { status: 500, headers: CORS });
     }
 };
 

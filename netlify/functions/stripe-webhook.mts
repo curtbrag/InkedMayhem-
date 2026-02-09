@@ -3,8 +3,9 @@ import { getStore } from "@netlify/blobs";
 
 async function notifyAdmin(type, data) {
     const secret = Netlify.env.get("JWT_SECRET") || "inkedmayhem-dev-secret-change-me";
+    const siteUrl = Netlify.env.get("URL") || "https://inkedmayhem.netlify.app";
     try {
-        await fetch("https://inkedmayhem.netlify.app/api/notify", {
+        await fetch(`${siteUrl}/api/notify`, {
             method: "POST",
             headers: { "Content-Type": "application/json", "x-internal-key": secret },
             body: JSON.stringify({ type, data })
