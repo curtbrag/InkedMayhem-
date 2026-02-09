@@ -38,7 +38,8 @@ export default async (req, context) => {
 
     // ─── PUBLIC: GET CONTENT LIST ─────────────────
     if (path === "" && req.method === "GET") {
-        const tier = url.searchParams.get("tier") || "all";
+        const user = verifyUser(req);
+        const userTier = user?.tier || "free";
         try {
             const { blobs } = await store.list();
             const items = [];
@@ -51,13 +52,16 @@ export default async (req, context) => {
 
             // Sort by date descending
             items.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-            
-            // Filter by tier access
-            const filtered = tier === "all" ? items : items.filter(i => {
-                if (i.tier === "free") return true;
-                if (tier === "elite") return true;
-                if (tier === "vip" && i.tier !== "elite") return true;
-                return false;
+
+            // Enforce access: show metadata for all, but redact body/image for locked tiers
+            const tierOrder = { free: 0, vip: 1, elite: 2 };
+            const userLevel = tierOrder[userTier] || 0;
+
+            const filtered = items.map(i => {
+                const itemLevel = tierOrder[i.tier] || 0;
+                if (userLevel >= itemLevel) return i;
+                // User doesn't have access — return metadata only, no body or image
+                return { key: i.key, title: i.title, tier: i.tier, type: i.type, createdAt: i.createdAt, locked: true };
             });
 
             return new Response(JSON.stringify({ success: true, content: filtered }), { headers: CORS });

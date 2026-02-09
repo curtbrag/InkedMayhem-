@@ -260,17 +260,6 @@
             </div>
         </div>
 
-        <!-- LATEST DROPS -->
-        <div class="content-sections">
-            <h2>LATEST DROPS</h2>
-            <div class="content-grid" id="latestContent">
-                <div class="empty-state">
-                    <span class="placeholder-icon">✦</span>
-                    <p>New content drops coming soon. Stay tuned.</p>
-                </div>
-            </div>
-        </div>
-
         <!-- VIP CONTENT -->
         <div class="content-sections">
             <h2>VIP EXCLUSIVES <span class="count">(Ink Insider+)</span></h2>
@@ -345,7 +334,7 @@
                     loadExclusiveContent();
                     // Load messages
                     loadMessages();
-                } catch (e) {}
+                } catch (e) { console.error('Session restore error:', e); }
             }
 
             document.getElementById('btnLogout').addEventListener('click', () => {
@@ -367,7 +356,7 @@
                     const tierMap = { free: 'FREE', vip: 'INK INSIDER', elite: 'MAYHEM CIRCLE' };
                     document.getElementById('userTierBadge').textContent = tierMap[data.user.tier] || 'FREE';
                 }
-            } catch (e) {}
+            } catch (e) { console.error('Profile load error:', e); }
         }
 
         async function updateProfile() {
@@ -392,7 +381,7 @@
                 }
                 msg.style.display = 'block';
                 setTimeout(() => { msg.style.display = 'none'; }, 3000);
-            } catch (e) {}
+            } catch (e) { console.error('Profile update error:', e); }
         }
 
         async function changePassword() {
@@ -476,23 +465,24 @@
 
             if (!items.length) {
                 if (tier === 'free') {
-                    container.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--muted);font-style:italic">New content drops coming soon! 🔥</div>';
+                    container.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--muted);font-style:italic">New content drops coming soon!</div>';
                 } else if (!hasAccess) {
-                    container.innerHTML = `<div style="padding:2rem;text-align:center;color:var(--muted)">🔒 Upgrade to ${tier.toUpperCase()} to unlock exclusive content <a href="/#exclusive" style="color:var(--red)">→ View Plans</a></div>`;
+                    container.innerHTML = `<div style="padding:2rem;text-align:center;color:var(--muted)">Upgrade to ${tier.toUpperCase()} to unlock exclusive content <a href="/#exclusive" style="color:var(--red)">View Plans</a></div>`;
                 } else {
-                    container.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--muted);font-style:italic">Exclusive content coming soon — stay tuned! 🔥</div>';
+                    container.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--muted);font-style:italic">Exclusive content coming soon — stay tuned!</div>';
                 }
                 return;
             }
 
             container.innerHTML = items.map(c => {
-                if (!hasAccess) {
+                // Server returns locked flag for content user can't access
+                if (c.locked) {
                     return `<div class="content-card" style="opacity:0.5;cursor:pointer" onclick="window.location.href='/#exclusive'">
                         <div class="content-card-media">
                             <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:var(--surface)">
-                                <span style="font-size:2rem;opacity:0.4">🔒</span>
+                                <span style="font-size:2rem;opacity:0.4">&#128274;</span>
                             </div>
-                            <span class="content-tier-tag">${tier.toUpperCase()}</span>
+                            <span class="content-tier-tag">${(c.tier || tier).toUpperCase()}</span>
                         </div>
                         <div class="content-card-info">
                             <h3>${escHtml(c.title)}</h3>
@@ -501,17 +491,16 @@
                     </div>`;
                 }
 
-                const typeIcons = { post: '📝', gallery: '🖼️', announcement: '📢' };
+                const typeIcons = { post: '&#128221;', gallery: '&#128444;', announcement: '&#128226;' };
                 const hasImage = c.imageUrl && c.imageUrl.startsWith('http');
-                const preview = c.body ? c.body.replace(/<[^>]*>/g, '').substring(0, 100) + '...' : '';
 
                 return `<div class="content-card" onclick="openContent(this)" data-body="${escAttr(c.body)}" data-title="${escAttr(c.title)}" data-image="${escAttr(c.imageUrl || '')}">
                     <div class="content-card-media">
-                        ${hasImage 
+                        ${hasImage
                             ? `<img src="${escHtml(c.imageUrl)}" alt="${escHtml(c.title)}" style="width:100%;height:100%;object-fit:cover">`
-                            : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:var(--surface);font-size:2rem">${typeIcons[c.type] || '📝'}</div>`
+                            : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:var(--surface);font-size:2rem">${typeIcons[c.type] || '&#128221;'}</div>`
                         }
-                        <span class="content-tier-tag">${tier.toUpperCase()}</span>
+                        <span class="content-tier-tag">${(c.tier || tier).toUpperCase()}</span>
                     </div>
                     <div class="content-card-info">
                         <h3>${escHtml(c.title)}</h3>
@@ -558,7 +547,7 @@
                     <div class="msg-bubble from-${m.from}">
                         ${m.from === 'admin' ? '<div class="msg-from">InkedMayhem</div>' : ''}
                         ${escHtml(m.text)}
-                        <span class="msg-time">${new Date(m.at).toLocaleString()}</span>
+                        <span class="msg-time">${new Date(m.sentAt).toLocaleString()}</span>
                     </div>
                 `).join('');
                 thread.scrollTop = thread.scrollHeight;
@@ -585,7 +574,7 @@
                     input.value = '';
                     loadMessages();
                 }
-            } catch (e) {}
+            } catch (e) { console.error('Send message error:', e); }
             btn.textContent = 'Send →';
             btn.disabled = false;
         }
