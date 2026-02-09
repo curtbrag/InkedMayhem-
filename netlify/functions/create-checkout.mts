@@ -1,4 +1,5 @@
 import Stripe from "stripe";
+import { getStore } from "@netlify/blobs";
 import jwt from "jsonwebtoken";
 
 const TIERS = {
@@ -75,16 +76,26 @@ export default async (req, context) => {
             });
 
         } else if (type === "single" && postId) {
-            // Pay-per-post checkout
-            // TODO: Look up post price from content store
+            // Pay-per-post checkout — look up price from content store
+            let postPrice = 499; // default $4.99
+            let postTitle = postId;
+            try {
+                const contentStore = getStore("content");
+                const post = await contentStore.get(postId, { type: "json" });
+                if (post) {
+                    if (post.price) postPrice = Math.round(post.price * 100);
+                    if (post.title) postTitle = post.title;
+                }
+            } catch (err) { console.error("Content price lookup:", err); }
+
             const session = await stripe.checkout.sessions.create({
                 mode: "payment",
                 customer_email: decoded.email,
                 line_items: [{
                     price_data: {
                         currency: "usd",
-                        product_data: { name: `Unlock: ${postId}` },
-                        unit_amount: 499 // default $4.99, customize per post
+                        product_data: { name: `Unlock: ${postTitle}` },
+                        unit_amount: postPrice
                     },
                     quantity: 1
                 }],

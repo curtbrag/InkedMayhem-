@@ -46,9 +46,9 @@ export default async (req, context) => {
                 try {
                     const item = await store.get(blob.key, { type: "json" });
                     if (item && !item.draft) items.push({ ...item, key: blob.key });
-                } catch {}
+                } catch (err) { console.error("Content item read error:", err); }
             }
-            
+
             // Sort by date descending
             items.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
             
@@ -94,13 +94,13 @@ export default async (req, context) => {
     if (path === "/save" && req.method === "POST") {
         if (!verifyAdmin(req)) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: CORS });
         try {
-            const { key, title, body, tier, type, imageUrl, draft } = await req.json();
+            const { key, title, body, tier, type, imageUrl, draft, price } = await req.json();
             if (!title || !body) return new Response(JSON.stringify({ error: "Title and body required" }), { status: 400, headers: CORS });
 
             const contentKey = key || `content-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`;
             
             let existing = null;
-            try { existing = await store.get(contentKey, { type: "json" }); } catch {}
+            try { existing = await store.get(contentKey, { type: "json" }); } catch (err) { console.error("Content lookup:", err); }
 
             const item = {
                 title,
@@ -108,6 +108,7 @@ export default async (req, context) => {
                 tier: tier || "free",
                 type: type || "post", // post, gallery, announcement
                 imageUrl: imageUrl || "",
+                price: price ? parseFloat(price) : null,
                 draft: draft || false,
                 createdAt: existing?.createdAt || new Date().toISOString(),
                 updatedAt: new Date().toISOString()
@@ -142,7 +143,7 @@ export default async (req, context) => {
                 try {
                     const item = await store.get(blob.key, { type: "json" });
                     if (item) items.push({ ...item, key: blob.key });
-                } catch {}
+                } catch (err) { console.error("Admin content read error:", err); }
             }
             items.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
             return new Response(JSON.stringify({ success: true, content: items }), { headers: CORS });
