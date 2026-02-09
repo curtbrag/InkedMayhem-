@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔥</text></svg>">
     <title>Members — InkedMayhem</title>
+    <meta name="description" content="InkedMayhem members area — exclusive content, direct messaging, and premium drops.">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="theme-color" content="#0a0a0a">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@0,400;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -229,6 +232,7 @@
     <nav id="navbar" class="scrolled">
         <a href="/" class="nav-logo">INKED<span>MAYHEM</span></a>
         <div class="nav-right">
+            <a href="/" style="font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--light-gray);transition:color 0.3s" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--light-gray)'">Home</a>
             <button class="btn-login" id="btnLogout">Sign Out</button>
         </div>
     </nav>
@@ -332,8 +336,18 @@
                     loadProfile();
                     // Load dynamic content
                     loadExclusiveContent();
-                    // Load messages
-                    loadMessages();
+                    // Load messages (elite only — DMs are an elite perk)
+                    if (currentUser.tier === 'elite') {
+                        loadMessages();
+                    } else {
+                        document.getElementById('msgThread').innerHTML = '';
+                        document.getElementById('messagesSection').innerHTML = `
+                            <h2>MESSAGES</h2>
+                            <div style="padding:2rem;text-align:center;border:1px dashed var(--border)">
+                                <p style="color:var(--muted);font-size:0.8rem;margin-bottom:1rem">Direct messaging is available to <strong style="color:var(--white)">Mayhem Circle (Elite)</strong> members.</p>
+                                <a href="/#exclusive" style="color:var(--red);font-size:0.65rem;letter-spacing:2px;text-transform:uppercase">Upgrade to Elite &rarr;</a>
+                            </div>`;
+                    }
                 } catch (e) { console.error('Session restore error:', e); }
             }
 
@@ -350,11 +364,16 @@
                 const r = await fetch('/api/me', { headers: { 'Authorization': `Bearer ${currentToken}` }});
                 const data = await r.json();
                 if (data.success) {
+                    const oldTier = currentUser?.tier;
                     currentUser = data.user;
                     localStorage.setItem('im_user', JSON.stringify(data.user));
                     document.getElementById('profileName').value = data.user.name || '';
                     const tierMap = { free: 'FREE', vip: 'INK INSIDER', elite: 'MAYHEM CIRCLE' };
                     document.getElementById('userTierBadge').textContent = tierMap[data.user.tier] || 'FREE';
+                    // If tier upgraded to elite, enable messaging
+                    if (oldTier !== 'elite' && data.user.tier === 'elite') {
+                        location.reload();
+                    }
                 }
             } catch (e) { console.error('Profile load error:', e); }
         }
@@ -438,7 +457,7 @@
         // ─── DYNAMIC CONTENT ─────────────────────
         async function loadExclusiveContent() {
             try {
-                const r = await fetch('/api/content?tier=' + (currentUser?.tier || 'free'), {
+                const r = await fetch('/api/content', {
                     headers: { 'Authorization': `Bearer ${currentToken}` }
                 });
                 const data = await r.json();
@@ -528,6 +547,8 @@
             `;
             document.body.appendChild(overlay);
             overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+            const escHandler = (e) => { if (e.key === 'Escape') { overlay.remove(); document.removeEventListener('keydown', escHandler); } };
+            document.addEventListener('keydown', escHandler);
         }
 
         // ─── MESSAGES ────────────────────────────
