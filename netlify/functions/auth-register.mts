@@ -3,11 +3,29 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 async function notifyAdmin(type, data, secret) {
+    const siteUrl = Netlify.env.get("URL") || "https://inkedmayhem.netlify.app";
     try {
-        await fetch("https://inkedmayhem.netlify.app/api/notify", {
+        await fetch(`${siteUrl}/api/notify`, {
             method: "POST",
             headers: { "Content-Type": "application/json", "x-internal-key": secret },
             body: JSON.stringify({ type, data })
+        });
+    } catch {}
+}
+
+async function sendTelegramSignup(name, email) {
+    const botToken = Netlify.env.get("TELEGRAM_CREATOR_BOT_TOKEN");
+    const chatId = Netlify.env.get("TELEGRAM_ADMIN_CHAT_ID") || Netlify.env.get("TELEGRAM_CREATOR_CHAT_ID");
+    if (!botToken || !chatId) return;
+    try {
+        await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                chat_id: chatId,
+                text: `👤 <b>New Member!</b>\n\n<b>${name || "Unknown"}</b> just signed up.\nEmail: ${email}`,
+                parse_mode: "HTML"
+            })
         });
     } catch {}
 }
@@ -51,8 +69,9 @@ export default async (req, context) => {
         const secret = Netlify.env.get("JWT_SECRET") || "inkedmayhem-dev-secret-change-me";
         const token = jwt.sign({ email: user.email, tier: user.tier }, secret, { expiresIn: "30d" });
 
-        // Fire notification (non-blocking)
+        // Fire notifications (non-blocking)
         notifyAdmin("new_signup", { email: user.email, name: user.name }, secret);
+        sendTelegramSignup(user.name, user.email);
 
         return new Response(JSON.stringify({
             success: true,

@@ -263,9 +263,13 @@ export default async (req: Request, context: any) => {
                     `<b>Add caption:</b> Send text starting with "caption:" after uploading\n\n` +
                     `<b>Commands:</b>\n` +
                     `/status — Pipeline overview\n` +
+                    `/inbox — Items awaiting review\n` +
                     `/queue — See queued items\n` +
+                    `/approve &lt;id&gt; — Approve + queue\n` +
+                    `/reject &lt;id&gt; — Reject content\n` +
+                    `/publish &lt;id&gt; — Publish now\n` +
                     `/schedule — View posting schedule\n` +
-                    `/help — Show this message`
+                    `/help — Show all commands`
                 );
                 await logBotEvent("creator", userId, "start", {});
                 return new Response(JSON.stringify({ ok: true }), { headers: CORS });
@@ -275,12 +279,19 @@ export default async (req: Request, context: any) => {
             if (message.text === "/help") {
                 await sendTelegramMessage(botToken, chatId,
                     `<b>Creator Bot Commands</b>\n\n` +
-                    `<b>Content:</b>\n` +
+                    `<b>Content Upload:</b>\n` +
                     `• Send a photo/video to upload\n` +
-                    `• Include caption in the message, or send "caption: your text" after\n` +
+                    `• Include caption in the message\n` +
+                    `• "caption: your text" to update last upload\n` +
                     `• "category: selfies" to set category\n` +
                     `• "tier: vip" to set access tier\n\n` +
-                    `<b>Management:</b>\n` +
+                    `<b>Review:</b>\n` +
+                    `/inbox — Items awaiting review\n` +
+                    `/approve &lt;id&gt; — Approve and queue\n` +
+                    `/reject &lt;id&gt; [reason] — Reject with reason\n` +
+                    `/publish &lt;id&gt; — Publish immediately\n` +
+                    `/tier &lt;id&gt; &lt;free|vip|elite&gt; — Set access tier\n\n` +
+                    `<b>Overview:</b>\n` +
                     `/status — Pipeline stats\n` +
                     `/queue — Items waiting to publish\n` +
                     `/schedule — Next scheduled posts\n` +
@@ -366,6 +377,214 @@ export default async (req: Request, context: any) => {
                         `<b>Scheduled Posts (${scheduled.length})</b>\n\n${list}`
                     );
                 }
+                return new Response(JSON.stringify({ ok: true }), { headers: CORS });
+            }
+
+            // ─── COMMAND: /inbox — List inbox items for quick review
+            if (message.text === "/inbox") {
+                const pipeStore = getStore("pipeline");
+                const { blobs } = await pipeStore.list();
+                const inbox: any[] = [];
+
+                for (const blob of blobs) {
+                    try {
+                        const item = await pipeStore.get(blob.key, { type: "json" }) as any;
+                        if (item?.status === "inbox") inbox.push(item);
+                    } catch {}
+                }
+
+                if (inbox.length === 0) {
+                    await sendTelegramMessage(botToken, chatId, "Inbox is empty. All caught up!");
+                } else {
+                    const list = inbox.slice(0, 10).map((item, i) =>
+                        `${i + 1}. <b>${item.caption || item.filename}</b>\n   ID: <code>${item.id}</code> [${item.tier}]`
+                    ).join("\n\n");
+                    await sendTelegramMessage(botToken, chatId,
+                        `<b>Inbox (${inbox.length})</b>\n\n${list}\n\n` +
+                        `Use /approve &lt;id&gt; or /reject &lt;id&gt; to manage`
+                    );
+                }
+                return new Response(JSON.stringify({ ok: true }), { headers: CORS });
+            }
+
+            // ─── COMMAND: /approve <id> — Approve and queue a pipeline item
+            if (message.text?.startsWith("/approve")) {
+                const parts = message.text.split(/\s+/);
+                const targetId = parts[1];
+                if (!targetId) {
+                    await sendTelegramMessage(botToken, chatId,
+                        "Usage: /approve &lt;pipeline-id&gt;\n\nUse /inbox to see item IDs.");
+                    return new Response(JSON.stringify({ ok: true }), { headers: CORS });
+                }
+
+                const pipeStore = getStore("pipeline");
+                const item = await pipeStore.get(targetId, { type: "json" }) as any;
+                if (!item) {
+                    await sendTelegramMessage(botToken, chatId, `Item not found: ${targetId}`);
+                    return new Response(JSON.stringify({ ok: true }), { headers: CORS });
+                }
+                if (item.status !== "inbox" && item.status !== "processed") {
+                    await sendTelegramMessage(botToken, chatId, `Cannot approve — item is "${item.status}"`);
+                    return new Response(JSON.stringify({ ok: true }), { headers: CORS });
+                }
+
+                item.status = "queued";
+                item.queuedAt = new Date().toISOString();
+                if (!item.processedAt) {
+                    item.processedAt = new Date().toISOString();
+                    item.checks = { ...item.checks, exifStripped: true, compressed: true, thumbnailGenerated: true };
+                }
+                await pipeStore.setJSON(targetId, item);
+
+                const logStore = getStore("pipeline-logs");
+                await logStore.setJSON(`log-${Date.now()}-tg`, {
+                    action: "telegram-approve",
+                    itemId: targetId,
+                    details: { approvedBy: username },
+                    timestamp: new Date().toISOString()
+                });
+
+                await sendTelegramMessage(botToken, chatId,
+                    `✅ <b>Approved!</b>\n\n${item.caption || item.filename}\nStatus: <b>QUEUED</b>${item.scheduledAt ? `\nScheduled: ${item.scheduledAt}` : ""}`
+                );
+                return new Response(JSON.stringify({ ok: true }), { headers: CORS });
+            }
+
+            // ─── COMMAND: /reject <id> [reason] — Reject a pipeline item
+            if (message.text?.startsWith("/reject")) {
+                const parts = message.text.split(/\s+/);
+                const targetId = parts[1];
+                const reason = parts.slice(2).join(" ") || "Rejected via Telegram";
+                if (!targetId) {
+                    await sendTelegramMessage(botToken, chatId,
+                        "Usage: /reject &lt;pipeline-id&gt; [reason]\n\nUse /inbox to see item IDs.");
+                    return new Response(JSON.stringify({ ok: true }), { headers: CORS });
+                }
+
+                const pipeStore = getStore("pipeline");
+                const item = await pipeStore.get(targetId, { type: "json" }) as any;
+                if (!item) {
+                    await sendTelegramMessage(botToken, chatId, `Item not found: ${targetId}`);
+                    return new Response(JSON.stringify({ ok: true }), { headers: CORS });
+                }
+
+                item.status = "rejected";
+                item.rejectReason = reason;
+                await pipeStore.setJSON(targetId, item);
+
+                const logStore = getStore("pipeline-logs");
+                await logStore.setJSON(`log-${Date.now()}-tg`, {
+                    action: "telegram-reject",
+                    itemId: targetId,
+                    details: { rejectedBy: username, reason },
+                    timestamp: new Date().toISOString()
+                });
+
+                await sendTelegramMessage(botToken, chatId,
+                    `❌ <b>Rejected</b>\n\n${item.caption || item.filename}\nReason: ${reason}`
+                );
+                return new Response(JSON.stringify({ ok: true }), { headers: CORS });
+            }
+
+            // ─── COMMAND: /publish <id> — Publish a queued item immediately
+            if (message.text?.startsWith("/publish")) {
+                const parts = message.text.split(/\s+/);
+                const targetId = parts[1];
+                if (!targetId) {
+                    await sendTelegramMessage(botToken, chatId,
+                        "Usage: /publish &lt;pipeline-id&gt;\n\nUse /queue to see queued items.");
+                    return new Response(JSON.stringify({ ok: true }), { headers: CORS });
+                }
+
+                const pipeStore = getStore("pipeline");
+                const contentStore = getStore("content");
+                const item = await pipeStore.get(targetId, { type: "json" }) as any;
+                if (!item) {
+                    await sendTelegramMessage(botToken, chatId, `Item not found: ${targetId}`);
+                    return new Response(JSON.stringify({ ok: true }), { headers: CORS });
+                }
+
+                // Allow publishing from inbox/processed/queued
+                if (item.status === "published") {
+                    await sendTelegramMessage(botToken, chatId, "Already published!");
+                    return new Response(JSON.stringify({ ok: true }), { headers: CORS });
+                }
+                if (item.status === "rejected") {
+                    await sendTelegramMessage(botToken, chatId, "Cannot publish rejected item. Approve it first.");
+                    return new Response(JSON.stringify({ ok: true }), { headers: CORS });
+                }
+
+                // If not yet queued, approve first
+                if (item.status !== "queued") {
+                    item.status = "queued";
+                    item.queuedAt = new Date().toISOString();
+                    if (!item.processedAt) {
+                        item.processedAt = new Date().toISOString();
+                        item.checks = { ...item.checks, exifStripped: true, compressed: true, thumbnailGenerated: true };
+                    }
+                }
+
+                // Create content entry
+                const contentKey = `content-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`;
+                const contentItem = {
+                    title: item.caption || item.filename,
+                    body: item.caption || "",
+                    tier: item.tier || "free",
+                    type: item.mediaType === "video" ? "video" : "gallery",
+                    imageUrl: `/api/pipeline/asset/${item.storedAs}`,
+                    draft: false,
+                    tags: item.tags || [],
+                    category: item.category || "photos",
+                    source: item.source,
+                    pipelineId: item.id,
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                };
+                await contentStore.setJSON(contentKey, contentItem);
+
+                item.status = "published";
+                item.publishedAt = new Date().toISOString();
+                item.contentKey = contentKey;
+                await pipeStore.setJSON(targetId, item);
+
+                const logStore = getStore("pipeline-logs");
+                await logStore.setJSON(`log-${Date.now()}-tg`, {
+                    action: "telegram-publish",
+                    itemId: targetId,
+                    details: { publishedBy: username, contentKey },
+                    timestamp: new Date().toISOString()
+                });
+
+                await sendTelegramMessage(botToken, chatId,
+                    `🚀 <b>Published!</b>\n\n${item.caption || item.filename}\nTier: ${item.tier}\nContent: ${contentKey}`
+                );
+                return new Response(JSON.stringify({ ok: true }), { headers: CORS });
+            }
+
+            // ─── COMMAND: /tier <id> <free|vip|elite> — Set item tier
+            if (message.text?.startsWith("/tier")) {
+                const parts = message.text.split(/\s+/);
+                const targetId = parts[1];
+                const newTier = (parts[2] || "").toLowerCase();
+                if (!targetId || !["free", "vip", "elite"].includes(newTier)) {
+                    await sendTelegramMessage(botToken, chatId,
+                        "Usage: /tier &lt;pipeline-id&gt; &lt;free|vip|elite&gt;");
+                    return new Response(JSON.stringify({ ok: true }), { headers: CORS });
+                }
+
+                const pipeStore = getStore("pipeline");
+                const item = await pipeStore.get(targetId, { type: "json" }) as any;
+                if (!item) {
+                    await sendTelegramMessage(botToken, chatId, `Item not found: ${targetId}`);
+                    return new Response(JSON.stringify({ ok: true }), { headers: CORS });
+                }
+
+                item.tier = newTier;
+                await pipeStore.setJSON(targetId, item);
+
+                await sendTelegramMessage(botToken, chatId,
+                    `🔒 <b>Tier updated!</b>\n\n${item.caption || item.filename}\nNew tier: <b>${newTier.toUpperCase()}</b>`
+                );
                 return new Response(JSON.stringify({ ok: true }), { headers: CORS });
             }
 

@@ -533,11 +533,13 @@
     <div class="tabs">
         <button class="tab active" data-tab="overview">Overview</button>
         <button class="tab" data-tab="pipeline">Pipeline <span class="badge" id="pipelineBadge" style="display:none">0</span></button>
+        <button class="tab" data-tab="calendar">Calendar</button>
         <button class="tab" data-tab="users">Users</button>
         <button class="tab" data-tab="messages">Messages <span class="badge" id="unreadBadge" style="display:none">0</span></button>
         <button class="tab" data-tab="conversations">Conversations</button>
         <button class="tab" data-tab="content">Content</button>
         <button class="tab" data-tab="analytics">Analytics</button>
+        <button class="tab" data-tab="settings">Settings</button>
     </div>
 
     <!-- ─── OVERVIEW TAB ──────────────────── -->
@@ -857,6 +859,33 @@
     </div>
 
     <!-- ─── ANALYTICS TAB ────────────────────── -->
+    <!-- ─── CALENDAR TAB ─────────────────────── -->
+    <div class="tab-content" id="tab-calendar">
+        <div class="section-title"><span class="icon">◆</span> Content Calendar</div>
+        <div style="display:flex; gap:1rem; margin-bottom:1.5rem; align-items:center">
+            <button class="btn-sm" onclick="calPrevMonth()">&lt; Prev</button>
+            <span id="calMonthLabel" style="font-family:var(--font-display); font-size:1.3rem; letter-spacing:2px; min-width:180px; text-align:center"></span>
+            <button class="btn-sm" onclick="calNextMonth()">Next &gt;</button>
+            <button class="btn-sm primary" onclick="calToday()" style="margin-left:1rem">Today</button>
+        </div>
+        <div style="display:grid; grid-template-columns:repeat(7,1fr); gap:1px; background:var(--border)">
+            <div style="background:var(--surface); padding:0.5rem; text-align:center; color:var(--muted); font-size:10px; text-transform:uppercase; letter-spacing:1px">Sun</div>
+            <div style="background:var(--surface); padding:0.5rem; text-align:center; color:var(--muted); font-size:10px; text-transform:uppercase; letter-spacing:1px">Mon</div>
+            <div style="background:var(--surface); padding:0.5rem; text-align:center; color:var(--muted); font-size:10px; text-transform:uppercase; letter-spacing:1px">Tue</div>
+            <div style="background:var(--surface); padding:0.5rem; text-align:center; color:var(--muted); font-size:10px; text-transform:uppercase; letter-spacing:1px">Wed</div>
+            <div style="background:var(--surface); padding:0.5rem; text-align:center; color:var(--muted); font-size:10px; text-transform:uppercase; letter-spacing:1px">Thu</div>
+            <div style="background:var(--surface); padding:0.5rem; text-align:center; color:var(--muted); font-size:10px; text-transform:uppercase; letter-spacing:1px">Fri</div>
+            <div style="background:var(--surface); padding:0.5rem; text-align:center; color:var(--muted); font-size:10px; text-transform:uppercase; letter-spacing:1px">Sat</div>
+        </div>
+        <div id="calGrid" style="display:grid; grid-template-columns:repeat(7,1fr); gap:1px; background:var(--border)"></div>
+        <div style="margin-top:2rem">
+            <div class="section-title" style="font-size:1.2rem"><span class="icon">◆</span> Upcoming Scheduled Posts</div>
+            <div id="calUpcoming" style="background:var(--darker); border:1px solid var(--border); padding:1rem">
+                <div class="loading-text"><span class="spinner"></span> Loading schedule...</div>
+            </div>
+        </div>
+    </div>
+
     <div class="tab-content" id="tab-analytics">
         <div class="section-title"><span class="icon">◆</span> Analytics</div>
 
@@ -899,6 +928,88 @@
                 <input type="email" id="resetEmail" placeholder="user@example.com" style="width:100%;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.1);color:var(--off-white);padding:0.5rem;margin-bottom:0.5rem">
                 <input type="text" id="resetPass" placeholder="New password (min 6 chars)" style="width:100%;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.1);color:var(--off-white);padding:0.5rem;margin-bottom:0.5rem">
                 <button class="btn-sm primary" onclick="resetUserPassword()" style="font-size:13px;padding:0.4rem 1rem">Reset Password</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ─── SETTINGS TAB ─────────────────────── -->
+    <div class="tab-content" id="tab-settings">
+        <div class="section-title"><span class="icon">◆</span> Settings & Configuration</div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:2rem">
+            <div>
+                <div class="section-title" style="font-size:1.2rem"><span class="icon">◆</span> Creator Profile</div>
+                <div style="background:var(--darker); border:1px solid var(--border); padding:1.5rem">
+                    <label style="display:block; color:var(--muted); font-size:10px; text-transform:uppercase; letter-spacing:1px; margin-bottom:0.3rem">Creator Name</label>
+                    <input type="text" id="setCreatorName" placeholder="InkedMayhem" style="width:100%; background:var(--surface); border:1px solid var(--border); color:var(--off-white); padding:0.5rem; font-family:var(--font-mono); font-size:12px; margin-bottom:0.75rem">
+                    <label style="display:block; color:var(--muted); font-size:10px; text-transform:uppercase; letter-spacing:1px; margin-bottom:0.3rem">Handle</label>
+                    <input type="text" id="setCreatorHandle" placeholder="@inkedmayhem" style="width:100%; background:var(--surface); border:1px solid var(--border); color:var(--off-white); padding:0.5rem; font-family:var(--font-mono); font-size:12px; margin-bottom:0.75rem">
+                    <label style="display:block; color:var(--muted); font-size:10px; text-transform:uppercase; letter-spacing:1px; margin-bottom:0.3rem">Creator Tier</label>
+                    <select id="setCreatorTier" style="width:100%; background:var(--surface); border:1px solid var(--border); color:var(--off-white); padding:0.5rem; font-family:var(--font-mono); font-size:12px; margin-bottom:0.75rem">
+                        <option value="A">A — Manual approval</option>
+                        <option value="B">B — Trusted auto-publish</option>
+                        <option value="C">C — Scheduled</option>
+                        <option value="D">D — Full automation</option>
+                    </select>
+                    <label style="display:block; color:var(--muted); font-size:10px; text-transform:uppercase; letter-spacing:1px; margin-bottom:0.3rem">Moderation Level</label>
+                    <select id="setModLevel" style="width:100%; background:var(--surface); border:1px solid var(--border); color:var(--off-white); padding:0.5rem; font-family:var(--font-mono); font-size:12px; margin-bottom:1rem">
+                        <option value="manual">Manual — Review everything</option>
+                        <option value="trusted">Trusted — Auto-approve</option>
+                        <option value="scheduled">Scheduled — Auto-queue</option>
+                    </select>
+                    <button class="btn-sm primary" onclick="saveCreatorConfig()" style="font-size:13px; padding:0.4rem 1rem">Save Profile</button>
+                </div>
+            </div>
+            <div>
+                <div class="section-title" style="font-size:1.2rem"><span class="icon">◆</span> Telegram Bots</div>
+                <div style="background:var(--darker); border:1px solid var(--border); padding:1.5rem; margin-bottom:1rem">
+                    <div style="display:flex; gap:1rem; margin-bottom:1rem">
+                        <span id="tgCreatorStatus" style="font-size:11px"></span>
+                        <span id="tgFanStatus" style="font-size:11px"></span>
+                    </div>
+                    <button class="btn-sm primary" onclick="setupTelegramBot('creator')">Setup Creator Bot</button>
+                    <button class="btn-sm" onclick="setupTelegramBot('fan')">Setup Fan Bot</button>
+                    <div id="tgSetupResult" style="margin-top:0.75rem; font-size:11px; color:var(--muted)"></div>
+                </div>
+                <div class="section-title" style="font-size:1.2rem"><span class="icon">◆</span> Content Rules</div>
+                <div style="background:var(--darker); border:1px solid var(--border); padding:1.5rem">
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem; font-size:11px; margin-bottom:1rem">
+                        <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer"><input type="checkbox" id="setStripExif" checked style="accent-color:var(--red)"> Strip EXIF data</label>
+                        <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer"><input type="checkbox" id="setCompress" checked style="accent-color:var(--red)"> Compress images</label>
+                        <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer"><input type="checkbox" id="setThumbnails" checked style="accent-color:var(--red)"> Generate thumbnails</label>
+                        <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer"><input type="checkbox" id="setAutoApprove" style="accent-color:var(--red)"> Auto-approve</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Creators List -->
+        <div style="margin-top:2rem">
+            <div class="section-title" style="font-size:1.2rem"><span class="icon">◆</span> Managed Creators</div>
+            <div id="creatorsListLoading" class="loading-text"><span class="spinner"></span> Loading creators...</div>
+            <div id="creatorsList" style="display:none"></div>
+            <div style="background:var(--darker); border:1px solid var(--border); padding:1.5rem; margin-top:1rem">
+                <div class="section-title" style="font-size:1rem"><span class="icon">◆</span> Onboard New Creator</div>
+                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:1rem">
+                    <div>
+                        <label style="display:block; color:var(--muted); font-size:10px; text-transform:uppercase; margin-bottom:0.3rem">Name</label>
+                        <input type="text" id="onboardName" placeholder="Creator Name" style="width:100%; background:var(--surface); border:1px solid var(--border); color:var(--off-white); padding:0.5rem; font-family:var(--font-mono); font-size:12px">
+                    </div>
+                    <div>
+                        <label style="display:block; color:var(--muted); font-size:10px; text-transform:uppercase; margin-bottom:0.3rem">Handle</label>
+                        <input type="text" id="onboardHandle" placeholder="@handle" style="width:100%; background:var(--surface); border:1px solid var(--border); color:var(--off-white); padding:0.5rem; font-family:var(--font-mono); font-size:12px">
+                    </div>
+                    <div>
+                        <label style="display:block; color:var(--muted); font-size:10px; text-transform:uppercase; margin-bottom:0.3rem">Tagline</label>
+                        <input type="text" id="onboardTagline" placeholder="Brand tagline" style="width:100%; background:var(--surface); border:1px solid var(--border); color:var(--off-white); padding:0.5rem; font-family:var(--font-mono); font-size:12px">
+                    </div>
+                </div>
+                <div style="display:flex; gap:1rem; margin-top:0.75rem; align-items:center">
+                    <label style="display:flex; align-items:center; gap:0.3rem; font-size:11px; cursor:pointer"><input type="checkbox" id="onboardMembership" style="accent-color:var(--red)"> Membership</label>
+                    <label style="display:flex; align-items:center; gap:0.3rem; font-size:11px; cursor:pointer"><input type="checkbox" id="onboardBlog" style="accent-color:var(--red)"> Blog</label>
+                    <label style="display:flex; align-items:center; gap:0.3rem; font-size:11px; cursor:pointer"><input type="checkbox" id="onboardFaq" style="accent-color:var(--red)"> FAQ Bot</label>
+                    <button class="btn-sm primary" onclick="onboardCreator()" style="margin-left:auto">Onboard Creator</button>
+                </div>
+                <div id="onboardResult" style="margin-top:0.75rem; display:none"></div>
             </div>
         </div>
     </div>
@@ -992,6 +1103,8 @@ document.querySelectorAll('.tab').forEach(tab => {
         if (tab.dataset.tab === 'analytics') loadAnalytics();
         if (tab.dataset.tab === 'overview') { loadStats(); loadPipelineStats(); }
         if (tab.dataset.tab === 'pipeline') { loadPipeline(); loadPipelineStats(); }
+        if (tab.dataset.tab === 'calendar') loadCalendar();
+        if (tab.dataset.tab === 'settings') loadSettingsTab();
     });
 });
 
@@ -1651,6 +1764,160 @@ async function resetUserPassword() {
             document.getElementById('resetPass').value = '';
         } else toast(data.error || 'Reset failed', true);
     } catch { toast('Reset failed', true); }
+}
+
+// ─── CALENDAR ─────────────────────────────────
+let calYear = new Date().getFullYear();
+let calMonth = new Date().getMonth();
+let calItems = [];
+
+function calPrevMonth() { calMonth--; if (calMonth < 0) { calMonth = 11; calYear--; } renderCalendar(); }
+function calNextMonth() { calMonth++; if (calMonth > 11) { calMonth = 0; calYear++; } renderCalendar(); }
+function calToday() { calYear = new Date().getFullYear(); calMonth = new Date().getMonth(); renderCalendar(); }
+
+async function loadCalendar() {
+    try {
+        const data = await pipeApi('/list?status=all');
+        if (data.success) calItems = data.items.filter(i => i.scheduledAt || i.publishedAt);
+    } catch {}
+    renderCalendar();
+    renderUpcoming();
+}
+
+function renderCalendar() {
+    const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    document.getElementById('calMonthLabel').textContent = `${months[calMonth]} ${calYear}`;
+    const grid = document.getElementById('calGrid');
+    const firstDay = new Date(calYear, calMonth, 1).getDay();
+    const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+    const todayStr = new Date().toISOString().split('T')[0];
+    let html = '';
+    const prevDays = new Date(calYear, calMonth, 0).getDate();
+    for (let i = firstDay - 1; i >= 0; i--) html += `<div style="background:var(--dark);opacity:0.4;min-height:80px;padding:0.4rem"><div style="font-size:10px;color:var(--gray)">${prevDays-i}</div></div>`;
+    for (let d = 1; d <= daysInMonth; d++) {
+        const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        const isToday = dateStr === todayStr;
+        const events = calItems.filter(item => (item.scheduledAt?.split('T')[0] === dateStr) || (item.publishedAt?.split('T')[0] === dateStr));
+        let ev = events.slice(0,3).map(item => {
+            const cls = item.status === 'published' ? 'color:var(--green);background:rgba(46,125,50,0.15)' : 'color:var(--gold);background:rgba(201,168,76,0.15)';
+            return `<div style="${cls};font-size:9px;padding:1px 3px;margin-bottom:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;border-radius:2px" onclick="openPipeItem('${esc(item.id)}')">${esc((item.caption||item.filename||'').substring(0,14))}</div>`;
+        }).join('');
+        if (events.length > 3) ev += `<div style="font-size:8px;color:var(--gray)">+${events.length-3}</div>`;
+        html += `<div style="background:var(--darker);min-height:80px;padding:0.4rem;${isToday?'border:1px solid var(--red)':''}"><div style="font-size:10px;color:${isToday?'var(--red)':'var(--muted)'};margin-bottom:2px;${isToday?'font-weight:bold':''}">${d}</div>${ev}</div>`;
+    }
+    const rem = (7 - ((firstDay + daysInMonth) % 7)) % 7;
+    for (let i = 1; i <= rem; i++) html += `<div style="background:var(--dark);opacity:0.4;min-height:80px;padding:0.4rem"><div style="font-size:10px;color:var(--gray)">${i}</div></div>`;
+    grid.innerHTML = html;
+}
+
+function renderUpcoming() {
+    const now = new Date().toISOString();
+    const upcoming = calItems.filter(i => i.status === 'queued' && i.scheduledAt && i.scheduledAt > now).sort((a,b) => (a.scheduledAt||'').localeCompare(b.scheduledAt||''));
+    const c = document.getElementById('calUpcoming');
+    if (!upcoming.length) { c.innerHTML = '<div style="color:var(--gray);font-size:11px;text-align:center;padding:1rem">No upcoming scheduled posts</div>'; return; }
+    c.innerHTML = upcoming.slice(0,10).map(item => {
+        const d = new Date(item.scheduledAt);
+        return `<div style="display:flex;justify-content:space-between;align-items:center;padding:0.4rem 0;border-bottom:1px solid var(--border)">
+            <span><span style="color:var(--gold);font-size:10px;text-transform:uppercase;letter-spacing:1px">SCHED</span> ${esc(item.caption||item.filename)} <span class="tier-badge tier-${item.tier||'free'}" style="font-size:9px">${(item.tier||'free').toUpperCase()}</span></span>
+            <span style="font-size:11px;color:var(--muted)">${d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})} ${d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})}</span>
+        </div>`;
+    }).join('');
+}
+
+// ─── SETTINGS ─────────────────────────────────
+const CONFIG_API = '/api/creator-config';
+async function configApi(path, method = 'GET', body = null) {
+    const opts = { method, headers: headers() };
+    if (body) opts.body = JSON.stringify(body);
+    const r = await fetch(`${CONFIG_API}${path}`, opts);
+    return r.json();
+}
+
+async function loadSettingsTab() {
+    try {
+        const data = await configApi('/get?id=inkedmayhem');
+        if (data.success && data.config) {
+            const c = data.config;
+            document.getElementById('setCreatorName').value = c.name || '';
+            document.getElementById('setCreatorHandle').value = c.handle || '';
+            document.getElementById('setCreatorTier').value = c.creatorTier || 'A';
+            document.getElementById('setModLevel').value = c.moderation?.level || 'manual';
+            document.getElementById('setStripExif').checked = c.contentRules?.stripExif !== false;
+            document.getElementById('setCompress').checked = c.contentRules?.compressImages !== false;
+            document.getElementById('setThumbnails').checked = c.contentRules?.generateThumbnails !== false;
+            document.getElementById('setAutoApprove').checked = c.moderation?.autoApproveAfterChecks === true;
+        }
+    } catch {}
+    loadBotStatus();
+    loadCreatorsList();
+}
+
+async function saveCreatorConfig() {
+    try {
+        const data = await configApi('/save', 'POST', {
+            config: {
+                id: 'inkedmayhem',
+                name: document.getElementById('setCreatorName').value,
+                handle: document.getElementById('setCreatorHandle').value,
+                creatorTier: document.getElementById('setCreatorTier').value,
+                moderation: { level: document.getElementById('setModLevel').value, autoApproveAfterChecks: document.getElementById('setAutoApprove').checked, notifyOnUpload: true, notifyOnPublish: true },
+                contentRules: { stripExif: document.getElementById('setStripExif').checked, compressImages: document.getElementById('setCompress').checked, generateThumbnails: document.getElementById('setThumbnails').checked }
+            }
+        });
+        if (data.success) toast('Config saved'); else toast('Save failed', true);
+    } catch { toast('Save failed', true); }
+}
+
+async function loadBotStatus() {
+    try {
+        const r = await fetch('/api/analytics/health');
+        const data = await r.json();
+        document.getElementById('tgCreatorStatus').innerHTML = `<span style="color:${data.env?.telegramCreator ? 'var(--green)' : 'var(--red)'}">● Creator: ${data.env?.telegramCreator ? 'OK' : 'Not Set'}</span>`;
+        document.getElementById('tgFanStatus').innerHTML = `<span style="color:${data.env?.telegramFan ? 'var(--green)' : 'var(--red)'}">● Fan: ${data.env?.telegramFan ? 'OK' : 'Not Set'}</span>`;
+    } catch {
+        document.getElementById('tgCreatorStatus').innerHTML = '<span style="color:var(--gray)">● Unknown</span>';
+        document.getElementById('tgFanStatus').innerHTML = '<span style="color:var(--gray)">● Unknown</span>';
+    }
+}
+
+async function setupTelegramBot(botType) {
+    const el = document.getElementById('tgSetupResult');
+    el.textContent = 'Setting up...';
+    try {
+        const r = await fetch('/api/telegram/setup', { method: 'POST', headers: headers(), body: JSON.stringify({ botType }) });
+        const data = await r.json();
+        if (data.success) { el.innerHTML = `<span style="color:var(--green)">Webhook set: ${esc(data.webhookUrl)}</span>`; toast(`${botType} bot configured`); loadBotStatus(); }
+        else el.innerHTML = `<span style="color:var(--red)">${esc(data.error || 'Failed')}</span>`;
+    } catch { el.innerHTML = '<span style="color:var(--red)">Setup failed</span>'; }
+}
+
+async function loadCreatorsList() {
+    try {
+        const data = await configApi('/list');
+        document.getElementById('creatorsListLoading').style.display = 'none';
+        const c = document.getElementById('creatorsList');
+        if (!data.success || !data.creators?.length) { c.style.display = 'block'; c.innerHTML = '<div style="background:var(--darker);border:1px solid var(--border);padding:1rem;color:var(--gray);font-size:11px">No creators configured.</div>'; return; }
+        c.style.display = 'block';
+        c.innerHTML = `<div class="table-wrap"><table><thead><tr><th>Name</th><th>Handle</th><th>Tier</th><th>Domain</th></tr></thead><tbody>${data.creators.map(cr => `<tr><td>${esc(cr.name)}</td><td style="color:var(--muted)">${esc(cr.handle)}</td><td><span style="color:var(--gold)">${cr.creatorTier||'A'}</span></td><td style="color:var(--muted);font-size:11px">${esc(cr.domain||'—')}</td></tr>`).join('')}</tbody></table></div>`;
+    } catch { document.getElementById('creatorsListLoading').style.display = 'none'; }
+}
+
+async function onboardCreator() {
+    const name = document.getElementById('onboardName').value.trim();
+    if (!name) { toast('Name required', true); return; }
+    try {
+        const data = await configApi('/onboard', 'POST', {
+            name, handle: document.getElementById('onboardHandle').value.trim(), tagline: document.getElementById('onboardTagline').value.trim(),
+            membership: document.getElementById('onboardMembership').checked, blog: document.getElementById('onboardBlog').checked, faq: document.getElementById('onboardFaq').checked
+        });
+        const el = document.getElementById('onboardResult');
+        if (data.success) {
+            el.style.display = 'block';
+            el.innerHTML = `<div style="background:rgba(46,125,50,0.1);border:1px solid var(--green);padding:1rem;color:var(--green);font-size:11px"><strong>Onboarded!</strong> ID: ${esc(data.creatorId)}<br>${(data.nextSteps||[]).map(s => '• ' + esc(s)).join('<br>')}</div>`;
+            toast('Creator onboarded!'); loadCreatorsList();
+            document.getElementById('onboardName').value = ''; document.getElementById('onboardHandle').value = ''; document.getElementById('onboardTagline').value = '';
+        } else { el.style.display = 'block'; el.innerHTML = `<span style="color:var(--red)">${esc(data.error||'Failed')}</span>`; }
+    } catch { toast('Onboard failed', true); }
 }
 </script>
 </body>

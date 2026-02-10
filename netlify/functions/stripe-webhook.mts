@@ -3,13 +3,58 @@ import { getStore } from "@netlify/blobs";
 
 async function notifyAdmin(type, data) {
     const secret = Netlify.env.get("JWT_SECRET") || "inkedmayhem-dev-secret-change-me";
+    const siteUrl = Netlify.env.get("URL") || "https://inkedmayhem.netlify.app";
     try {
-        await fetch("https://inkedmayhem.netlify.app/api/notify", {
+        await fetch(`${siteUrl}/api/notify`, {
             method: "POST",
             headers: { "Content-Type": "application/json", "x-internal-key": secret },
             body: JSON.stringify({ type, data })
         });
     } catch {}
+}
+
+async function sendTelegramNotification(text) {
+    const botToken = Netlify.env.get("TELEGRAM_CREATOR_BOT_TOKEN");
+    const chatId = Netlify.env.get("TELEGRAM_ADMIN_CHAT_ID") || Netlify.env.get("TELEGRAM_CREATOR_CHAT_ID");
+    if (!botToken || !chatId) return;
+    try {
+        await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ chat_id: chatId, text, parse_mode: "HTML" })
+        });
+    } catch {}
+}
+
+async function checkMilestones(store) {
+    const { blobs } = await store.list();
+    const totalUsers = blobs.length;
+    let paidCount = 0;
+    for (const blob of blobs) {
+        try {
+            const u = await store.get(blob.key, { type: "json" });
+            if (u?.tier === "vip" || u?.tier === "elite") paidCount++;
+        } catch {}
+    }
+
+    // Check subscriber milestones
+    const milestones = [10, 25, 50, 100, 250, 500, 1000];
+    for (const m of milestones) {
+        if (totalUsers === m) {
+            await sendTelegramNotification(
+                `🎉 <b>MILESTONE!</b>\n\n` +
+                `You just hit <b>${m} total members!</b>\n` +
+                `Keep growing! 🚀`
+            );
+        }
+        if (paidCount === m) {
+            await sendTelegramNotification(
+                `💰 <b>MILESTONE!</b>\n\n` +
+                `You now have <b>${m} paying subscribers!</b>\n` +
+                `The hustle is paying off! 🔥`
+            );
+        }
+    }
 }
 
 export default async (req, context) => {
@@ -53,13 +98,25 @@ export default async (req, context) => {
                 user.tier = tier;
                 user.stripeCustomerId = session.customer;
                 user.subscriptionId = session.subscription;
-                
+                user.subscribedAt = new Date().toISOString();
+
                 // Notify admin
                 notifyAdmin("new_subscription", {
                     email,
                     tier,
                     amount: session.amount_total ? `$${(session.amount_total / 100).toFixed(2)}` : "N/A"
                 });
+
+                // Telegram welcome + milestone
+                const tierNames = { vip: "Ink Insider", elite: "Mayhem Circle" };
+                await sendTelegramNotification(
+                    `🔥 <b>New Subscriber!</b>\n\n` +
+                    `<b>${user.name || email}</b> just joined <b>${tierNames[tier] || tier.toUpperCase()}</b>!\n` +
+                    `💰 ${session.amount_total ? `$${(session.amount_total / 100).toFixed(2)}/mo` : "N/A"}`
+                );
+
+                // Check milestones
+                try { await checkMilestones(store); } catch {}
             } else {
                 if (!user.purchases) user.purchases = [];
                 user.purchases.push({
