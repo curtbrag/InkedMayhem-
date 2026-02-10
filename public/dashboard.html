@@ -619,6 +619,7 @@
         <button class="tab" data-tab="users">Users</button>
         <button class="tab" data-tab="messages">Messages <span class="badge" id="unreadBadge" style="display:none">0</span></button>
         <button class="tab" data-tab="conversations">Conversations</button>
+        <button class="tab" data-tab="promos">Promos</button>
         <button class="tab" data-tab="settings">Settings</button>
     </div>
 
@@ -832,6 +833,7 @@
                         <th>Email</th>
                         <th>Name</th>
                         <th>Tier</th>
+                        <th>Status</th>
                         <th>Joined</th>
                         <th>Actions</th>
                     </tr>
@@ -1080,6 +1082,38 @@
         </div>
     </div>
 
+    <!-- ─── PROMOS TAB ──────────────────────── -->
+    <div class="tab-content" id="tab-promos">
+        <div class="section-title"><span class="icon">◆</span> Promo Codes</div>
+
+        <div class="compose-form" style="margin-top:0; max-width:600px">
+            <div style="font-size:14px; font-weight:700; margin-bottom:1rem">Create Promo Code</div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem">
+                <div><label>Code</label><input type="text" id="promoCode" placeholder="LAUNCH20" style="text-transform:uppercase"></div>
+                <div><label>Description</label><input type="text" id="promoDesc" placeholder="Launch discount"></div>
+                <div><label>Discount Type</label>
+                    <select id="promoType" style="width:100%">
+                        <option value="percent">Percentage (%)</option>
+                        <option value="fixed">Fixed Amount ($)</option>
+                    </select>
+                </div>
+                <div><label>Value</label><input type="number" id="promoValue" placeholder="20"></div>
+                <div><label>Max Uses (0=∞)</label><input type="number" id="promoMaxUses" placeholder="0" value="0"></div>
+                <div><label>Stripe Coupon ID</label><input type="text" id="promoStripeCoupon" placeholder="Optional"></div>
+            </div>
+            <button class="login-btn" style="max-width:200px; margin-top:1rem" onclick="createPromo()">Create Code</button>
+        </div>
+
+        <div id="promosLoading" class="loading-text" style="margin-top:2rem"><span class="spinner"></span> Loading promo codes...</div>
+        <div id="promosEmpty" style="display:none; color:var(--gray); text-align:center; padding:2rem">No promo codes yet</div>
+        <div id="promosTable" class="table-wrap" style="display:none; margin-top:1rem">
+            <table>
+                <thead><tr><th>Code</th><th>Discount</th><th>Uses</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead>
+                <tbody id="promosBody"></tbody>
+            </table>
+        </div>
+    </div>
+
     <!-- ─── SETTINGS TAB ─────────────────────── -->
     <div class="tab-content" id="tab-settings">
         <div class="section-title"><span class="icon">◆</span> Settings & Configuration</div>
@@ -1284,9 +1318,93 @@ document.querySelectorAll('.tab').forEach(tab => {
         if (tab.dataset.tab === 'pipeline') { loadPipeline(); loadPipelineStats(); }
         if (tab.dataset.tab === 'calendar') loadCalendar();
         if (tab.dataset.tab === 'analytics') loadAnalytics();
+        if (tab.dataset.tab === 'promos') loadPromos();
         if (tab.dataset.tab === 'settings') loadSettings();
     });
 });
+
+// ─── PROMO CODES ──────────────────────────────
+const PROMO_API = '/api/promo-codes';
+
+async function promoApi(path, method = 'GET', body = null) {
+    const opts = { method, headers: authHeaders() };
+    if (body) opts.body = JSON.stringify(body);
+    const r = await fetch(`${PROMO_API}${path}`, opts);
+    return r.json();
+}
+
+async function loadPromos() {
+    try {
+        document.getElementById('promosLoading').style.display = 'block';
+        document.getElementById('promosTable').style.display = 'none';
+        document.getElementById('promosEmpty').style.display = 'none';
+
+        const data = await promoApi('');
+        document.getElementById('promosLoading').style.display = 'none';
+
+        if (!data.success || !data.codes.length) {
+            document.getElementById('promosEmpty').style.display = 'block';
+            return;
+        }
+
+        const tbody = document.getElementById('promosBody');
+        tbody.innerHTML = data.codes.map(p => {
+            const discountLabel = p.discountType === 'percent' ? `${p.discountValue}%` : `$${(p.discountValue / 100).toFixed(2)}`;
+            const usesLabel = p.maxUses ? `${p.usedCount || 0}/${p.maxUses}` : `${p.usedCount || 0}/∞`;
+            const statusColor = p.active ? 'var(--green)' : 'var(--red)';
+            return `<tr>
+                <td style="font-weight:700;letter-spacing:1px">${esc(p.code)}</td>
+                <td>${discountLabel} <span style="color:var(--gray)">${esc(p.description || '')}</span></td>
+                <td>${usesLabel}</td>
+                <td><span style="color:${statusColor}">${p.active ? 'ACTIVE' : 'INACTIVE'}</span></td>
+                <td>${formatDate(p.createdAt)}</td>
+                <td>
+                    <button class="btn-sm" onclick="togglePromo('${esc(p.code)}')">${p.active ? 'Disable' : 'Enable'}</button>
+                    <button class="btn-sm danger" onclick="deletePromo('${esc(p.code)}')">Delete</button>
+                </td>
+            </tr>`;
+        }).join('');
+        document.getElementById('promosTable').style.display = 'block';
+    } catch (e) {
+        document.getElementById('promosLoading').style.display = 'none';
+        showToast('Failed to load promos');
+    }
+}
+
+async function createPromo() {
+    const code = document.getElementById('promoCode').value.trim();
+    const description = document.getElementById('promoDesc').value.trim();
+    const discountType = document.getElementById('promoType').value;
+    const discountValue = Number(document.getElementById('promoValue').value);
+    const maxUses = Number(document.getElementById('promoMaxUses').value) || null;
+    const stripeCouponId = document.getElementById('promoStripeCoupon').value.trim() || null;
+
+    if (!code || !discountValue) { showToast('Code and value required'); return; }
+
+    const data = await promoApi('/create', 'POST', { code, description, discountType, discountValue, maxUses, stripeCouponId });
+    if (data.success) {
+        showToast('Promo code created!');
+        document.getElementById('promoCode').value = '';
+        document.getElementById('promoDesc').value = '';
+        document.getElementById('promoValue').value = '';
+        loadPromos();
+    } else {
+        showToast(data.error || 'Create failed');
+    }
+}
+
+async function togglePromo(code) {
+    const data = await promoApi('/toggle', 'POST', { code });
+    if (data.success) { showToast(`Code ${data.active ? 'enabled' : 'disabled'}`); loadPromos(); }
+    else showToast('Toggle failed');
+}
+
+async function deletePromo(code) {
+    if (!confirm(`Delete promo code ${code}?`)) return;
+    const data = await promoApi('/delete', 'POST', { code });
+    if (data.success) { showToast('Code deleted'); loadPromos(); }
+    else showToast('Delete failed');
+}
 
 // ─── STATS ───────────────────────────────────
 async function loadStats() {
@@ -1329,8 +1447,14 @@ async function loadUsers() {
         }
 
         const tbody = document.getElementById('usersBody');
-        tbody.innerHTML = data.users.map(u => `
-            <tr>
+        tbody.innerHTML = data.users.map(u => {
+            const statusColor = u.status === 'banned' ? 'var(--red)' : u.status === 'suspended' ? 'var(--gold)' : 'var(--green)';
+            const statusLabel = (u.status || 'active').toUpperCase();
+            const banBtn = u.status === 'banned' || u.status === 'suspended'
+                ? `<button class="btn-sm" style="background:var(--green);color:#fff" onclick="userAction('${esc(u.key)}','activate')">Activate</button>`
+                : `<button class="btn-sm" style="background:var(--gold);color:#000" onclick="userAction('${esc(u.key)}','suspend')">Suspend</button>
+                   <button class="btn-sm danger" onclick="userAction('${esc(u.key)}','ban')">Ban</button>`;
+            return `<tr>
                 <td>${esc(u.email)}</td>
                 <td>${esc(u.name)}</td>
                 <td>
@@ -1340,13 +1464,15 @@ async function loadUsers() {
                         ).join('')}
                     </select>
                 </td>
+                <td><span style="color:${statusColor};font-size:10px;letter-spacing:1px">${statusLabel}</span></td>
                 <td>${formatDate(u.createdAt)}</td>
-                <td>
-                    <button class="btn-sm" onclick="messageUser('${esc(u.email)}')">Message</button>
-                    <button class="btn-sm danger" onclick="deleteUser('${esc(u.key)}', '${esc(u.email)}')">Delete</button>
+                <td style="white-space:nowrap">
+                    <button class="btn-sm" onclick="messageUser('${esc(u.email)}')">Msg</button>
+                    ${banBtn}
+                    <button class="btn-sm danger" onclick="deleteUser('${esc(u.key)}', '${esc(u.email)}')">Del</button>
                 </td>
-            </tr>
-        `).join('');
+            </tr>`;
+        }).join('');
         document.getElementById('usersTable').style.display = 'block';
     } catch (e) {
         document.getElementById('usersLoading').style.display = 'none';
@@ -1365,6 +1491,18 @@ async function deleteUser(key, email) {
     const data = await api('/users/delete', 'POST', { userKey: key });
     if (data.success) { toast('User deleted'); loadUsers(); loadStats(); }
     else toast('Delete failed', true);
+}
+
+async function userAction(key, action) {
+    const labels = { ban: 'Ban', suspend: 'Suspend', activate: 'Activate' };
+    if (action !== 'activate' && !confirm(`${labels[action]} this user?`)) return;
+    let reason = '';
+    if (action === 'ban' || action === 'suspend') {
+        reason = prompt(`${labels[action]} reason (optional):`) || '';
+    }
+    const data = await api('/users/ban', 'POST', { userKey: key, action, reason });
+    if (data.success) { toast(`User ${action === 'activate' ? 'activated' : action + 'ned'}`); loadUsers(); }
+    else toast('Action failed', true);
 }
 
 function messageUser(email) {

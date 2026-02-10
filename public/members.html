@@ -284,6 +284,23 @@
             </div>
         </div>
 
+        <!-- SEARCH & FILTER -->
+        <div class="content-sections" style="padding-bottom:0;margin-bottom:0">
+            <div style="display:flex;gap:0.75rem;flex-wrap:wrap;align-items:center">
+                <input type="text" id="contentSearch" placeholder="Search content..." oninput="filterContent()"
+                    style="flex:1;min-width:200px;background:var(--surface);border:1px solid var(--border);color:var(--off-white);padding:0.6rem 1rem;font-family:var(--font-mono);font-size:12px;outline:none">
+                <select id="categoryFilter" onchange="filterContent()"
+                    style="background:var(--surface);border:1px solid var(--border);color:var(--off-white);padding:0.6rem 0.75rem;font-family:var(--font-mono);font-size:11px;min-width:130px">
+                    <option value="">All Categories</option>
+                </select>
+                <select id="sortFilter" onchange="filterContent()"
+                    style="background:var(--surface);border:1px solid var(--border);color:var(--off-white);padding:0.6rem 0.75rem;font-family:var(--font-mono);font-size:11px;min-width:110px">
+                    <option value="newest">Newest First</option>
+                    <option value="oldest">Oldest First</option>
+                </select>
+            </div>
+        </div>
+
         <!-- LATEST DROPS (all tiers, most recent first) -->
         <div class="content-sections">
             <h2>LATEST DROPS <span class="count" id="latestCount"></span></h2>
@@ -468,6 +485,8 @@
         }
 
         // ─── DYNAMIC CONTENT ─────────────────────
+        let allContent = [];
+
         async function loadExclusiveContent() {
             try {
                 const r = await fetch('/api/content?tier=' + (currentUser?.tier || 'free'), {
@@ -476,23 +495,64 @@
                 const data = await r.json();
                 if (!data.success) return;
 
-                const content = data.content || [];
+                allContent = data.content || [];
 
-                // Latest drops — all content the user can see, most recent first (max 6)
-                const latestItems = content.slice(0, 6);
-                renderContentGrid('latestContent', latestItems, 'all');
-                document.getElementById('latestCount').textContent = content.length ? `(${content.length})` : '';
+                // Build category filter options
+                const categories = [...new Set(allContent.map(c => c.category).filter(Boolean))];
+                const catSelect = document.getElementById('categoryFilter');
+                catSelect.innerHTML = '<option value="">All Categories</option>' +
+                    categories.map(c => `<option value="${escAttr(c)}">${escHtml(c.charAt(0).toUpperCase() + c.slice(1))}</option>`).join('');
 
-                const vipItems = content.filter(c => c.tier === 'vip');
-                const eliteItems = content.filter(c => c.tier === 'elite');
-                const freeItems = content.filter(c => c.tier === 'free');
-
-                renderContentGrid('vipContent', vipItems, 'vip');
-                renderContentGrid('eliteContent', eliteItems, 'elite');
-                renderContentGrid('freeContent', freeItems, 'free');
+                renderAllContent(allContent);
             } catch (e) {
                 console.error('Content load error:', e);
             }
+        }
+
+        function renderAllContent(content) {
+            // Latest drops — all content the user can see, most recent first (max 6)
+            const latestItems = content.slice(0, 6);
+            renderContentGrid('latestContent', latestItems, 'all');
+            document.getElementById('latestCount').textContent = content.length ? `(${content.length})` : '';
+
+            const vipItems = content.filter(c => c.tier === 'vip');
+            const eliteItems = content.filter(c => c.tier === 'elite');
+            const freeItems = content.filter(c => c.tier === 'free');
+
+            renderContentGrid('vipContent', vipItems, 'vip');
+            renderContentGrid('eliteContent', eliteItems, 'elite');
+            renderContentGrid('freeContent', freeItems, 'free');
+        }
+
+        function filterContent() {
+            const query = (document.getElementById('contentSearch').value || '').toLowerCase().trim();
+            const category = document.getElementById('categoryFilter').value;
+            const sort = document.getElementById('sortFilter').value;
+
+            let filtered = [...allContent];
+
+            // Text search
+            if (query) {
+                filtered = filtered.filter(c =>
+                    (c.title || '').toLowerCase().includes(query) ||
+                    (c.body || '').toLowerCase().includes(query) ||
+                    (c.category || '').toLowerCase().includes(query)
+                );
+            }
+
+            // Category filter
+            if (category) {
+                filtered = filtered.filter(c => c.category === category);
+            }
+
+            // Sort
+            if (sort === 'oldest') {
+                filtered.sort((a, b) => (a.createdAt || '').localeCompare(b.createdAt || ''));
+            } else {
+                filtered.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+            }
+
+            renderAllContent(filtered);
         }
 
         function renderContentGrid(containerId, items, tier) {
@@ -517,18 +577,27 @@
                 const itemHasAccess = tier === 'all' || tierOrder[userTier] >= tierOrder[itemTier];
 
                 if (!itemHasAccess) {
-                    return `<div class="content-card" style="opacity:0.5;cursor:pointer" onclick="window.location.href='/#exclusive'">
-                        <div class="content-card-media">
-                            <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:var(--surface)">
-                                <span style="font-size:2rem;opacity:0.4">🔒</span>
+                    const purchased = currentUser?.purchases?.some(p => p.postId === c.key);
+                    if (purchased) {
+                        // User purchased this individual post — show it
+                    } else {
+                        const priceLabel = c.price ? `$${Number(c.price).toFixed(2)}` : '$4.99';
+                        return `<div class="content-card" style="opacity:0.6">
+                            <div class="content-card-media">
+                                <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:var(--surface)">
+                                    <span style="font-size:2rem;opacity:0.4">🔒</span>
+                                </div>
+                                <span class="content-tier-tag">${itemTier.toUpperCase()}</span>
                             </div>
-                            <span class="content-tier-tag">${itemTier.toUpperCase()}</span>
-                        </div>
-                        <div class="content-card-info">
-                            <h3>${escHtml(c.title)}</h3>
-                            <span class="content-date">Upgrade to unlock</span>
-                        </div>
-                    </div>`;
+                            <div class="content-card-info">
+                                <h3>${escHtml(c.title)}</h3>
+                                <span class="content-date">
+                                    <a href="/#exclusive" style="color:var(--red);text-decoration:none">Upgrade</a>
+                                    ${c.key ? ` or <a href="#" onclick="unlockPost('${escAttr(c.key)}');return false" style="color:var(--gold);text-decoration:none">Unlock ${priceLabel}</a>` : ''}
+                                </span>
+                            </div>
+                        </div>`;
+                    }
                 }
 
                 const typeIcons = { post: '📝', gallery: '🖼️', video: '🎬', announcement: '📢' };
@@ -550,6 +619,28 @@
                     </div>
                 </div>`;
             }).join('');
+        }
+
+        async function unlockPost(postKey) {
+            if (!currentToken) { window.location.href = '/members'; return; }
+            try {
+                const r = await fetch('/api/create-checkout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${currentToken}` },
+                    body: JSON.stringify({ type: 'single', postId: postKey })
+                });
+                const data = await r.json();
+                if (data.url) {
+                    window.location.href = data.url;
+                } else if (data.alreadyOwned) {
+                    alert('You already own this content! Refreshing...');
+                    location.reload();
+                } else {
+                    alert(data.error || 'Checkout failed');
+                }
+            } catch (e) {
+                alert('Payment error. Please try again.');
+            }
         }
 
         function openContent(el) {

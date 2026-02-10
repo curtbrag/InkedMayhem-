@@ -539,6 +539,7 @@
         <button class="tab" data-tab="conversations">Conversations</button>
         <button class="tab" data-tab="content">Content</button>
         <button class="tab" data-tab="analytics">Analytics</button>
+        <button class="tab" data-tab="promos">Promos</button>
         <button class="tab" data-tab="settings">Settings</button>
     </div>
 
@@ -695,6 +696,7 @@
                         <th>Email</th>
                         <th>Name</th>
                         <th>Tier</th>
+                        <th>Status</th>
                         <th>Joined</th>
                         <th>Actions</th>
                     </tr>
@@ -983,6 +985,65 @@
         </div>
     </div>
 
+    <!-- ─── PROMOS TAB ──────────────────────── -->
+    <div class="tab-content" id="tab-promos">
+        <div class="section-title"><span class="icon">◆</span> Promo Codes</div>
+
+        <!-- Create Promo Code -->
+        <div style="background:var(--darker);border:1px solid var(--border);padding:1.5rem;margin-bottom:2rem;max-width:600px">
+            <div style="font-size:12px;font-weight:700;color:var(--off-white);margin-bottom:1rem">Create Promo Code</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem">
+                <div>
+                    <label style="display:block;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:1px;margin-bottom:0.2rem">Code</label>
+                    <input type="text" id="promoCode" placeholder="LAUNCH20" style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--off-white);padding:0.5rem;font-family:var(--font-mono);font-size:12px;text-transform:uppercase">
+                </div>
+                <div>
+                    <label style="display:block;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:1px;margin-bottom:0.2rem">Description</label>
+                    <input type="text" id="promoDesc" placeholder="Launch discount" style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--off-white);padding:0.5rem;font-family:var(--font-mono);font-size:12px">
+                </div>
+                <div>
+                    <label style="display:block;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:1px;margin-bottom:0.2rem">Discount Type</label>
+                    <select id="promoType" style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--off-white);padding:0.5rem;font-family:var(--font-mono);font-size:12px">
+                        <option value="percent">Percentage (%)</option>
+                        <option value="fixed">Fixed Amount ($)</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="display:block;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:1px;margin-bottom:0.2rem">Value</label>
+                    <input type="number" id="promoValue" placeholder="20" style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--off-white);padding:0.5rem;font-family:var(--font-mono);font-size:12px">
+                </div>
+                <div>
+                    <label style="display:block;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:1px;margin-bottom:0.2rem">Max Uses (0=unlimited)</label>
+                    <input type="number" id="promoMaxUses" placeholder="0" value="0" style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--off-white);padding:0.5rem;font-family:var(--font-mono);font-size:12px">
+                </div>
+                <div>
+                    <label style="display:block;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:1px;margin-bottom:0.2rem">Stripe Coupon ID (optional)</label>
+                    <input type="text" id="promoStripeCoupon" placeholder="" style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--off-white);padding:0.5rem;font-family:var(--font-mono);font-size:12px">
+                </div>
+            </div>
+            <button class="btn-sm primary" onclick="createPromo()" style="margin-top:1rem;font-size:13px;padding:0.4rem 1rem">Create Code</button>
+        </div>
+
+        <!-- Promo Codes List -->
+        <div id="promosLoading" class="loading-text"><span class="spinner"></span> Loading promo codes...</div>
+        <div id="promosEmpty" style="display:none;color:var(--gray);text-align:center;padding:2rem">No promo codes yet</div>
+        <div id="promosTable" style="display:none" class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Discount</th>
+                        <th>Uses</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="promosBody"></tbody>
+            </table>
+        </div>
+    </div>
+
     <!-- ─── SETTINGS TAB ─────────────────────── -->
     <div class="tab-content" id="tab-settings">
         <div class="section-title"><span class="icon">◆</span> Settings & Configuration</div>
@@ -1152,6 +1213,7 @@ document.querySelectorAll('.tab').forEach(tab => {
         if (tab.dataset.tab === 'conversations') loadConversations();
         if (tab.dataset.tab === 'content') loadContent();
         if (tab.dataset.tab === 'analytics') loadAnalytics();
+        if (tab.dataset.tab === 'promos') loadPromos();
         if (tab.dataset.tab === 'overview') { loadStats(); loadPipelineStats(); }
         if (tab.dataset.tab === 'pipeline') { loadPipeline(); loadPipelineStats(); }
         if (tab.dataset.tab === 'calendar') loadCalendar();
@@ -1200,8 +1262,14 @@ async function loadUsers() {
         }
 
         const tbody = document.getElementById('usersBody');
-        tbody.innerHTML = data.users.map(u => `
-            <tr>
+        tbody.innerHTML = data.users.map(u => {
+            const statusColor = u.status === 'banned' ? 'var(--red)' : u.status === 'suspended' ? 'var(--gold)' : 'var(--green)';
+            const statusLabel = (u.status || 'active').toUpperCase();
+            const banBtn = u.status === 'banned' || u.status === 'suspended'
+                ? `<button class="btn-sm" style="background:var(--green);color:#fff" onclick="userAction('${esc(u.key)}','activate')">Activate</button>`
+                : `<button class="btn-sm" style="background:var(--gold);color:#000" onclick="userAction('${esc(u.key)}','suspend')">Suspend</button>
+                   <button class="btn-sm danger" onclick="userAction('${esc(u.key)}','ban')">Ban</button>`;
+            return `<tr>
                 <td>${esc(u.email)}</td>
                 <td>${esc(u.name)}</td>
                 <td>
@@ -1211,13 +1279,15 @@ async function loadUsers() {
                         ).join('')}
                     </select>
                 </td>
+                <td><span style="color:${statusColor};font-size:10px;letter-spacing:1px">${statusLabel}</span></td>
                 <td>${formatDate(u.createdAt)}</td>
-                <td>
-                    <button class="btn-sm" onclick="messageUser('${esc(u.email)}')">Message</button>
-                    <button class="btn-sm danger" onclick="deleteUser('${esc(u.key)}', '${esc(u.email)}')">Delete</button>
+                <td style="white-space:nowrap">
+                    <button class="btn-sm" onclick="messageUser('${esc(u.email)}')">Msg</button>
+                    ${banBtn}
+                    <button class="btn-sm danger" onclick="deleteUser('${esc(u.key)}', '${esc(u.email)}')">Del</button>
                 </td>
-            </tr>
-        `).join('');
+            </tr>`;
+        }).join('');
         document.getElementById('usersTable').style.display = 'block';
     } catch (e) {
         document.getElementById('usersLoading').style.display = 'none';
@@ -1236,6 +1306,18 @@ async function deleteUser(key, email) {
     const data = await api('/users/delete', 'POST', { userKey: key });
     if (data.success) { toast('User deleted'); loadUsers(); loadStats(); }
     else toast('Delete failed', true);
+}
+
+async function userAction(key, action) {
+    const labels = { ban: 'Ban', suspend: 'Suspend', activate: 'Activate' };
+    if (action !== 'activate' && !confirm(`${labels[action]} this user?`)) return;
+    let reason = '';
+    if (action === 'ban' || action === 'suspend') {
+        reason = prompt(`${labels[action]} reason (optional):`) || '';
+    }
+    const data = await api('/users/ban', 'POST', { userKey: key, action, reason });
+    if (data.success) { toast(`User ${action === 'activate' ? 'activated' : action + 'ned'}`); loadUsers(); }
+    else toast('Action failed', true);
 }
 
 function messageUser(email) {
@@ -1749,6 +1831,89 @@ async function downloadStoreExport() {
         URL.revokeObjectURL(url);
         toast(`${storeName} exported!`);
     } catch (e) { toast('Export failed', true); }
+}
+
+// ─── PROMO CODES ──────────────────────────────
+const PROMO_API = '/api/promo-codes';
+
+async function promoApi(path, method = 'GET', body = null) {
+    const opts = { method, headers: headers() };
+    if (body) opts.body = JSON.stringify(body);
+    const r = await fetch(`${PROMO_API}${path}`, opts);
+    return r.json();
+}
+
+async function loadPromos() {
+    try {
+        document.getElementById('promosLoading').style.display = 'block';
+        document.getElementById('promosTable').style.display = 'none';
+        document.getElementById('promosEmpty').style.display = 'none';
+
+        const data = await promoApi('');
+        document.getElementById('promosLoading').style.display = 'none';
+
+        if (!data.success || !data.codes.length) {
+            document.getElementById('promosEmpty').style.display = 'block';
+            return;
+        }
+
+        const tbody = document.getElementById('promosBody');
+        tbody.innerHTML = data.codes.map(p => {
+            const discountLabel = p.discountType === 'percent' ? `${p.discountValue}%` : `$${(p.discountValue / 100).toFixed(2)}`;
+            const usesLabel = p.maxUses ? `${p.usedCount || 0}/${p.maxUses}` : `${p.usedCount || 0}/∞`;
+            const statusColor = p.active ? 'var(--green)' : 'var(--red)';
+            return `<tr>
+                <td style="font-weight:700;letter-spacing:1px">${esc(p.code)}</td>
+                <td>${discountLabel} <span style="color:var(--gray)">${esc(p.description || '')}</span></td>
+                <td>${usesLabel}</td>
+                <td><span style="color:${statusColor}">${p.active ? 'ACTIVE' : 'INACTIVE'}</span></td>
+                <td>${formatDate(p.createdAt)}</td>
+                <td>
+                    <button class="btn-sm" onclick="togglePromo('${esc(p.code)}')">${p.active ? 'Disable' : 'Enable'}</button>
+                    <button class="btn-sm danger" onclick="deletePromo('${esc(p.code)}')">Delete</button>
+                </td>
+            </tr>`;
+        }).join('');
+        document.getElementById('promosTable').style.display = 'block';
+    } catch (e) {
+        document.getElementById('promosLoading').style.display = 'none';
+        toast('Failed to load promos', true);
+    }
+}
+
+async function createPromo() {
+    const code = document.getElementById('promoCode').value.trim();
+    const description = document.getElementById('promoDesc').value.trim();
+    const discountType = document.getElementById('promoType').value;
+    const discountValue = Number(document.getElementById('promoValue').value);
+    const maxUses = Number(document.getElementById('promoMaxUses').value) || null;
+    const stripeCouponId = document.getElementById('promoStripeCoupon').value.trim() || null;
+
+    if (!code || !discountValue) { toast('Code and value required', true); return; }
+
+    const data = await promoApi('/create', 'POST', { code, description, discountType, discountValue, maxUses, stripeCouponId });
+    if (data.success) {
+        toast('Promo code created!');
+        document.getElementById('promoCode').value = '';
+        document.getElementById('promoDesc').value = '';
+        document.getElementById('promoValue').value = '';
+        loadPromos();
+    } else {
+        toast(data.error || 'Create failed', true);
+    }
+}
+
+async function togglePromo(code) {
+    const data = await promoApi('/toggle', 'POST', { code });
+    if (data.success) { toast(`Code ${data.active ? 'enabled' : 'disabled'}`); loadPromos(); }
+    else toast('Toggle failed', true);
+}
+
+async function deletePromo(code) {
+    if (!confirm(`Delete promo code ${code}?`)) return;
+    const data = await promoApi('/delete', 'POST', { code });
+    if (data.success) { toast('Code deleted'); loadPromos(); }
+    else toast('Delete failed', true);
 }
 
 // ─── PIPELINE ─────────────────────────────────

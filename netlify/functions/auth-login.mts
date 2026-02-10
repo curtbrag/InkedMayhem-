@@ -64,6 +64,14 @@ export default async (req, context) => {
             return new Response(JSON.stringify({ error: "Invalid credentials" }), { status: 401 });
         }
 
+        // Check ban/suspend status
+        if (user.status === "banned") {
+            return new Response(JSON.stringify({ error: "Account has been banned" }), { status: 403 });
+        }
+        if (user.status === "suspended") {
+            return new Response(JSON.stringify({ error: "Account is suspended. Contact support." }), { status: 403 });
+        }
+
         // Track last login
         user.lastLogin = new Date().toISOString();
         await store.setJSON(userKey, user);

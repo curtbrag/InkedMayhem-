@@ -69,6 +69,7 @@ export default async (req, context) => {
                         email: user.email,
                         name: user.name || "—",
                         tier: user.tier || "free",
+                        status: user.status || "active",
                         purchases: user.purchases || [],
                         createdAt: user.createdAt || "—",
                         lastLogin: user.lastLogin || null
@@ -86,7 +87,7 @@ export default async (req, context) => {
     // ─── UPDATE USER ─────────────────────────────
     if (path === "/users/update" && req.method === "POST") {
         try {
-            const { userKey, tier, name } = await req.json();
+            const { userKey, tier, name, status } = await req.json();
             if (!userKey) return new Response(JSON.stringify({ error: "userKey required" }), { status: 400, headers: CORS });
 
             const store = getStore("users");
@@ -95,12 +96,50 @@ export default async (req, context) => {
 
             if (tier) user.tier = tier;
             if (name) user.name = name;
+            if (status !== undefined) user.status = status; // "active", "suspended", "banned"
             user.updatedAt = new Date().toISOString();
 
             await store.setJSON(userKey, user);
-            return new Response(JSON.stringify({ success: true, user: { email: user.email, name: user.name, tier: user.tier } }), { headers: CORS });
+            return new Response(JSON.stringify({ success: true, user: { email: user.email, name: user.name, tier: user.tier, status: user.status } }), { headers: CORS });
         } catch (err) {
             return new Response(JSON.stringify({ error: "Update failed" }), { status: 500, headers: CORS });
+        }
+    }
+
+    // ─── BAN/SUSPEND USER ─────────────────────────
+    if (path === "/users/ban" && req.method === "POST") {
+        try {
+            const { userKey, action, reason } = await req.json();
+            if (!userKey || !action) return new Response(JSON.stringify({ error: "userKey and action required" }), { status: 400, headers: CORS });
+
+            const store = getStore("users");
+            const user = await store.get(userKey, { type: "json" });
+            if (!user) return new Response(JSON.stringify({ error: "User not found" }), { status: 404, headers: CORS });
+
+            if (action === "ban") {
+                user.status = "banned";
+                user.bannedAt = new Date().toISOString();
+                user.banReason = reason || "Banned by admin";
+            } else if (action === "suspend") {
+                user.status = "suspended";
+                user.suspendedAt = new Date().toISOString();
+                user.suspendReason = reason || "Suspended by admin";
+            } else if (action === "unban" || action === "unsuspend" || action === "activate") {
+                user.status = "active";
+                user.bannedAt = null;
+                user.banReason = null;
+                user.suspendedAt = null;
+                user.suspendReason = null;
+            } else {
+                return new Response(JSON.stringify({ error: "Invalid action. Use: ban, suspend, activate" }), { status: 400, headers: CORS });
+            }
+
+            user.updatedAt = new Date().toISOString();
+            await store.setJSON(userKey, user);
+
+            return new Response(JSON.stringify({ success: true, status: user.status }), { headers: CORS });
+        } catch (err) {
+            return new Response(JSON.stringify({ error: "Action failed" }), { status: 500, headers: CORS });
         }
     }
 
