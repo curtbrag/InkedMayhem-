@@ -1,0 +1,72 @@
+{
+  "id": "",
+  "name": "",
+  "handle": "",
+  "domain": "",
+  "creatorTier": "A",
+  "brand": {
+    "colors": {
+      "primary": "#060606",
+      "accent": "#c22020",
+      "text": "#e8e4df",
+      "gold": "#c9a84c"
+    },
+    "fonts": {
+      "display": "Bebas Neue",
+      "serif": "Cormorant Garamond",
+      "mono": "Space Mono"
+    },
+    "ctaText": "Join Now",
+    "tagline": ""
+  },
+  "features": {
+    "blog": false,
+    "membership": false,
+    "unlockPosts": false,
+    "contact": true,
+    "ageGate": false,
+    "faq": false,
+    "bookings": false,
+    "galleryFilters": true
+  },
+  "membership": {
+    "tiers": {
+      "free": { "name": "Free", "price": 0, "description": "Public gallery access" },
+      "vip": { "name": "VIP", "price": 9.99, "description": "Exclusive content" },
+      "elite": { "name": "Elite", "price": 24.99, "description": "Full access + perks" }
+    }
+  },
+  "socials": {},
+  "contentRules": {
+    "allowedFileTypes": ["jpg", "jpeg", "png", "webp", "mp4"],
+    "maxImageSizeMB": 25,
+    "maxVideoSizeMB": 500,
+    "autoWatermark": false,
+    "stripExif": true,
+    "compressImages": true,
+    "generateThumbnails": true,
+    "explicitAllowed": false,
+    "categories": ["photos", "selfies", "lifestyle"]
+  },
+  "postingSchedule": {
+    "enabled": false,
+    "slots": [],
+    "autoFillSlots": false
+  },
+  "telegram": {
+    "creatorBot": { "enabled": false, "token": "", "chatId": "" },
+    "fanBot": { "enabled": false, "token": "", "username": "" }
+  },
+  "faq": {
+    "botTone": "professional",
+    "bannedPhrases": [],
+    "escalationKeywords": ["refund", "chargeback", "address", "meet", "minor"],
+    "templates": []
+  },
+  "moderation": {
+    "level": "manual",
+    "autoApproveAfterChecks": false,
+    "notifyOnUpload": true,
+    "notifyOnPublish": true
+  }
+}

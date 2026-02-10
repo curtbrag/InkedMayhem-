@@ -452,6 +452,19 @@
         .toast-ok { background: var(--surface); color: var(--off-white); border: 1px solid var(--mid); }
         .toast-err { background: #2a0808; color: var(--red-bright); border: 1px solid var(--red); }
 
+        /* ─── PIPELINE SPECIFIC ────────────────── */
+        .pipe-filter.active {
+            border-color: var(--red);
+            color: var(--red);
+        }
+        #pipeDetail .compose-form select {
+            width: 100%;
+            margin-bottom: 0;
+        }
+        #pipeDetail .compose-form textarea {
+            min-height: 80px;
+        }
+
         /* ─── RESPONSIVE ────────────────────────── */
         @media (max-width: 768px) {
             .dash-header { padding: 1rem; }
@@ -527,6 +540,7 @@
     <!-- TABS -->
     <div class="tabs">
         <button class="tab active" data-tab="overview">Overview</button>
+        <button class="tab" data-tab="pipeline">Pipeline <span class="badge" id="pipelineBadge" style="display:none">0</span></button>
         <button class="tab" data-tab="users">Users</button>
         <button class="tab" data-tab="messages">Messages <span class="badge" id="unreadBadge" style="display:none">0</span></button>
         <button class="tab" data-tab="conversations">Conversations</button>
@@ -554,12 +568,180 @@
             </div>
         </div>
 
+        <!-- Pipeline Overview in Dashboard -->
+        <div class="section-title" style="font-size:1.3rem; margin-top: 2rem;"><span class="icon">◆</span> Content Pipeline</div>
+        <div class="stats-grid" id="overviewPipeGrid">
+            <div class="stat-card"><div class="label">Pipeline Inbox</div><div class="value" id="overviewPipeInbox">—</div></div>
+            <div class="stat-card gold"><div class="label">Queued</div><div class="value" id="overviewPipeQueued">—</div></div>
+            <div class="stat-card"><div class="label">Published</div><div class="value" id="overviewPipePublished" style="color:var(--green)">—</div></div>
+        </div>
+
         <div class="section-title" style="font-size:1.3rem; margin-top: 2rem;"><span class="icon">◆</span> Tier Breakdown</div>
         <div class="stats-grid" id="tierGrid">
             <div class="stat-card"><div class="label">Free</div><div class="value" id="tierFree">—</div></div>
             <div class="stat-card"><div class="label">Peek</div><div class="value" id="tierPeek" style="color:var(--red)">—</div></div>
             <div class="stat-card"><div class="label">VIP</div><div class="value" id="tierVip" style="color:var(--gold)">—</div></div>
             <div class="stat-card"><div class="label">Elite</div><div class="value" id="tierElite" style="color:#fff">—</div></div>
+        </div>
+    </div>
+
+    <!-- ─── PIPELINE TAB ───────────────────── -->
+    <div class="tab-content" id="tab-pipeline">
+        <div class="section-title"><span class="icon">◆</span> Content Pipeline</div>
+
+        <!-- Pipeline Stats -->
+        <div class="stats-grid" id="pipelineStatsGrid">
+            <div class="stat-card">
+                <div class="label">Inbox</div>
+                <div class="value" id="pipeInbox">—</div>
+                <div class="sub">Awaiting review</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Processed</div>
+                <div class="value" id="pipeProcessed">—</div>
+                <div class="sub">Checks complete</div>
+            </div>
+            <div class="stat-card gold">
+                <div class="label">Queued</div>
+                <div class="value" id="pipeQueued">—</div>
+                <div class="sub">Ready to publish</div>
+            </div>
+            <div class="stat-card" style="border-left: 2px solid var(--green)">
+                <div class="label">Published</div>
+                <div class="value" id="pipePublished" style="color:var(--green)">—</div>
+            </div>
+            <div class="stat-card red">
+                <div class="label">Rejected</div>
+                <div class="value" id="pipeRejected">—</div>
+            </div>
+        </div>
+
+        <!-- Pipeline Actions -->
+        <div style="display:flex; gap:0.5rem; margin-bottom:1.5rem; flex-wrap:wrap">
+            <button class="btn-sm primary" onclick="pipeUploadModal()">+ Upload Content</button>
+            <button class="btn-sm" onclick="pipeProcessAll()">Process All Inbox</button>
+            <button class="btn-sm" onclick="pipePublishAll()">Publish All Queued</button>
+            <button class="btn-sm" onclick="pipeCheckSchedule()">Run Schedule Check</button>
+        </div>
+
+        <!-- Pipeline Filters -->
+        <div style="display:flex; gap:0.5rem; margin-bottom:1rem; flex-wrap:wrap">
+            <button class="btn-sm pipe-filter active" data-filter="all" onclick="filterPipeline('all', this)">All</button>
+            <button class="btn-sm pipe-filter" data-filter="inbox" onclick="filterPipeline('inbox', this)">Inbox</button>
+            <button class="btn-sm pipe-filter" data-filter="processed" onclick="filterPipeline('processed', this)">Processed</button>
+            <button class="btn-sm pipe-filter" data-filter="queued" onclick="filterPipeline('queued', this)">Queued</button>
+            <button class="btn-sm pipe-filter" data-filter="published" onclick="filterPipeline('published', this)">Published</button>
+            <button class="btn-sm pipe-filter" data-filter="rejected" onclick="filterPipeline('rejected', this)">Rejected</button>
+        </div>
+
+        <!-- Pipeline Table -->
+        <div id="pipeLoading" class="loading-text"><span class="spinner"></span> Loading pipeline...</div>
+        <div class="table-wrap" id="pipeTable" style="display:none">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Status</th>
+                        <th>File</th>
+                        <th>Caption</th>
+                        <th>Category</th>
+                        <th>Tier</th>
+                        <th>Source</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="pipeBody"></tbody>
+            </table>
+        </div>
+        <div class="empty" id="pipeEmpty" style="display:none">
+            <div class="icon">📂</div>
+            <p>No items in the pipeline. Upload content to get started.</p>
+        </div>
+
+        <!-- Item Detail / Edit Panel -->
+        <div class="msg-detail" id="pipeDetail">
+            <span class="back-link" onclick="closePipeDetail()">← Back to pipeline</span>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:2rem; margin-top:1rem">
+                <div>
+                    <div class="msg-meta" id="pipeDetailMeta"></div>
+                    <div id="pipeDetailPreview" style="margin:1rem 0; max-width:100%; background:var(--surface); border:1px solid var(--border); padding:1rem; text-align:center">
+                        <span style="color:var(--gray)">Preview</span>
+                    </div>
+                    <div id="pipeDetailChecks" style="margin-top:1rem"></div>
+                </div>
+                <div>
+                    <div class="compose-form" style="margin-top:0; border:none; padding:0; background:none">
+                        <label>Caption</label>
+                        <textarea id="pipeEditCaption" placeholder="Add a caption..."></textarea>
+                        <label>Category</label>
+                        <select id="pipeEditCategory">
+                            <option value="photos">Photos</option>
+                            <option value="selfies">Selfies</option>
+                            <option value="lifestyle">Lifestyle</option>
+                            <option value="behind-the-scenes">Behind the Scenes</option>
+                        </select>
+                        <label style="margin-top:1rem">Access Tier</label>
+                        <select id="pipeEditTier">
+                            <option value="free">Free</option>
+                            <option value="vip">VIP</option>
+                            <option value="elite">Elite</option>
+                        </select>
+                        <label style="margin-top:1rem">Schedule (optional)</label>
+                        <input type="datetime-local" id="pipeEditSchedule" style="width:100%; background:var(--surface); border:1px solid var(--border); color:var(--off-white); padding:0.75rem 1rem; font-family:var(--font-mono); font-size:12px">
+                        <div style="display:flex; gap:0.5rem; margin-top:1.5rem; flex-wrap:wrap">
+                            <button class="btn-sm primary" onclick="pipeApproveItem()">Approve + Queue</button>
+                            <button class="btn-sm" onclick="pipeSaveItem()">Save Changes</button>
+                            <button class="btn-sm" onclick="pipePublishItem()">Publish Now</button>
+                            <button class="btn-sm danger" onclick="pipeRejectItem()">Reject</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upload Modal -->
+        <div id="pipeUploadPanel" style="display:none">
+            <div class="compose-form" style="margin-top:1rem">
+                <div class="section-title" style="font-size: 1.2rem;"><span class="icon">◆</span> Upload Content</div>
+                <label>File</label>
+                <input type="file" id="pipeFileInput" accept="image/*,video/*" style="background:var(--surface); border:1px solid var(--border); color:var(--off-white); padding:0.75rem; width:100%; font-family:var(--font-mono); font-size:12px; margin-bottom:1rem">
+                <label>Caption</label>
+                <input type="text" id="pipeUpCaption" placeholder="Optional caption" style="width:100%; background:var(--surface); border:1px solid var(--border); color:var(--off-white); padding:0.75rem 1rem; font-family:var(--font-mono); font-size:12px; margin-bottom:1rem">
+                <div style="display:flex; gap:1rem; margin-bottom:1rem">
+                    <div style="flex:1">
+                        <label>Category</label>
+                        <select id="pipeUpCategory" style="width:100%">
+                            <option value="photos">Photos</option>
+                            <option value="selfies">Selfies</option>
+                            <option value="lifestyle">Lifestyle</option>
+                            <option value="behind-the-scenes">Behind the Scenes</option>
+                        </select>
+                    </div>
+                    <div style="flex:1">
+                        <label>Tier</label>
+                        <select id="pipeUpTier" style="width:100%">
+                            <option value="free">Free</option>
+                            <option value="vip">VIP</option>
+                            <option value="elite">Elite</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="display:flex; gap:0.5rem">
+                    <button class="login-btn" style="max-width:200px" id="pipeUploadBtn" onclick="pipeDoUpload()">Upload</button>
+                    <button class="btn-sm" onclick="pipeCloseUpload()">Cancel</button>
+                </div>
+                <div id="pipeUploadProgress" style="display:none; margin-top:1rem; color:var(--muted); font-size:11px">
+                    <span class="spinner"></span> Uploading...
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity Log -->
+        <div style="margin-top:2rem">
+            <div class="section-title" style="font-size:1.2rem"><span class="icon">◆</span> Recent Activity</div>
+            <div id="pipeActivityLog" style="background:var(--darker); border:1px solid var(--border); padding:1rem; max-height:300px; overflow-y:auto">
+                <div class="loading-text"><span class="spinner"></span> Loading activity...</div>
+            </div>
         </div>
     </div>
 
@@ -731,6 +913,7 @@ async function showDashboard() {
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('dashboard').style.display = 'block';
     loadStats();
+    loadPipelineStats();
 }
 
 // Check existing session
@@ -754,7 +937,8 @@ document.querySelectorAll('.tab').forEach(tab => {
         if (tab.dataset.tab === 'users') loadUsers();
         if (tab.dataset.tab === 'messages') loadMessages();
         if (tab.dataset.tab === 'conversations') loadConversations();
-        if (tab.dataset.tab === 'overview') loadStats();
+        if (tab.dataset.tab === 'overview') { loadStats(); loadPipelineStats(); }
+        if (tab.dataset.tab === 'pipeline') { loadPipeline(); loadPipelineStats(); }
     });
 });
 
@@ -1043,6 +1227,353 @@ async function composeSend() {
         document.getElementById('composeText').value = '';
         loadConversations();
     } else toast('Failed', true);
+}
+
+// ─── PIPELINE ─────────────────────────────────
+const PIPE_API = '/api/pipeline';
+let currentPipeFilter = 'all';
+let currentPipeId = null;
+let currentPipeItem = null;
+
+async function pipeApi(path, method = 'GET', body = null) {
+    const opts = { method, headers: headers() };
+    if (body) opts.body = JSON.stringify(body);
+    const r = await fetch(`${PIPE_API}${path}`, opts);
+    return r.json();
+}
+
+async function loadPipelineStats() {
+    try {
+        const data = await pipeApi('/stats');
+        if (!data.success) return;
+        const p = data.pipeline;
+        document.getElementById('pipeInbox').textContent = p.inbox;
+        document.getElementById('pipeProcessed').textContent = p.processed;
+        document.getElementById('pipeQueued').textContent = p.queued;
+        document.getElementById('pipePublished').textContent = p.published;
+        document.getElementById('pipeRejected').textContent = p.rejected;
+
+        // Overview stats
+        document.getElementById('overviewPipeInbox').textContent = p.inbox;
+        document.getElementById('overviewPipeQueued').textContent = p.queued;
+        document.getElementById('overviewPipePublished').textContent = p.published;
+
+        // Badge
+        const badge = document.getElementById('pipelineBadge');
+        const pending = p.inbox + p.processed;
+        if (pending > 0) {
+            badge.textContent = pending;
+            badge.style.display = 'inline';
+        } else {
+            badge.style.display = 'none';
+        }
+
+        // Activity log
+        if (data.recentActivity) {
+            renderActivityLog(data.recentActivity);
+        }
+    } catch (e) { console.error('Pipeline stats error:', e); }
+}
+
+function renderActivityLog(logs) {
+    const container = document.getElementById('pipeActivityLog');
+    if (!logs.length) {
+        container.innerHTML = '<div style="color:var(--gray); font-size:11px; text-align:center; padding:1rem">No recent activity</div>';
+        return;
+    }
+    container.innerHTML = logs.map(log => {
+        const time = formatDate(log.timestamp);
+        const actionColors = {
+            'ingest': 'var(--gold)',
+            'process': 'var(--muted)',
+            'approve': 'var(--green)',
+            'reject': 'var(--red)',
+            'publish': 'var(--green)',
+            'delete': 'var(--red)',
+            'telegram-upload': 'var(--gold)',
+            'update': 'var(--muted)',
+            'schedule-check': 'var(--muted)',
+            'process-all': 'var(--muted)',
+            'publish-all': 'var(--green)',
+            'auto-queue': 'var(--gold)'
+        };
+        const color = actionColors[log.action] || 'var(--muted)';
+        return `<div style="display:flex; justify-content:space-between; align-items:center; padding:0.4rem 0; border-bottom:1px solid var(--border); font-size:11px">
+            <span><span style="color:${color}; text-transform:uppercase; letter-spacing:1px; font-size:10px">${esc(log.action)}</span> — ${esc(log.itemId || '')}</span>
+            <span style="color:var(--gray)">${time}</span>
+        </div>`;
+    }).join('');
+}
+
+async function loadPipeline() {
+    document.getElementById('pipeLoading').style.display = 'block';
+    document.getElementById('pipeTable').style.display = 'none';
+    document.getElementById('pipeEmpty').style.display = 'none';
+    document.getElementById('pipeDetail').classList.remove('active');
+
+    try {
+        const data = await pipeApi(`/list?status=${currentPipeFilter}`);
+        document.getElementById('pipeLoading').style.display = 'none';
+
+        if (!data.success || !data.items.length) {
+            document.getElementById('pipeEmpty').style.display = 'block';
+            return;
+        }
+
+        const statusBadge = (status) => {
+            const colors = {
+                inbox: 'var(--gold)',
+                processed: 'var(--muted)',
+                queued: 'var(--gold)',
+                published: 'var(--green)',
+                rejected: 'var(--red)'
+            };
+            const c = colors[status] || 'var(--muted)';
+            return `<span style="color:${c}; border:1px solid ${c}; padding:2px 8px; font-size:10px; text-transform:uppercase; letter-spacing:1px">${status}</span>`;
+        };
+
+        const tbody = document.getElementById('pipeBody');
+        tbody.innerHTML = data.items.map(item => `
+            <tr>
+                <td>${statusBadge(item.status)}</td>
+                <td style="max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap">${esc(item.filename)}</td>
+                <td style="color:var(--muted); max-width:150px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap">${esc(item.caption || '—')}</td>
+                <td>${esc(item.category || '—')}</td>
+                <td><span class="tier-badge tier-${item.tier || 'free'}">${(item.tier || 'free').toUpperCase()}</span></td>
+                <td style="font-size:10px; color:var(--muted)">${esc(item.source || 'upload')}</td>
+                <td style="white-space:nowrap">${formatDate(item.createdAt)}</td>
+                <td>
+                    <button class="btn-sm primary" onclick="openPipeItem('${esc(item.id)}')">Open</button>
+                    ${item.status === 'inbox' ? `<button class="btn-sm" onclick="quickProcess('${esc(item.id)}')">Process</button>` : ''}
+                    ${item.status === 'queued' ? `<button class="btn-sm" onclick="quickPublish('${esc(item.id)}')">Publish</button>` : ''}
+                    <button class="btn-sm danger" onclick="pipeDeleteItem('${esc(item.id)}')">Del</button>
+                </td>
+            </tr>
+        `).join('');
+        document.getElementById('pipeTable').style.display = 'block';
+    } catch (e) {
+        document.getElementById('pipeLoading').style.display = 'none';
+        toast('Failed to load pipeline', true);
+    }
+}
+
+function filterPipeline(status, btn) {
+    currentPipeFilter = status;
+    document.querySelectorAll('.pipe-filter').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    loadPipeline();
+}
+
+async function openPipeItem(id) {
+    try {
+        const data = await pipeApi(`/item?id=${id}`);
+        if (!data.success) { toast('Item not found', true); return; }
+
+        currentPipeId = id;
+        currentPipeItem = data.item;
+        const item = data.item;
+
+        document.getElementById('pipeTable').style.display = 'none';
+        document.getElementById('pipeDetailMeta').innerHTML = `
+            <strong>${esc(item.filename)}</strong><br>
+            Status: <span style="color:var(--gold)">${item.status.toUpperCase()}</span> |
+            Source: ${esc(item.source)} |
+            Type: ${esc(item.mediaType)} |
+            Size: ${item.fileSizeMB}MB<br>
+            Created: ${formatDate(item.createdAt)}
+            ${item.processedAt ? ` | Processed: ${formatDate(item.processedAt)}` : ''}
+            ${item.publishedAt ? ` | Published: ${formatDate(item.publishedAt)}` : ''}
+            ${item.scheduledAt ? `<br>Scheduled: ${item.scheduledAt}` : ''}
+            ${item.rejectReason ? `<br><span style="color:var(--red)">Rejected: ${esc(item.rejectReason)}</span>` : ''}
+        `;
+
+        // Preview
+        const preview = document.getElementById('pipeDetailPreview');
+        if (item.mediaType === 'image' && item.storedAs) {
+            preview.innerHTML = `<img src="/api/pipeline/asset/${esc(item.storedAs)}" style="max-width:100%; max-height:400px; object-fit:contain" onerror="this.parentNode.innerHTML='<span style=color:var(--gray)>Preview unavailable</span>'">`;
+        } else if (item.mediaType === 'video') {
+            preview.innerHTML = `<div style="color:var(--muted); padding:2rem">Video file — ${esc(item.filename)}</div>`;
+        } else {
+            preview.innerHTML = `<span style="color:var(--gray)">Preview unavailable</span>`;
+        }
+
+        // Checks
+        const checks = item.checks || {};
+        document.getElementById('pipeDetailChecks').innerHTML = `
+            <div style="font-size:10px; text-transform:uppercase; letter-spacing:1px; color:var(--muted); margin-bottom:0.5rem">Content Checks</div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.3rem; font-size:11px">
+                <span>${checks.fileTypeValid ? '✅' : '❌'} File type valid</span>
+                <span>${checks.fileSizeValid ? '✅' : '❌'} File size valid</span>
+                <span>${checks.exifStripped ? '✅' : '⏳'} EXIF stripped</span>
+                <span>${checks.compressed ? '✅' : '⏳'} Compressed</span>
+                <span>${checks.thumbnailGenerated ? '✅' : '⏳'} Thumbnail</span>
+            </div>
+        `;
+
+        // Fill edit fields
+        document.getElementById('pipeEditCaption').value = item.caption || '';
+        document.getElementById('pipeEditCategory').value = item.category || 'photos';
+        document.getElementById('pipeEditTier').value = item.tier || 'free';
+        document.getElementById('pipeEditSchedule').value = item.scheduledAt ? item.scheduledAt.slice(0, 16) : '';
+
+        document.getElementById('pipeDetail').classList.add('active');
+    } catch (e) { toast('Failed to load item', true); }
+}
+
+function closePipeDetail() {
+    document.getElementById('pipeDetail').classList.remove('active');
+    document.getElementById('pipeTable').style.display = 'block';
+    loadPipeline();
+    loadPipelineStats();
+}
+
+async function pipeSaveItem() {
+    if (!currentPipeId) return;
+    const data = await pipeApi('/update', 'POST', {
+        pipelineId: currentPipeId,
+        caption: document.getElementById('pipeEditCaption').value,
+        category: document.getElementById('pipeEditCategory').value,
+        tier: document.getElementById('pipeEditTier').value,
+        scheduledAt: document.getElementById('pipeEditSchedule').value || null
+    });
+    if (data.success) toast('Saved');
+    else toast('Save failed', true);
+}
+
+async function pipeApproveItem() {
+    if (!currentPipeId) return;
+    const data = await pipeApi('/approve', 'POST', {
+        pipelineId: currentPipeId,
+        caption: document.getElementById('pipeEditCaption').value,
+        category: document.getElementById('pipeEditCategory').value,
+        tier: document.getElementById('pipeEditTier').value,
+        scheduledAt: document.getElementById('pipeEditSchedule').value || null
+    });
+    if (data.success) { toast('Approved + queued'); closePipeDetail(); }
+    else toast(data.error || 'Approve failed', true);
+}
+
+async function pipePublishItem() {
+    if (!currentPipeId) return;
+    // If item is not yet queued, approve first
+    if (currentPipeItem && currentPipeItem.status !== 'queued') {
+        const approve = await pipeApi('/approve', 'POST', {
+            pipelineId: currentPipeId,
+            caption: document.getElementById('pipeEditCaption').value,
+            category: document.getElementById('pipeEditCategory').value,
+            tier: document.getElementById('pipeEditTier').value
+        });
+        if (!approve.success) { toast('Failed to queue item first', true); return; }
+    }
+    const data = await pipeApi('/publish', 'POST', { pipelineId: currentPipeId });
+    if (data.success) { toast('Published!'); closePipeDetail(); }
+    else toast(data.error || 'Publish failed', true);
+}
+
+async function pipeRejectItem() {
+    if (!currentPipeId) return;
+    const reason = prompt('Reject reason (optional):') || '';
+    const data = await pipeApi('/reject', 'POST', { pipelineId: currentPipeId, reason });
+    if (data.success) { toast('Rejected'); closePipeDetail(); }
+    else toast('Reject failed', true);
+}
+
+async function pipeDeleteItem(id) {
+    if (!confirm('Delete this pipeline item?')) return;
+    const data = await pipeApi('/delete', 'POST', { pipelineId: id });
+    if (data.success) { toast('Deleted'); loadPipeline(); loadPipelineStats(); }
+    else toast('Delete failed', true);
+}
+
+async function quickProcess(id) {
+    const data = await pipeApi('/process', 'POST', { pipelineId: id });
+    if (data.success) { toast('Processed'); loadPipeline(); loadPipelineStats(); }
+    else toast('Process failed', true);
+}
+
+async function quickPublish(id) {
+    const data = await pipeApi('/publish', 'POST', { pipelineId: id });
+    if (data.success) { toast('Published!'); loadPipeline(); loadPipelineStats(); }
+    else toast('Publish failed', true);
+}
+
+async function pipeProcessAll() {
+    if (!confirm('Process all inbox items?')) return;
+    const data = await pipeApi('/process-all', 'POST');
+    if (data.success) { toast(`Processed ${data.processed} items`); loadPipeline(); loadPipelineStats(); }
+    else toast('Batch process failed', true);
+}
+
+async function pipePublishAll() {
+    if (!confirm('Publish all queued items?')) return;
+    const data = await pipeApi('/publish-all', 'POST');
+    if (data.success) { toast(`Published ${data.published} items`); loadPipeline(); loadPipelineStats(); }
+    else toast('Batch publish failed', true);
+}
+
+async function pipeCheckSchedule() {
+    const data = await pipeApi('/check-schedule', 'POST');
+    if (data.success) { toast(`Schedule check: ${data.published} items published`); loadPipeline(); loadPipelineStats(); }
+    else toast('Schedule check failed', true);
+}
+
+// Upload
+function pipeUploadModal() {
+    document.getElementById('pipeUploadPanel').style.display = 'block';
+    document.getElementById('pipeFileInput').value = '';
+    document.getElementById('pipeUpCaption').value = '';
+}
+
+function pipeCloseUpload() {
+    document.getElementById('pipeUploadPanel').style.display = 'none';
+}
+
+async function pipeDoUpload() {
+    const fileInput = document.getElementById('pipeFileInput');
+    const file = fileInput.files[0];
+    if (!file) { toast('Select a file first', true); return; }
+
+    const btn = document.getElementById('pipeUploadBtn');
+    const progress = document.getElementById('pipeUploadProgress');
+    btn.disabled = true;
+    btn.textContent = 'Uploading...';
+    progress.style.display = 'block';
+
+    try {
+        // Read file as base64
+        const reader = new FileReader();
+        const fileData = await new Promise((resolve, reject) => {
+            reader.onload = () => resolve(reader.result.split(',')[1]);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
+
+        const data = await pipeApi('/ingest', 'POST', {
+            filename: file.name,
+            fileSize: file.size,
+            fileData,
+            caption: document.getElementById('pipeUpCaption').value,
+            category: document.getElementById('pipeUpCategory').value,
+            tier: document.getElementById('pipeUpTier').value,
+            source: 'upload'
+        });
+
+        if (data.success) {
+            toast('Uploaded to pipeline!');
+            pipeCloseUpload();
+            loadPipeline();
+            loadPipelineStats();
+        } else {
+            toast(data.error || 'Upload failed', true);
+        }
+    } catch (e) {
+        toast('Upload error', true);
+        console.error('Upload error:', e);
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'Upload';
+    progress.style.display = 'none';
 }
 
 // ─── UTILITIES ───────────────────────────────

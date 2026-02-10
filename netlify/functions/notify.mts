@@ -113,6 +113,49 @@ export default async (req, context) => {
                 `);
                 break;
 
+            case "pipeline_ingest":
+                subject = `📥 New content uploaded: ${data.filename || "Unknown file"}`;
+                html = emailTemplate("Content Pipeline — New Upload", `
+                    <p>New content has been added to the pipeline.</p>
+                    <p><strong>File:</strong> ${data.filename || "Unknown"}</p>
+                    <p><strong>Source:</strong> ${data.source || "upload"}</p>
+                    <p><strong>Pipeline ID:</strong> ${data.pipelineId || "N/A"}</p>
+                    <p>Review and approve in the <a href="https://inkedmayhem.netlify.app/admin/" style="color: #c41230;">Admin Dashboard</a>.</p>
+                `);
+                break;
+
+            case "pipeline_publish":
+                subject = `✅ Content published: ${data.filename || "content"}`;
+                html = emailTemplate("Content Published", `
+                    <p>Content has been published to the site.</p>
+                    <p><strong>File:</strong> ${data.filename || "Unknown"}</p>
+                    <p><strong>Tier:</strong> ${data.tier || "free"}</p>
+                    <p><strong>Content Key:</strong> ${data.contentKey || "N/A"}</p>
+                `);
+                break;
+
+            case "pipeline_error":
+                subject = `⚠️ Pipeline error: ${data.error || "Unknown error"}`;
+                html = emailTemplate("Pipeline Error", `
+                    <p>An error occurred in the content pipeline.</p>
+                    <p><strong>Error:</strong> ${data.error || "Unknown"}</p>
+                    <p><strong>Item:</strong> ${data.pipelineId || "N/A"}</p>
+                    <p><strong>Details:</strong> ${data.details || "No additional details"}</p>
+                `);
+                break;
+
+            case "telegram_escalation":
+                subject = `🚨 Telegram escalation: ${data.category || "safety"}`;
+                html = emailTemplate("Telegram Safety Escalation", `
+                    <p style="color: #e63030;"><strong>A message has been flagged for review.</strong></p>
+                    <p><strong>User:</strong> ${data.username || "Unknown"}</p>
+                    <p><strong>Category:</strong> ${data.category || "N/A"}</p>
+                    <p style="background: #1a1a1a; padding: 1rem; border-left: 3px solid #e63030;">
+                        ${(data.message || "").substring(0, 500)}
+                    </p>
+                `);
+                break;
+
             default:
                 return new Response(JSON.stringify({ error: "Unknown type" }), { status: 400 });
         }
