@@ -901,10 +901,38 @@ export default async (req: Request, context: any) => {
                 // Normal FAQ match
                 if (match.matched && match.response) {
                     await sendTelegramMessage(botToken, chatId, match.response);
+
+                    // Track FAQ hit for analytics
+                    const faqStore = getStore("telegram-faq-stats");
+                    try {
+                        const stats = await faqStore.get("faq-hits", { type: "json" }) as any || {};
+                        stats[match.category || "unknown"] = (stats[match.category || "unknown"] || 0) + 1;
+                        stats._total = (stats._total || 0) + 1;
+                        stats._lastUpdated = new Date().toISOString();
+                        await faqStore.setJSON("faq-hits", stats);
+                    } catch {}
+
                     return new Response(JSON.stringify({ ok: true }), { headers: CORS });
                 }
 
-                // No match — fallback
+                // No match — track unanswered question for admin review
+                const faqStore = getStore("telegram-faq-stats");
+                try {
+                    const unanswered = await faqStore.get("unanswered", { type: "json" }) as any || { questions: [] };
+                    unanswered.questions.push({
+                        question: text.substring(0, 300),
+                        username,
+                        userId,
+                        timestamp: new Date().toISOString()
+                    });
+                    // Keep last 100 unanswered questions
+                    if (unanswered.questions.length > 100) {
+                        unanswered.questions = unanswered.questions.slice(-100);
+                    }
+                    await faqStore.setJSON("unanswered", unanswered);
+                } catch {}
+
+                // Fallback response
                 await sendTelegramMessage(botToken, chatId,
                     "I don't have a specific answer for that, but you can reach out through the contact form on the site and someone will get back to you.\n\n" +
                     "Or try asking about: membership, content, schedule, or pricing."
@@ -1041,11 +1069,26 @@ export default async (req: Request, context: any) => {
             }
             recentLogs.sort((a: any, b: any) => (b.timestamp || "").localeCompare(a.timestamp || ""));
 
+            // FAQ stats
+            let faqHits = {};
+            let unanswered: any[] = [];
+            try {
+                const faqStore = getStore("telegram-faq-stats");
+                const hits = await faqStore.get("faq-hits", { type: "json" });
+                if (hits) faqHits = hits;
+                const unans = await faqStore.get("unanswered", { type: "json" }) as any;
+                if (unans?.questions) unanswered = unans.questions.slice(-20);
+            } catch {}
+
             return new Response(JSON.stringify({
                 success: true,
                 totalInteractions: logBlobs.blobs.length,
                 totalEscalations: escBlobs.blobs.length,
                 recentActivity: recentLogs.slice(0, 10),
+                faq: {
+                    hits: faqHits,
+                    unansweredQuestions: unanswered
+                },
                 botsConfigured: {
                     creator: !!getCreatorBotToken(),
                     fan: !!getFanBotToken()

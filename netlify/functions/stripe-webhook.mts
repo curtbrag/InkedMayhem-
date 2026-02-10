@@ -107,6 +107,13 @@ export default async (req, context) => {
                     amount: session.amount_total ? `$${(session.amount_total / 100).toFixed(2)}` : "N/A"
                 });
 
+                // Send welcome email to subscriber
+                notifyAdmin("subscriber_welcome", {
+                    email,
+                    name: user.name,
+                    tier
+                });
+
                 // Telegram welcome + milestone
                 const tierNames = { vip: "Ink Insider", elite: "Mayhem Circle" };
                 await sendTelegramNotification(

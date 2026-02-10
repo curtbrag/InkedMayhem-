@@ -223,6 +223,30 @@
     </style>
 </head>
 <body>
+    <!-- AGE GATE -->
+    <div id="ageGate" style="display:none;position:fixed;inset:0;z-index:99999;background:#060606;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:2rem">
+        <div style="max-width:400px">
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:3rem;letter-spacing:4px;margin-bottom:0.5rem">INKED<span style="color:#c22020">MAYHEM</span></div>
+            <div style="color:#888;font-size:0.7rem;letter-spacing:3px;text-transform:uppercase;margin-bottom:2rem">Age Verification Required</div>
+            <p style="color:#aaa;font-size:0.9rem;line-height:1.6;margin-bottom:2rem">This website contains content intended for adults. By entering, you confirm that you are at least 18 years old.</p>
+            <div style="display:flex;gap:1rem;justify-content:center">
+                <button onclick="verifyAge(true)" style="background:#c22020;color:#fff;border:none;padding:0.85rem 2.5rem;font-family:'Space Mono',monospace;font-size:0.7rem;text-transform:uppercase;letter-spacing:2px;cursor:pointer">I am 18+</button>
+                <button onclick="verifyAge(false)" style="background:none;border:1px solid #333;color:#888;padding:0.85rem 2.5rem;font-family:'Space Mono',monospace;font-size:0.7rem;text-transform:uppercase;letter-spacing:2px;cursor:pointer">Exit</button>
+            </div>
+        </div>
+    </div>
+    <script>
+    (function() {
+        if (sessionStorage.getItem('im_age_verified')) return;
+        fetch('/api/creator-config/features?id=inkedmayhem').then(r => r.json()).then(data => {
+            if (data.success && data.features?.ageGate) {
+                document.getElementById('ageGate').style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            }
+        }).catch(() => {});
+    })();
+    function verifyAge(ok) { if (ok) { sessionStorage.setItem('im_age_verified','1'); document.getElementById('ageGate').style.display='none'; document.body.style.overflow=''; } else { window.location.href='https://www.google.com'; } }
+    </script>
     <div class="noise-overlay"></div>
 
     <!-- NAV -->
@@ -260,14 +284,11 @@
             </div>
         </div>
 
-        <!-- LATEST DROPS -->
+        <!-- LATEST DROPS (all tiers, most recent first) -->
         <div class="content-sections">
-            <h2>LATEST DROPS</h2>
+            <h2>LATEST DROPS <span class="count" id="latestCount"></span></h2>
             <div class="content-grid" id="latestContent">
-                <div class="empty-state">
-                    <span class="placeholder-icon">✦</span>
-                    <p>New content drops coming soon. Stay tuned.</p>
-                </div>
+                <div class="loading-text" style="padding:2rem;text-align:center;color:var(--muted)">Loading...</div>
             </div>
         </div>
 
@@ -456,6 +477,12 @@
                 if (!data.success) return;
 
                 const content = data.content || [];
+
+                // Latest drops — all content the user can see, most recent first (max 6)
+                const latestItems = content.slice(0, 6);
+                renderContentGrid('latestContent', latestItems, 'all');
+                document.getElementById('latestCount').textContent = content.length ? `(${content.length})` : '';
+
                 const vipItems = content.filter(c => c.tier === 'vip');
                 const eliteItems = content.filter(c => c.tier === 'elite');
                 const freeItems = content.filter(c => c.tier === 'free');
@@ -472,27 +499,30 @@
             const container = document.getElementById(containerId);
             const userTier = currentUser?.tier || 'free';
             const tierOrder = { free: 0, vip: 1, elite: 2 };
-            const hasAccess = tierOrder[userTier] >= tierOrder[tier];
+            const hasAccess = tier === 'all' || tierOrder[userTier] >= tierOrder[tier];
 
             if (!items.length) {
-                if (tier === 'free') {
-                    container.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--muted);font-style:italic">New content drops coming soon! 🔥</div>';
+                if (tier === 'free' || tier === 'all') {
+                    container.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--muted);font-style:italic">New content drops coming soon!</div>';
                 } else if (!hasAccess) {
-                    container.innerHTML = `<div style="padding:2rem;text-align:center;color:var(--muted)">🔒 Upgrade to ${tier.toUpperCase()} to unlock exclusive content <a href="/#exclusive" style="color:var(--red)">→ View Plans</a></div>`;
+                    container.innerHTML = `<div style="padding:2rem;text-align:center;color:var(--muted)">🔒 Upgrade to ${tier.toUpperCase()} to unlock exclusive content <a href="/#exclusive" style="color:var(--red)">View Plans</a></div>`;
                 } else {
-                    container.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--muted);font-style:italic">Exclusive content coming soon — stay tuned! 🔥</div>';
+                    container.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--muted);font-style:italic">Exclusive content coming soon — stay tuned!</div>';
                 }
                 return;
             }
 
             container.innerHTML = items.map(c => {
-                if (!hasAccess) {
+                const itemTier = c.tier || 'free';
+                const itemHasAccess = tier === 'all' || tierOrder[userTier] >= tierOrder[itemTier];
+
+                if (!itemHasAccess) {
                     return `<div class="content-card" style="opacity:0.5;cursor:pointer" onclick="window.location.href='/#exclusive'">
                         <div class="content-card-media">
                             <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:var(--surface)">
                                 <span style="font-size:2rem;opacity:0.4">🔒</span>
                             </div>
-                            <span class="content-tier-tag">${tier.toUpperCase()}</span>
+                            <span class="content-tier-tag">${itemTier.toUpperCase()}</span>
                         </div>
                         <div class="content-card-info">
                             <h3>${escHtml(c.title)}</h3>
@@ -501,21 +531,22 @@
                     </div>`;
                 }
 
-                const typeIcons = { post: '📝', gallery: '🖼️', announcement: '📢' };
-                const hasImage = c.imageUrl && c.imageUrl.startsWith('http');
-                const preview = c.body ? c.body.replace(/<[^>]*>/g, '').substring(0, 100) + '...' : '';
+                const typeIcons = { post: '📝', gallery: '🖼️', video: '🎬', announcement: '📢' };
+                // Handle both external URLs and pipeline asset paths
+                const hasImage = c.imageUrl && (c.imageUrl.startsWith('http') || c.imageUrl.startsWith('/api/'));
+                const tierLabel = tier === 'all' ? itemTier.toUpperCase() : tier.toUpperCase();
 
-                return `<div class="content-card" onclick="openContent(this)" data-body="${escAttr(c.body)}" data-title="${escAttr(c.title)}" data-image="${escAttr(c.imageUrl || '')}">
+                return `<div class="content-card" onclick="openContent(this)" data-body="${escAttr(c.body)}" data-title="${escAttr(c.title)}" data-image="${escAttr(c.imageUrl || '')}" data-type="${escAttr(c.type || 'post')}" data-category="${escAttr(c.category || '')}">
                     <div class="content-card-media">
-                        ${hasImage 
-                            ? `<img src="${escHtml(c.imageUrl)}" alt="${escHtml(c.title)}" style="width:100%;height:100%;object-fit:cover">`
+                        ${hasImage
+                            ? `<img src="${escHtml(c.imageUrl)}" alt="${escHtml(c.title)}" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div style="width:100%;height:100%;display:none;align-items:center;justify-content:center;background:var(--surface);font-size:2rem">${typeIcons[c.type] || '🖼️'}</div>`
                             : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:var(--surface);font-size:2rem">${typeIcons[c.type] || '📝'}</div>`
                         }
-                        <span class="content-tier-tag">${tier.toUpperCase()}</span>
+                        <span class="content-tier-tag">${tierLabel}</span>
                     </div>
                     <div class="content-card-info">
                         <h3>${escHtml(c.title)}</h3>
-                        <span class="content-date">${new Date(c.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                        <span class="content-date">${c.category ? escHtml(c.category) + ' · ' : ''}${new Date(c.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                     </div>
                 </div>`;
             }).join('');
@@ -525,16 +556,23 @@
             const title = el.dataset.title;
             const body = el.dataset.body;
             const image = el.dataset.image;
-            
-            // Simple overlay reader
+            const type = el.dataset.type;
+            const category = el.dataset.category;
+
             const overlay = document.createElement('div');
             overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.95);overflow-y:auto;padding:2rem';
+
+            const hasImage = image && (image.startsWith('http') || image.startsWith('/api/'));
+            const isVideo = type === 'video';
+
             overlay.innerHTML = `
-                <div style="max-width:700px;margin:2rem auto;color:var(--text)">
+                <div style="max-width:700px;margin:2rem auto;color:var(--off-white,#e8e4df)">
                     <span onclick="this.parentElement.parentElement.remove()" style="position:fixed;top:1rem;right:1.5rem;cursor:pointer;font-size:1.5rem;color:var(--muted);z-index:10000">✕</span>
-                    ${image ? `<img src="${escHtml(image)}" style="width:100%;max-height:400px;object-fit:cover;margin-bottom:1.5rem">` : ''}
+                    ${hasImage && !isVideo ? `<img src="${escHtml(image)}" style="width:100%;max-height:500px;object-fit:contain;margin-bottom:1.5rem;background:var(--surface)" onerror="this.style.display='none'">` : ''}
+                    ${hasImage && isVideo ? `<video src="${escHtml(image)}" controls style="width:100%;max-height:500px;margin-bottom:1.5rem;background:var(--surface)"></video>` : ''}
+                    ${category ? `<div style="font-size:0.6rem;letter-spacing:3px;text-transform:uppercase;color:var(--red);margin-bottom:0.5rem">${escHtml(category)}</div>` : ''}
                     <h1 style="font-family:var(--font-display);font-size:2rem;letter-spacing:2px;margin-bottom:1rem">${escHtml(title)}</h1>
-                    <div style="line-height:1.8;color:var(--muted);font-size:15px">${body}</div>
+                    <div style="line-height:1.8;color:var(--muted);font-size:15px">${body || '<em>No description</em>'}</div>
                 </div>
             `;
             document.body.appendChild(overlay);

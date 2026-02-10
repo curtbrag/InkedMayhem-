@@ -65,6 +65,44 @@ export default async (req, context) => {
     try {
         const { type, data } = await req.json();
         const adminEmail = getAdminEmail();
+
+        // Subscriber-facing emails go to the subscriber, not admin
+        if (type === "subscriber_welcome") {
+            if (!data.email) {
+                return new Response(JSON.stringify({ skipped: true, reason: "No subscriber email" }));
+            }
+            const tierNames = { vip: "Ink Insider", elite: "Mayhem Circle" };
+            const tierName = tierNames[data.tier] || data.tier?.toUpperCase() || "MEMBER";
+            const subject = `Welcome to ${tierName}!`;
+            const html = emailTemplate(`Welcome, ${tierName}!`, `
+                <p style="font-size: 1.1rem; color: #e8e4df;">Hey ${data.name || "there"},</p>
+                <p>You're officially in. Welcome to <strong style="color: #c41230;">${tierName}</strong>.</p>
+                <p>Here's what you just unlocked:</p>
+                <ul style="color: #bbb; line-height: 2;">
+                    ${data.tier === "elite" ? `
+                        <li>All VIP + Elite exclusive content</li>
+                        <li>Priority messaging with InkedMayhem</li>
+                        <li>Early access to new drops</li>
+                        <li>Behind-the-scenes content</li>
+                    ` : `
+                        <li>VIP exclusive content</li>
+                        <li>Direct messaging with InkedMayhem</li>
+                        <li>New content notifications</li>
+                    `}
+                </ul>
+                <p style="margin-top: 1.5rem;">
+                    <a href="https://inkedmayhem.netlify.app/members" style="display:inline-block;background:#c41230;color:#fff;padding:0.75rem 2rem;text-decoration:none;font-family:'Space Mono',monospace;font-size:0.75rem;letter-spacing:2px;text-transform:uppercase;">
+                        Access Your Content →
+                    </a>
+                </p>
+                <p style="color: #666; font-size: 0.8rem; margin-top: 1.5rem;">
+                    Questions? Just reply to this email or message through the members area.
+                </p>
+            `);
+            const sent = await sendEmail(data.email, subject, html);
+            return new Response(JSON.stringify({ success: true, sent }));
+        }
+
         if (!adminEmail) {
             return new Response(JSON.stringify({ skipped: true, reason: "No NOTIFY_EMAIL" }));
         }

@@ -94,7 +94,32 @@ export default async (req: Request, context: any) => {
     const path = url.pathname.replace("/api/creator-config", "").replace(/\/$/, "") || "";
     const store = getStore("creator-configs");
 
-    // All routes require admin auth
+    // ─── PUBLIC: Feature flags (no auth required) ─────────
+    // GET /api/creator-config/features?id=inkedmayhem
+    if (path === "/features" && req.method === "GET") {
+        try {
+            const id = url.searchParams.get("id") || "inkedmayhem";
+            const config = await store.get(id, { type: "json" }) as any;
+            if (!config) {
+                return new Response(JSON.stringify({ success: true, features: {} }), { headers: CORS });
+            }
+            // Return only non-sensitive public info
+            return new Response(JSON.stringify({
+                success: true,
+                features: config.features || {},
+                brand: {
+                    name: config.name || "",
+                    tagline: config.brand?.tagline || "",
+                    ctaText: config.brand?.ctaText || ""
+                },
+                membership: config.membership || {}
+            }), { headers: CORS });
+        } catch {
+            return new Response(JSON.stringify({ success: true, features: {} }), { headers: CORS });
+        }
+    }
+
+    // All routes below require admin auth
     if (!verifyAdmin(req)) {
         return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: CORS });
     }
