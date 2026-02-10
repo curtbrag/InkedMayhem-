@@ -2,12 +2,49 @@ import { getStore } from "@netlify/blobs";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
+// Rate limiting: max 10 login attempts per IP per 15 minutes
+const RATE_LIMIT_MAX = 10;
+const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000;
+
+async function checkRateLimit(ip) {
+    const store = getStore("auth-ratelimits");
+    const key = `login-${ip.replace(/[^a-z0-9.:]/gi, "")}`;
+    try {
+        const record = await store.get(key, { type: "json" });
+        if (record) {
+            const windowStart = new Date(record.windowStart).getTime();
+            if (Date.now() - windowStart < RATE_LIMIT_WINDOW_MS) {
+                if (record.count >= RATE_LIMIT_MAX) return false;
+                record.count++;
+                await store.setJSON(key, record);
+                return true;
+            }
+        }
+        await store.setJSON(key, { count: 1, windowStart: new Date().toISOString() });
+        return true;
+    } catch {
+        return true; // Allow on error
+    }
+}
+
 export default async (req, context) => {
     if (req.method !== "POST") {
         return new Response(JSON.stringify({ error: "Method not allowed" }), { status: 405 });
     }
 
     try {
+        // Rate limit check
+        const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim()
+            || req.headers.get("x-nf-client-connection-ip")
+            || "unknown";
+        const allowed = await checkRateLimit(clientIp);
+        if (!allowed) {
+            return new Response(JSON.stringify({ error: "Too many login attempts. Try again in 15 minutes." }), {
+                status: 429,
+                headers: { "Content-Type": "application/json", "Retry-After": "900" }
+            });
+        }
+
         const { email, password } = await req.json();
 
         if (!email || !password) {

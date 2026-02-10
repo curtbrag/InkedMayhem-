@@ -1025,6 +1025,59 @@
             <div class="section-title" style="font-size:1.2rem"><span class="icon">◆</span> Activity (Last 7 Days)</div>
             <div id="anActivityChart" style="background:var(--darker); border:1px solid var(--border); padding:1rem"></div>
         </div>
+
+        <!-- FAQ Bot Insights -->
+        <div class="section-title" style="font-size:1.2rem; margin-top:2rem"><span class="icon">◆</span> FAQ Bot Insights</div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:1rem">
+            <div style="background:var(--darker); border:1px solid var(--border); padding:1.5rem">
+                <div style="display:flex; gap:2rem; margin-bottom:1rem">
+                    <div>
+                        <div style="font-size:2rem; font-weight:700; color:var(--red-bright)" id="anFaqHits">—</div>
+                        <div style="color:var(--muted); font-size:11px">Total FAQ hits</div>
+                    </div>
+                    <div>
+                        <div style="font-size:2rem; font-weight:700; color:var(--gold)" id="anFaqUnanswered">—</div>
+                        <div style="color:var(--muted); font-size:11px">Unanswered</div>
+                    </div>
+                    <div>
+                        <div style="font-size:2rem; font-weight:700; color:var(--red)" id="anFaqEscalations">—</div>
+                        <div style="color:var(--muted); font-size:11px">Escalations</div>
+                    </div>
+                </div>
+                <div style="color:var(--muted); font-size:10px; text-transform:uppercase; letter-spacing:1px; margin-bottom:0.5rem">Top Categories</div>
+                <div id="anFaqCategories"></div>
+            </div>
+            <div style="background:var(--darker); border:1px solid var(--border); padding:1.5rem">
+                <div style="color:var(--muted); font-size:10px; text-transform:uppercase; letter-spacing:1px; margin-bottom:0.5rem">Unanswered Questions</div>
+                <div id="anFaqUnansweredList" style="max-height:250px; overflow-y:auto"></div>
+            </div>
+        </div>
+
+        <!-- Data Export & Backup -->
+        <div class="section-title" style="font-size:1.2rem; margin-top:2rem"><span class="icon">◆</span> Data Export & Backup</div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:1rem">
+            <div style="background:var(--darker); border:1px solid var(--border); padding:1.5rem">
+                <div style="font-size:14px; font-weight:700; color:var(--off-white); margin-bottom:0.5rem">Full Backup</div>
+                <div style="color:var(--muted); font-size:11px; margin-bottom:1rem">Download all data as JSON</div>
+                <div id="anExportStats" style="font-size:11px; color:var(--muted); margin-bottom:1rem">Loading...</div>
+                <button class="login-btn" style="max-width:220px" onclick="downloadFullBackup()">Download Full Backup</button>
+            </div>
+            <div style="background:var(--darker); border:1px solid var(--border); padding:1.5rem">
+                <div style="font-size:14px; font-weight:700; color:var(--off-white); margin-bottom:0.5rem">Export Single Store</div>
+                <select id="anExportStore" style="width:100%; background:var(--surface); border:1px solid var(--border); color:var(--off-white); padding:0.5rem; font-family:var(--font-mono); font-size:12px; margin-bottom:0.5rem">
+                    <option value="users">users</option>
+                    <option value="content">content</option>
+                    <option value="pipeline">pipeline</option>
+                    <option value="pipeline-logs">pipeline-logs</option>
+                    <option value="conversations">conversations</option>
+                    <option value="creator-configs">creator-configs</option>
+                    <option value="telegram-logs">telegram-logs</option>
+                    <option value="telegram-escalations">telegram-escalations</option>
+                    <option value="telegram-faq-stats">telegram-faq-stats</option>
+                </select>
+                <button class="login-btn" style="max-width:180px; background:var(--mid)" onclick="downloadStoreExport()">Export Store</button>
+            </div>
+        </div>
     </div>
 
     <!-- ─── SETTINGS TAB ─────────────────────── -->
@@ -2015,6 +2068,94 @@ async function loadAnalytics() {
 
     // Load activity chart
     loadActivityChart();
+
+    // Load FAQ insights
+    loadFaqInsights();
+
+    // Load export stats
+    loadExportStats();
+}
+
+async function loadFaqInsights() {
+    try {
+        const r = await fetch(`${AN_API}/faq`, { headers: authHeaders() });
+        const data = await r.json();
+        if (!data.success) return;
+
+        const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+        setEl('anFaqHits', data.totalHits || 0);
+        setEl('anFaqUnanswered', data.unansweredCount || 0);
+        setEl('anFaqEscalations', data.escalationCount || 0);
+
+        const catEl = document.getElementById('anFaqCategories');
+        if (catEl && data.topCategories?.length) {
+            catEl.innerHTML = data.topCategories.map(c =>
+                `<div style="display:flex; justify-content:space-between; padding:0.25rem 0; border-bottom:1px solid var(--border)">
+                    <span style="text-transform:capitalize">${esc(c.category)}</span>
+                    <span style="color:var(--red-bright); font-weight:700">${c.hits}</span>
+                </div>`
+            ).join('');
+        } else if (catEl) {
+            catEl.innerHTML = '<div style="color:var(--gray); font-size:11px">No FAQ data yet</div>';
+        }
+
+        const unEl = document.getElementById('anFaqUnansweredList');
+        if (unEl && data.unansweredQuestions?.length) {
+            unEl.innerHTML = data.unansweredQuestions.map(q =>
+                `<div style="padding:0.3rem 0; border-bottom:1px solid var(--border)">
+                    <div style="color:var(--off-white); font-size:11px">"${esc((q.question || '').substring(0, 120))}"</div>
+                    <div style="color:var(--gray); font-size:10px">${q.timestamp ? new Date(q.timestamp).toLocaleDateString() : ''}</div>
+                </div>`
+            ).join('');
+        } else if (unEl) {
+            unEl.innerHTML = '<div style="color:var(--gray); font-size:11px">No unanswered questions</div>';
+        }
+    } catch (e) { console.error('FAQ insights error:', e); }
+}
+
+async function loadExportStats() {
+    try {
+        const r = await fetch('/api/admin-export/stats', { headers: authHeaders() });
+        const data = await r.json();
+        if (!data.success) return;
+        const el = document.getElementById('anExportStats');
+        if (!el) return;
+        const entries = Object.entries(data.stores).filter(([,v]) => v > 0);
+        el.innerHTML = entries.map(([name, count]) =>
+            `<span style="display:inline-block; background:rgba(255,255,255,0.06); padding:2px 8px; border-radius:3px; margin:2px">${name}: <b>${count}</b></span>`
+        ).join(' ') + `<div style="margin-top:0.5rem; color:var(--gold)">Total: ${data.totalItems} items</div>`;
+    } catch { const el = document.getElementById('anExportStats'); if (el) el.textContent = 'Could not load stats'; }
+}
+
+async function downloadFullBackup() {
+    try {
+        showToast('Generating backup...');
+        const r = await fetch('/api/admin-export', { headers: authHeaders() });
+        const blob = await r.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `inkedmayhem-backup-${new Date().toISOString().split('T')[0]}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast('Backup downloaded!');
+    } catch { showToast('Backup failed'); }
+}
+
+async function downloadStoreExport() {
+    const storeName = document.getElementById('anExportStore')?.value || 'users';
+    try {
+        showToast(`Exporting ${storeName}...`);
+        const r = await fetch(`/api/admin-export/store?name=${storeName}`, { headers: authHeaders() });
+        const blob = await r.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${storeName}-export-${new Date().toISOString().split('T')[0]}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast(`${storeName} exported!`);
+    } catch { showToast('Export failed'); }
 }
 
 async function loadHealthCheck() {

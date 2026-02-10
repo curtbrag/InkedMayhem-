@@ -244,6 +244,18 @@ export default async (req: Request, context: any) => {
         }
     }
 
+    // ─── FAQ INSIGHTS ──────────────────────────────────────────
+    // GET /api/analytics/faq
+    // Returns FAQ bot stats, top questions, unanswered questions
+    if (path === "/faq" && req.method === "GET") {
+        try {
+            const faqStats = await getFaqInsights();
+            return new Response(JSON.stringify({ success: true, ...faqStats }), { headers: CORS });
+        } catch (err) {
+            return new Response(JSON.stringify({ error: "FAQ insights failed" }), { status: 500, headers: CORS });
+        }
+    }
+
     return new Response(JSON.stringify({ error: "Not found" }), { status: 404, headers: CORS });
 };
 
@@ -409,6 +421,68 @@ async function getTelegramMetrics() {
             creator: !!Netlify.env.get("TELEGRAM_CREATOR_BOT_TOKEN"),
             fan: !!Netlify.env.get("TELEGRAM_FAN_BOT_TOKEN")
         }
+    };
+}
+
+async function getFaqInsights() {
+    const faqStore = getStore("telegram-faq-stats");
+    const escStore = getStore("telegram-escalations");
+
+    // Get FAQ hit stats
+    const topCategories: Array<{ category: string; hits: number }> = [];
+    let totalHits = 0;
+    let unansweredQuestions: Array<{ question: string; timestamp: string; userId?: string }> = [];
+
+    try {
+        // Get per-category hit counts
+        const { blobs: faqBlobs } = await faqStore.list();
+        for (const blob of faqBlobs) {
+            try {
+                const stat = await faqStore.get(blob.key, { type: "json" }) as any;
+                if (!stat) continue;
+
+                if (blob.key === "unanswered") {
+                    // Unanswered questions log
+                    unansweredQuestions = Array.isArray(stat) ? stat : (stat.questions || []);
+                } else if (stat.hits !== undefined) {
+                    topCategories.push({ category: blob.key, hits: stat.hits || 0 });
+                    totalHits += stat.hits || 0;
+                }
+            } catch {}
+        }
+    } catch {}
+
+    // Sort categories by hits (most popular first)
+    topCategories.sort((a, b) => b.hits - a.hits);
+
+    // Get recent escalations
+    const escalations: Array<{ category: string; username: string; message: string; timestamp: string }> = [];
+    try {
+        const { blobs: escBlobs } = await escStore.list();
+        for (const blob of escBlobs.slice(-20)) {
+            try {
+                const esc = await escStore.get(blob.key, { type: "json" }) as any;
+                if (esc) {
+                    escalations.push({
+                        category: esc.category || "unknown",
+                        username: esc.username || "unknown",
+                        message: (esc.message || "").substring(0, 200),
+                        timestamp: esc.timestamp || blob.key
+                    });
+                }
+            } catch {}
+        }
+    } catch {}
+
+    escalations.sort((a, b) => (b.timestamp || "").localeCompare(a.timestamp || ""));
+
+    return {
+        totalHits,
+        topCategories: topCategories.slice(0, 10),
+        unansweredQuestions: unansweredQuestions.slice(-20).reverse(),
+        unansweredCount: unansweredQuestions.length,
+        recentEscalations: escalations.slice(0, 10),
+        escalationCount: escalations.length
     };
 }
 

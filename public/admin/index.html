@@ -921,6 +921,57 @@
             <div style="color:var(--muted);font-size:12px;margin-top:4px">Estimated monthly recurring (VIP × $9.99 + Elite × $24.99)</div>
         </div>
 
+        <div class="section-title" style="font-size:1.2rem;margin-top:2rem"><span class="icon">◆</span> FAQ Bot Insights</div>
+        <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-top:1rem">
+            <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);padding:1.5rem;flex:1;min-width:280px">
+                <div style="display:flex;gap:2rem;margin-bottom:1rem">
+                    <div>
+                        <div style="font-size:2rem;font-weight:700;color:var(--red-bright)" id="faqTotalHits">—</div>
+                        <div style="color:var(--muted);font-size:11px">Total FAQ hits</div>
+                    </div>
+                    <div>
+                        <div style="font-size:2rem;font-weight:700;color:var(--gold)" id="faqUnansweredCount">—</div>
+                        <div style="color:var(--muted);font-size:11px">Unanswered</div>
+                    </div>
+                    <div>
+                        <div style="font-size:2rem;font-weight:700;color:var(--red)" id="faqEscalationCount">—</div>
+                        <div style="color:var(--muted);font-size:11px">Escalations</div>
+                    </div>
+                </div>
+                <div style="font-size:12px;font-weight:700;color:var(--off-white);margin-bottom:0.5rem">Top Categories</div>
+                <div id="faqTopCategories" style="font-size:11px;color:var(--muted)">Loading...</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);padding:1.5rem;flex:1;min-width:280px">
+                <div style="font-size:12px;font-weight:700;color:var(--off-white);margin-bottom:0.5rem">Unanswered Questions</div>
+                <div id="faqUnansweredList" style="font-size:11px;color:var(--muted);max-height:200px;overflow-y:auto">Loading...</div>
+            </div>
+        </div>
+
+        <div class="section-title" style="font-size:1.2rem;margin-top:2rem"><span class="icon">◆</span> Data Export & Backup</div>
+        <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-top:1rem">
+            <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);padding:1.5rem;flex:1;min-width:280px">
+                <div style="font-size:14px;font-weight:700;color:var(--off-white);margin-bottom:0.5rem">Full Backup</div>
+                <div style="color:var(--muted);font-size:11px;margin-bottom:1rem">Download all data as JSON (users, content, pipeline, conversations, configs)</div>
+                <div id="exportStoreStats" style="font-size:11px;color:var(--muted);margin-bottom:1rem">Loading store stats...</div>
+                <button class="btn-sm primary" onclick="downloadFullBackup()" style="font-size:13px;padding:0.4rem 1rem">Download Full Backup</button>
+            </div>
+            <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);padding:1.5rem;flex:1;min-width:280px">
+                <div style="font-size:14px;font-weight:700;color:var(--off-white);margin-bottom:0.5rem">Export Single Store</div>
+                <select id="exportStoreName" style="width:100%;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.1);color:var(--off-white);padding:0.5rem;margin-bottom:0.5rem;font-family:var(--font-mono);font-size:12px">
+                    <option value="users">users</option>
+                    <option value="content">content</option>
+                    <option value="pipeline">pipeline</option>
+                    <option value="pipeline-logs">pipeline-logs</option>
+                    <option value="conversations">conversations</option>
+                    <option value="creator-configs">creator-configs</option>
+                    <option value="telegram-logs">telegram-logs</option>
+                    <option value="telegram-escalations">telegram-escalations</option>
+                    <option value="telegram-faq-stats">telegram-faq-stats</option>
+                </select>
+                <button class="btn-sm" onclick="downloadStoreExport()" style="font-size:13px;padding:0.4rem 1rem">Export Store</button>
+            </div>
+        </div>
+
         <div class="section-title" style="font-size:1.2rem;margin-top:2rem"><span class="icon">◆</span> Admin Tools</div>
         <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-top:1rem">
             <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);padding:1.5rem;flex:1;min-width:280px">
@@ -1608,6 +1659,96 @@ async function loadAnalytics() {
             }).join('');
         }
     } catch (e) { console.error('Analytics error:', e); }
+
+    // Load FAQ insights
+    loadFaqInsights();
+    // Load export stats
+    loadExportStats();
+}
+
+async function loadFaqInsights() {
+    try {
+        const r = await fetch('/api/analytics/faq', { headers: headers() });
+        const data = await r.json();
+        if (!data.success) return;
+
+        document.getElementById('faqTotalHits').textContent = data.totalHits || 0;
+        document.getElementById('faqUnansweredCount').textContent = data.unansweredCount || 0;
+        document.getElementById('faqEscalationCount').textContent = data.escalationCount || 0;
+
+        // Top categories
+        const catEl = document.getElementById('faqTopCategories');
+        if (data.topCategories && data.topCategories.length) {
+            catEl.innerHTML = data.topCategories.map(c =>
+                `<div style="display:flex;justify-content:space-between;padding:0.2rem 0;border-bottom:1px solid rgba(255,255,255,0.05)">
+                    <span style="text-transform:capitalize">${esc(c.category)}</span>
+                    <span style="color:var(--red-bright);font-weight:700">${c.hits}</span>
+                </div>`
+            ).join('');
+        } else {
+            catEl.innerHTML = '<span style="color:var(--gray)">No FAQ data yet</span>';
+        }
+
+        // Unanswered questions
+        const unEl = document.getElementById('faqUnansweredList');
+        if (data.unansweredQuestions && data.unansweredQuestions.length) {
+            unEl.innerHTML = data.unansweredQuestions.map(q =>
+                `<div style="padding:0.3rem 0;border-bottom:1px solid rgba(255,255,255,0.05)">
+                    <div style="color:var(--off-white)">"${esc((q.question || '').substring(0, 120))}"</div>
+                    <div style="color:var(--gray);font-size:10px">${q.timestamp ? formatDate(q.timestamp) : ''}</div>
+                </div>`
+            ).join('');
+        } else {
+            unEl.innerHTML = '<span style="color:var(--gray)">No unanswered questions</span>';
+        }
+    } catch (e) { console.error('FAQ insights error:', e); }
+}
+
+async function loadExportStats() {
+    try {
+        const r = await fetch('/api/admin-export/stats', { headers: headers() });
+        const data = await r.json();
+        if (!data.success) return;
+
+        const el = document.getElementById('exportStoreStats');
+        const entries = Object.entries(data.stores).filter(([,v]) => v > 0);
+        el.innerHTML = entries.map(([name, count]) =>
+            `<span style="display:inline-block;background:rgba(255,255,255,0.06);padding:2px 8px;border-radius:3px;margin:2px">${name}: <strong>${count}</strong></span>`
+        ).join(' ') + `<div style="margin-top:0.5rem;color:var(--gold)">Total items: ${data.totalItems}</div>`;
+    } catch (e) {
+        document.getElementById('exportStoreStats').textContent = 'Could not load stats';
+    }
+}
+
+async function downloadFullBackup() {
+    try {
+        toast('Generating backup...');
+        const r = await fetch('/api/admin-export', { headers: headers() });
+        const blob = await r.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `inkedmayhem-backup-${new Date().toISOString().split('T')[0]}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        toast('Backup downloaded!');
+    } catch (e) { toast('Backup failed', true); }
+}
+
+async function downloadStoreExport() {
+    const storeName = document.getElementById('exportStoreName').value;
+    try {
+        toast(`Exporting ${storeName}...`);
+        const r = await fetch(`/api/admin-export/store?name=${storeName}`, { headers: headers() });
+        const blob = await r.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${storeName}-export-${new Date().toISOString().split('T')[0]}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        toast(`${storeName} exported!`);
+    } catch (e) { toast('Export failed', true); }
 }
 
 // ─── PIPELINE ─────────────────────────────────

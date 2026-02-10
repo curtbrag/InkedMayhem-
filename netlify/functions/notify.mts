@@ -182,6 +182,21 @@ export default async (req, context) => {
                 `);
                 break;
 
+            case "content_drop":
+                subject = `New drop from InkedMayhem!`;
+                html = emailTemplate("New Content Drop", `
+                    <p style="font-size: 1.1rem; color: #e8e4df;">New content just dropped.</p>
+                    <p><strong>${data.title || "New content"}</strong></p>
+                    ${data.category ? `<p style="color: #c41230; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px;">${data.category}</p>` : ""}
+                    ${data.tier && data.tier !== "free" ? `<p style="color: #c9a84c; font-size: 0.8rem;">Tier: ${data.tier.toUpperCase()}</p>` : ""}
+                    <p style="margin-top: 1.5rem;">
+                        <a href="https://inkedmayhem.netlify.app/members" style="display:inline-block;background:#c41230;color:#fff;padding:0.75rem 2rem;text-decoration:none;font-family:'Space Mono',monospace;font-size:0.75rem;letter-spacing:2px;text-transform:uppercase;">
+                            View Now &rarr;
+                        </a>
+                    </p>
+                `);
+                break;
+
             case "telegram_escalation":
                 subject = `🚨 Telegram escalation: ${data.category || "safety"}`;
                 html = emailTemplate("Telegram Safety Escalation", `

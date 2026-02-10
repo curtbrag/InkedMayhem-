@@ -511,12 +511,21 @@ export default async (req: Request, context: any) => {
 
             await logPipelineEvent("publish", pipelineId, { contentKey });
 
-            // Notify
+            // Notify admin
             await notifyAdmin("pipeline_publish", {
                 filename: item.filename,
                 contentKey,
                 tier: item.tier
             });
+
+            // Notify subscribers of new content drop
+            if (item.tier === "free" || item.tier === "vip" || item.tier === "elite") {
+                notifyAdmin("content_drop", {
+                    title: contentItem.title,
+                    category: item.category,
+                    tier: item.tier
+                });
+            }
 
             return new Response(JSON.stringify({
                 success: true,

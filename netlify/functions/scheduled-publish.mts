@@ -57,7 +57,7 @@ export default async (req: Request) => {
                 await pipeStore.setJSON(blob.key, item);
 
                 published++;
-                results.push({ id: item.id, filename: item.filename, status: "published" });
+                results.push({ id: item.id, filename: item.filename, status: "published", tier: item.tier, title: contentItem.title, category: item.category });
 
                 console.log(`[SCHEDULED-PUBLISH] Published: ${item.filename} (scheduled for ${item.scheduledAt})`);
             } catch (err) {
@@ -113,6 +113,27 @@ export default async (req: Request) => {
                             }
                         })
                     });
+
+                    // Send content drop notifications for each published item
+                    for (const r of results) {
+                        try {
+                            await fetch(`${siteUrl}/api/notify`, {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json",
+                                    "x-internal-key": secret
+                                },
+                                body: JSON.stringify({
+                                    type: "content_drop",
+                                    data: {
+                                        title: r.title || r.filename,
+                                        category: r.category || "photos",
+                                        tier: r.tier || "free"
+                                    }
+                                })
+                            });
+                        } catch {}
+                    }
                 }
             } catch (notifyErr) {
                 console.error("[SCHEDULED-PUBLISH] Notification failed:", notifyErr);
