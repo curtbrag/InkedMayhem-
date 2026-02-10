@@ -39,6 +39,9 @@ export default async (req, context) => {
     // ─── PUBLIC: GET CONTENT LIST ─────────────────
     if (path === "" && req.method === "GET") {
         const tier = url.searchParams.get("tier") || "all";
+        const search = (url.searchParams.get("search") || "").toLowerCase().trim();
+        const category = (url.searchParams.get("category") || "").toLowerCase().trim();
+        const sort = url.searchParams.get("sort") || "newest"; // newest, oldest, title
         try {
             const { blobs } = await store.list();
             const items = [];
@@ -48,17 +51,37 @@ export default async (req, context) => {
                     if (item && !item.draft) items.push({ ...item, key: blob.key });
                 } catch {}
             }
-            
-            // Sort by date descending
-            items.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-            
+
             // Filter by tier access
-            const filtered = tier === "all" ? items : items.filter(i => {
+            let filtered = tier === "all" ? items : items.filter(i => {
                 if (i.tier === "free") return true;
                 if (tier === "elite") return true;
                 if (tier === "vip" && i.tier !== "elite") return true;
                 return false;
             });
+
+            // Server-side search
+            if (search) {
+                filtered = filtered.filter(i =>
+                    (i.title || "").toLowerCase().includes(search) ||
+                    (i.body || "").toLowerCase().includes(search) ||
+                    (i.category || "").toLowerCase().includes(search)
+                );
+            }
+
+            // Category filter
+            if (category) {
+                filtered = filtered.filter(i => (i.category || "").toLowerCase() === category);
+            }
+
+            // Sort
+            if (sort === "oldest") {
+                filtered.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+            } else if (sort === "title") {
+                filtered.sort((a, b) => (a.title || "").localeCompare(b.title || ""));
+            } else {
+                filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            }
 
             return new Response(JSON.stringify({ success: true, content: filtered }), { headers: CORS });
         } catch (err) {

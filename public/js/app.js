@@ -256,6 +256,44 @@ function updateAuthUI(user) {
 }
 
 // ==================== SUBSCRIPTION / PAYMENT ====================
+let activePromoCode = null;
+
+async function applyPromoCode() {
+    const input = document.getElementById('promoCodeInput');
+    const result = document.getElementById('promoResult');
+    const code = (input?.value || '').trim().toUpperCase();
+
+    if (!code) { result.textContent = ''; result.style.color = '#888'; return; }
+
+    result.textContent = 'Checking...';
+    result.style.color = '#888';
+
+    try {
+        const res = await fetch('/api/promo-codes/validate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code })
+        });
+        const data = await res.json();
+        if (data.valid) {
+            activePromoCode = code;
+            const desc = data.discountType === 'percent'
+                ? `${data.discountValue}% off`
+                : `$${(data.discountValue / 100).toFixed(2)} off`;
+            result.textContent = `${desc} applied!`;
+            result.style.color = '#4ade80';
+            showToast(`Promo code ${code} applied — ${desc}`);
+        } else {
+            activePromoCode = null;
+            result.textContent = data.error || 'Invalid code';
+            result.style.color = '#c22020';
+        }
+    } catch {
+        result.textContent = 'Error checking code';
+        result.style.color = '#c22020';
+    }
+}
+
 async function handleSubscribe(tier) {
     const token = localStorage.getItem('im_token');
 
@@ -267,13 +305,16 @@ async function handleSubscribe(tier) {
     }
 
     try {
+        const body = { tier, type: 'subscription' };
+        if (activePromoCode) body.promoCode = activePromoCode;
+
         const res = await fetch('/api/create-checkout', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify({ tier, type: 'subscription' })
+            body: JSON.stringify(body)
         });
 
         const data = await res.json();
