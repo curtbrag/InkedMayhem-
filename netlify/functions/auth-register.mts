@@ -2,6 +2,13 @@ import { getStore } from "@netlify/blobs";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
+const CORS = {
+    "Content-Type": "application/json",
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    "Access-Control-Allow-Methods": "POST, OPTIONS"
+};
+
 // Rate limiting: max 5 registrations per IP per hour
 const RATE_LIMIT_MAX = 5;
 const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000;
@@ -56,8 +63,12 @@ async function sendTelegramSignup(name, email) {
 }
 
 export default async (req, context) => {
+    if (req.method === "OPTIONS") {
+        return new Response("", { headers: CORS });
+    }
+
     if (req.method !== "POST") {
-        return new Response(JSON.stringify({ error: "Method not allowed" }), { status: 405 });
+        return new Response(JSON.stringify({ error: "Method not allowed" }), { status: 405, headers: CORS });
     }
 
     try {
@@ -69,18 +80,18 @@ export default async (req, context) => {
         if (!allowed) {
             return new Response(JSON.stringify({ error: "Too many registration attempts. Try again later." }), {
                 status: 429,
-                headers: { "Content-Type": "application/json", "Retry-After": "3600" }
+                headers: { ...CORS, "Retry-After": "3600" }
             });
         }
 
         const { email, password, name } = await req.json();
 
         if (!email || !password) {
-            return new Response(JSON.stringify({ error: "Email and password required" }), { status: 400 });
+            return new Response(JSON.stringify({ error: "Email and password required" }), { status: 400, headers: CORS });
         }
 
         if (password.length < 6) {
-            return new Response(JSON.stringify({ error: "Password must be at least 6 characters" }), { status: 400 });
+            return new Response(JSON.stringify({ error: "Password must be at least 6 characters" }), { status: 400, headers: CORS });
         }
 
         const store = getStore("users");
@@ -88,7 +99,7 @@ export default async (req, context) => {
 
         const existing = await store.get(userKey, { type: "json" });
         if (existing) {
-            return new Response(JSON.stringify({ error: "Account already exists" }), { status: 409 });
+            return new Response(JSON.stringify({ error: "Account already exists" }), { status: 409, headers: CORS });
         }
 
         const hash = await bcrypt.hash(password, 10);
@@ -114,13 +125,11 @@ export default async (req, context) => {
             success: true,
             token,
             user: { email: user.email, name: user.name, tier: user.tier }
-        }), {
-            headers: { "Content-Type": "application/json" }
-        });
+        }), { headers: CORS });
 
     } catch (err) {
         console.error("Register error:", err);
-        return new Response(JSON.stringify({ error: "Server error" }), { status: 500 });
+        return new Response(JSON.stringify({ error: "Server error" }), { status: 500, headers: CORS });
     }
 };
 

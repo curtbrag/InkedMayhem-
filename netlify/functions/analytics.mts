@@ -256,6 +256,30 @@ export default async (req: Request, context: any) => {
         }
     }
 
+    // ─── REVENUE & SUBSCRIBER ANALYTICS ──────────────────────
+    // GET /api/analytics/revenue?days=30
+    if (path === "/revenue" && req.method === "GET") {
+        try {
+            const days = parseInt(url.searchParams.get("days") || "30");
+            const revenueMetrics = await getRevenueMetrics(days);
+            return new Response(JSON.stringify({ success: true, ...revenueMetrics }), { headers: CORS });
+        } catch (err) {
+            return new Response(JSON.stringify({ error: "Revenue metrics failed" }), { status: 500, headers: CORS });
+        }
+    }
+
+    // ─── SUBSCRIBER GROWTH ──────────────────────────────────
+    // GET /api/analytics/subscribers?days=90
+    if (path === "/subscribers" && req.method === "GET") {
+        try {
+            const days = parseInt(url.searchParams.get("days") || "90");
+            const subMetrics = await getSubscriberMetrics(days);
+            return new Response(JSON.stringify({ success: true, ...subMetrics }), { headers: CORS });
+        } catch (err) {
+            return new Response(JSON.stringify({ error: "Subscriber metrics failed" }), { status: 500, headers: CORS });
+        }
+    }
+
     return new Response(JSON.stringify({ error: "Not found" }), { status: 404, headers: CORS });
 };
 
@@ -483,6 +507,121 @@ async function getFaqInsights() {
         unansweredCount: unansweredQuestions.length,
         recentEscalations: escalations.slice(0, 10),
         escalationCount: escalations.length
+    };
+}
+
+async function getRevenueMetrics(days: number) {
+    const revenueStore = getStore("revenue-events");
+    const cutoff = daysAgo(days);
+
+    const { blobs } = await revenueStore.list();
+    const events: any[] = [];
+    let totalRevenue = 0;
+    let totalRefunds = 0;
+    let failedPayments = 0;
+    let disputes = 0;
+    const revenueByDay: Record<string, number> = {};
+    const revenueByType: Record<string, number> = {};
+
+    for (const blob of blobs) {
+        try {
+            const ev = await revenueStore.get(blob.key, { type: "json" }) as any;
+            if (!ev || !ev.timestamp || ev.timestamp < cutoff) continue;
+            events.push(ev);
+
+            const day = ev.timestamp.split("T")[0];
+            const amount = (ev.amount || 0) / 100; // Convert cents to dollars
+
+            if (ev.event === "subscription_created" || ev.event === "recurring_payment" || ev.event === "single_purchase") {
+                totalRevenue += amount;
+                revenueByDay[day] = (revenueByDay[day] || 0) + amount;
+                revenueByType[ev.event] = (revenueByType[ev.event] || 0) + amount;
+            } else if (ev.event === "refund") {
+                totalRefunds += amount;
+            } else if (ev.event === "payment_failed") {
+                failedPayments++;
+            } else if (ev.event === "dispute") {
+                disputes++;
+            }
+        } catch {}
+    }
+
+    // Sort revenue by day for chart data
+    const sortedDays = Object.entries(revenueByDay)
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([date, amount]) => ({ date, amount: Math.round(amount * 100) / 100 }));
+
+    return {
+        days,
+        totalRevenue: Math.round(totalRevenue * 100) / 100,
+        totalRefunds: Math.round(totalRefunds * 100) / 100,
+        netRevenue: Math.round((totalRevenue - totalRefunds) * 100) / 100,
+        failedPayments,
+        disputes,
+        totalEvents: events.length,
+        revenueByDay: sortedDays,
+        revenueByType,
+        avgDailyRevenue: days > 0 ? Math.round((totalRevenue / days) * 100) / 100 : 0
+    };
+}
+
+async function getSubscriberMetrics(days: number) {
+    const userStore = getStore("users");
+    const { blobs } = await userStore.list();
+    const cutoff = daysAgo(days);
+
+    const growthByDay: Record<string, { signups: number; cancels: number }> = {};
+    let activeVip = 0;
+    let activeElite = 0;
+    let cancelledInPeriod = 0;
+    let newSubsInPeriod = 0;
+    const churnDates: string[] = [];
+
+    for (const blob of blobs) {
+        try {
+            const user = await userStore.get(blob.key, { type: "json" }) as any;
+            if (!user) continue;
+
+            if (user.tier === "vip") activeVip++;
+            if (user.tier === "elite") activeElite++;
+
+            if (user.subscribedAt && user.subscribedAt >= cutoff) {
+                newSubsInPeriod++;
+                const day = user.subscribedAt.split("T")[0];
+                if (!growthByDay[day]) growthByDay[day] = { signups: 0, cancels: 0 };
+                growthByDay[day].signups++;
+            }
+
+            if (user.cancelledAt && user.cancelledAt >= cutoff) {
+                cancelledInPeriod++;
+                churnDates.push(user.cancelledAt);
+                const day = user.cancelledAt.split("T")[0];
+                if (!growthByDay[day]) growthByDay[day] = { signups: 0, cancels: 0 };
+                growthByDay[day].cancels++;
+            }
+        } catch {}
+    }
+
+    const totalPaid = activeVip + activeElite;
+    const totalAtStart = totalPaid + cancelledInPeriod - newSubsInPeriod;
+    const churnRate = totalAtStart > 0
+        ? Math.round((cancelledInPeriod / totalAtStart) * 10000) / 100
+        : 0;
+
+    const sortedGrowth = Object.entries(growthByDay)
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([date, data]) => ({ date, ...data }));
+
+    return {
+        days,
+        activeVip,
+        activeElite,
+        totalPaid,
+        newSubscribers: newSubsInPeriod,
+        cancelled: cancelledInPeriod,
+        churnRate: `${churnRate}%`,
+        growthByDay: sortedGrowth,
+        mrr: Math.round((activeVip * 9.99 + activeElite * 24.99) * 100) / 100
     };
 }
 

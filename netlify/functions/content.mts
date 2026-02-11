@@ -83,7 +83,20 @@ export default async (req, context) => {
                 filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
             }
 
-            return new Response(JSON.stringify({ success: true, content: filtered }), { headers: CORS });
+            // Pagination
+            const page = Math.max(1, parseInt(url.searchParams.get("page") || "1"));
+            const limit = Math.min(100, Math.max(1, parseInt(url.searchParams.get("limit") || "50")));
+            const total = filtered.length;
+            const paginated = filtered.slice((page - 1) * limit, page * limit);
+
+            return new Response(JSON.stringify({
+                success: true,
+                content: paginated,
+                total,
+                page,
+                limit,
+                pages: Math.ceil(total / limit)
+            }), { headers: CORS });
         } catch (err) {
             return new Response(JSON.stringify({ error: "Failed to load content" }), { status: 500, headers: CORS });
         }

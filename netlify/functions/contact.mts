@@ -1,5 +1,12 @@
 import { getStore } from "@netlify/blobs";
 
+const CORS = {
+    "Content-Type": "application/json",
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Allow-Methods": "POST, OPTIONS"
+};
+
 // Rate limiting: max 5 contact submissions per IP per hour
 const RATE_LIMIT_MAX = 5;
 const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000;
@@ -53,8 +60,12 @@ async function notifyAdmin(type, data) {
 }
 
 export default async (req, context) => {
+    if (req.method === "OPTIONS") {
+        return new Response("", { headers: CORS });
+    }
+
     if (req.method !== "POST") {
-        return new Response(JSON.stringify({ error: "Method not allowed" }), { status: 405 });
+        return new Response(JSON.stringify({ error: "Method not allowed" }), { status: 405, headers: CORS });
     }
 
     try {
@@ -66,7 +77,7 @@ export default async (req, context) => {
         if (!allowed) {
             return new Response(JSON.stringify({ error: "Too many submissions. Try again later." }), {
                 status: 429,
-                headers: { "Content-Type": "application/json", "Retry-After": "3600" }
+                headers: { ...CORS, "Retry-After": "3600" }
             });
         }
 
@@ -74,29 +85,23 @@ export default async (req, context) => {
 
         // Honeypot field — if filled, it's a bot
         if (_hp) {
-            // Silently accept but don't store
-            return new Response(JSON.stringify({ success: true }), {
-                headers: { "Content-Type": "application/json" }
-            });
+            return new Response(JSON.stringify({ success: true }), { headers: CORS });
         }
 
         if (!name || !email || !message) {
-            return new Response(JSON.stringify({ error: "Name, email, and message required" }), { status: 400 });
+            return new Response(JSON.stringify({ error: "Name, email, and message required" }), { status: 400, headers: CORS });
         }
 
         if (!isValidEmail(email)) {
-            return new Response(JSON.stringify({ error: "Invalid email address" }), { status: 400 });
+            return new Response(JSON.stringify({ error: "Invalid email address" }), { status: 400, headers: CORS });
         }
 
         if (name.length > 100 || email.length > 200 || message.length > 5000) {
-            return new Response(JSON.stringify({ error: "Input too long" }), { status: 400 });
+            return new Response(JSON.stringify({ error: "Input too long" }), { status: 400, headers: CORS });
         }
 
         if (isSpammy(message) || isSpammy(name)) {
-            // Silently accept but don't store
-            return new Response(JSON.stringify({ success: true }), {
-                headers: { "Content-Type": "application/json" }
-            });
+            return new Response(JSON.stringify({ success: true }), { headers: CORS });
         }
 
         const store = getStore("contacts");
@@ -115,13 +120,11 @@ export default async (req, context) => {
         // Fire notification
         notifyAdmin("contact_form", { name, email, subject, message });
 
-        return new Response(JSON.stringify({ success: true }), {
-            headers: { "Content-Type": "application/json" }
-        });
+        return new Response(JSON.stringify({ success: true }), { headers: CORS });
 
     } catch (err) {
         console.error("Contact error:", err);
-        return new Response(JSON.stringify({ error: "Server error" }), { status: 500 });
+        return new Response(JSON.stringify({ error: "Server error" }), { status: 500, headers: CORS });
     }
 };
 

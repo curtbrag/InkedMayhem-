@@ -77,7 +77,14 @@ export default async (req, context) => {
                 }
             }
             users.sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""));
-            return new Response(JSON.stringify({ success: true, users, total: users.length }), { headers: CORS });
+
+            // Pagination
+            const page = Math.max(1, parseInt(url.searchParams.get("page") || "1"));
+            const limit = Math.min(100, Math.max(1, parseInt(url.searchParams.get("limit") || "50")));
+            const total = users.length;
+            const paginated = users.slice((page - 1) * limit, page * limit);
+
+            return new Response(JSON.stringify({ success: true, users: paginated, total, page, limit, pages: Math.ceil(total / limit) }), { headers: CORS });
         } catch (err) {
             console.error("List users error:", err);
             return new Response(JSON.stringify({ error: "Failed to list users" }), { status: 500, headers: CORS });
@@ -171,7 +178,14 @@ export default async (req, context) => {
             }
             messages.sort((a, b) => (b.receivedAt || "").localeCompare(a.receivedAt || ""));
             const unread = messages.filter(m => !m.read).length;
-            return new Response(JSON.stringify({ success: true, messages, total: messages.length, unread }), { headers: CORS });
+
+            // Pagination
+            const page = Math.max(1, parseInt(url.searchParams.get("page") || "1"));
+            const limit = Math.min(100, Math.max(1, parseInt(url.searchParams.get("limit") || "50")));
+            const total = messages.length;
+            const paginated = messages.slice((page - 1) * limit, page * limit);
+
+            return new Response(JSON.stringify({ success: true, messages: paginated, total, unread, page, limit, pages: Math.ceil(total / limit) }), { headers: CORS });
         } catch (err) {
             console.error("List messages error:", err);
             return new Response(JSON.stringify({ error: "Failed to list messages" }), { status: 500, headers: CORS });

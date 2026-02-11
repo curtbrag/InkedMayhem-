@@ -2,6 +2,13 @@ import Stripe from "stripe";
 import { getStore } from "@netlify/blobs";
 import jwt from "jsonwebtoken";
 
+const CORS = {
+    "Content-Type": "application/json",
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    "Access-Control-Allow-Methods": "POST, OPTIONS"
+};
+
 const TIERS = {
     vip: {
         name: "Ink Insider — VIP",
@@ -18,15 +25,19 @@ const TIERS = {
 const DEFAULT_POST_PRICE = 499; // $4.99 in cents
 
 export default async (req, context) => {
+    if (req.method === "OPTIONS") {
+        return new Response("", { headers: CORS });
+    }
+
     if (req.method !== "POST") {
-        return new Response(JSON.stringify({ error: "Method not allowed" }), { status: 405 });
+        return new Response(JSON.stringify({ error: "Method not allowed" }), { status: 405, headers: CORS });
     }
 
     try {
         // Verify auth
         const authHeader = req.headers.get("authorization");
         if (!authHeader) {
-            return new Response(JSON.stringify({ error: "Not authenticated" }), { status: 401 });
+            return new Response(JSON.stringify({ error: "Not authenticated" }), { status: 401, headers: CORS });
         }
 
         const secret = Netlify.env.get("JWT_SECRET") || "inkedmayhem-dev-secret-change-me";
@@ -36,7 +47,7 @@ export default async (req, context) => {
         try {
             decoded = jwt.verify(token, secret);
         } catch (e) {
-            return new Response(JSON.stringify({ error: "Invalid token" }), { status: 401 });
+            return new Response(JSON.stringify({ error: "Invalid token" }), { status: 401, headers: CORS });
         }
 
         const { tier, type, postId, promoCode } = await req.json();
@@ -45,7 +56,7 @@ export default async (req, context) => {
         if (!stripeKey) {
             return new Response(JSON.stringify({
                 error: "Payment not configured yet. Set STRIPE_SECRET_KEY in Netlify env vars."
-            }), { status: 503 });
+            }), { status: 503, headers: CORS });
         }
 
         const stripe = new Stripe(stripeKey);
@@ -59,13 +70,13 @@ export default async (req, context) => {
                 const promo = await promoStore.get(promoCode.toUpperCase(), { type: "json" });
                 if (promo && promo.active && (!promo.expiresAt || promo.expiresAt > new Date().toISOString())) {
                     if (promo.maxUses && promo.usedCount >= promo.maxUses) {
-                        return new Response(JSON.stringify({ error: "Promo code has been fully redeemed" }), { status: 400 });
+                        return new Response(JSON.stringify({ error: "Promo code has been fully redeemed" }), { status: 400, headers: CORS });
                     }
                     if (promo.stripeCouponId) {
                         discounts = [{ coupon: promo.stripeCouponId }];
                     }
                 } else {
-                    return new Response(JSON.stringify({ error: "Invalid or expired promo code" }), { status: 400 });
+                    return new Response(JSON.stringify({ error: "Invalid or expired promo code" }), { status: 400, headers: CORS });
                 }
             } catch {
                 // Promo code store doesn't exist or code not found — ignore
@@ -112,9 +123,7 @@ export default async (req, context) => {
                 } catch {}
             }
 
-            return new Response(JSON.stringify({ url: session.url }), {
-                headers: { "Content-Type": "application/json" }
-            });
+            return new Response(JSON.stringify({ url: session.url }), { headers: CORS });
 
         } else if (type === "single" && postId) {
             // Pay-per-post checkout — look up price from content store
@@ -136,7 +145,7 @@ export default async (req, context) => {
                 const userKey = decoded.email.toLowerCase().replace(/[^a-z0-9@._-]/g, '');
                 const user = await userStore.get(userKey, { type: "json" }) as any;
                 if (user?.purchases?.some((p: any) => p.postId === postId)) {
-                    return new Response(JSON.stringify({ error: "Already purchased", alreadyOwned: true }), { status: 400 });
+                    return new Response(JSON.stringify({ error: "Already purchased", alreadyOwned: true }), { status: 400, headers: CORS });
                 }
             } catch {}
 
@@ -159,16 +168,14 @@ export default async (req, context) => {
                 }
             });
 
-            return new Response(JSON.stringify({ url: session.url }), {
-                headers: { "Content-Type": "application/json" }
-            });
+            return new Response(JSON.stringify({ url: session.url }), { headers: CORS });
         }
 
-        return new Response(JSON.stringify({ error: "Invalid request" }), { status: 400 });
+        return new Response(JSON.stringify({ error: "Invalid request" }), { status: 400, headers: CORS });
 
     } catch (err) {
         console.error("Checkout error:", err);
-        return new Response(JSON.stringify({ error: "Payment error" }), { status: 500 });
+        return new Response(JSON.stringify({ error: "Payment error" }), { status: 500, headers: CORS });
     }
 };
 
