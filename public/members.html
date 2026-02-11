@@ -358,6 +358,56 @@
                     <div id="pwMsg" style="font-size:11px;margin-top:0.5rem;color:var(--gold);display:none"></div>
                 </div>
             </div>
+
+            <!-- Subscription Info -->
+            <div style="margin-top:2rem;background:var(--surface);border:1px solid var(--border);padding:1.5rem" id="subscriptionInfo">
+                <div style="font-size:0.65rem;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:1rem">Subscription</div>
+                <div style="display:flex;gap:2rem;flex-wrap:wrap;align-items:center">
+                    <div>
+                        <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Current Plan</div>
+                        <div style="font-size:1.2rem;font-weight:700;letter-spacing:2px" id="subTierName">FREE</div>
+                    </div>
+                    <div id="subPriceInfo" style="display:none">
+                        <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Monthly</div>
+                        <div style="font-size:1.2rem;font-weight:700;color:var(--gold)" id="subPrice">—</div>
+                    </div>
+                    <div id="subSinceInfo" style="display:none">
+                        <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Member Since</div>
+                        <div style="font-size:13px" id="subSince">—</div>
+                    </div>
+                    <div id="subCancelInfo" style="display:none">
+                        <div style="font-size:11px;color:var(--red);margin-bottom:4px">Cancels On</div>
+                        <div style="font-size:13px;color:var(--red)" id="subCancelDate">—</div>
+                    </div>
+                </div>
+                <div style="margin-top:1.5rem;display:flex;gap:1rem;flex-wrap:wrap" id="subActions">
+                    <button onclick="upgradeTier('vip')" id="btnUpgradeVip" style="font-family:var(--font-mono);font-size:11px;letter-spacing:2px;text-transform:uppercase;padding:0.5rem 1.5rem;background:var(--red);color:white;border:none;cursor:pointer;display:none">Upgrade to VIP — $9.99/mo</button>
+                    <button onclick="upgradeTier('elite')" id="btnUpgradeElite" style="font-family:var(--font-mono);font-size:11px;letter-spacing:2px;text-transform:uppercase;padding:0.5rem 1.5rem;background:var(--gold);color:var(--bg);border:none;cursor:pointer;display:none">Upgrade to Elite — $24.99/mo</button>
+                </div>
+            </div>
+
+            <!-- Account Activity -->
+            <div style="margin-top:2rem;background:var(--surface);border:1px solid var(--border);padding:1.5rem">
+                <div style="font-size:0.65rem;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:1rem">Account Info</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;font-size:12px">
+                    <div>
+                        <span style="color:var(--muted)">Email:</span>
+                        <span id="acctEmail" style="color:var(--text)">—</span>
+                    </div>
+                    <div>
+                        <span style="color:var(--muted)">Joined:</span>
+                        <span id="acctJoined" style="color:var(--text)">—</span>
+                    </div>
+                    <div>
+                        <span style="color:var(--muted)">Last Login:</span>
+                        <span id="acctLastLogin" style="color:var(--text)">—</span>
+                    </div>
+                    <div>
+                        <span style="color:var(--muted)">Purchases:</span>
+                        <span id="acctPurchases" style="color:var(--text)">0</span>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -405,9 +455,60 @@
                     localStorage.setItem('im_user', JSON.stringify(data.user));
                     document.getElementById('profileName').value = data.user.name || '';
                     const tierMap = { free: 'FREE', vip: 'INK INSIDER', elite: 'MAYHEM CIRCLE' };
+                    const priceMap = { vip: '$9.99/mo', elite: '$24.99/mo' };
                     document.getElementById('userTierBadge').textContent = tierMap[data.user.tier] || 'FREE';
+
+                    // Subscription info
+                    const u = data.user;
+                    document.getElementById('subTierName').textContent = tierMap[u.tier] || 'FREE';
+                    document.getElementById('subTierName').style.color = u.tier === 'elite' ? 'var(--gold)' : u.tier === 'vip' ? 'var(--red)' : 'var(--muted)';
+
+                    if (priceMap[u.tier]) {
+                        document.getElementById('subPriceInfo').style.display = 'block';
+                        document.getElementById('subPrice').textContent = priceMap[u.tier];
+                    }
+
+                    if (u.subscribedAt) {
+                        document.getElementById('subSinceInfo').style.display = 'block';
+                        document.getElementById('subSince').textContent = new Date(u.subscribedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                    }
+
+                    if (u.cancelPending && u.cancelAt) {
+                        document.getElementById('subCancelInfo').style.display = 'block';
+                        document.getElementById('subCancelDate').textContent = new Date(u.cancelAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                    }
+
+                    // Show upgrade buttons based on tier
+                    if (u.tier === 'free') {
+                        document.getElementById('btnUpgradeVip').style.display = 'inline-block';
+                        document.getElementById('btnUpgradeElite').style.display = 'inline-block';
+                    } else if (u.tier === 'vip') {
+                        document.getElementById('btnUpgradeElite').style.display = 'inline-block';
+                    }
+
+                    // Account info
+                    document.getElementById('acctEmail').textContent = u.email || '—';
+                    document.getElementById('acctJoined').textContent = u.createdAt ? new Date(u.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
+                    document.getElementById('acctLastLogin').textContent = u.lastLogin ? new Date(u.lastLogin).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' }) : '—';
+                    document.getElementById('acctPurchases').textContent = (u.purchases || []).length;
                 }
             } catch (e) {}
+        }
+
+        async function upgradeTier(tier) {
+            try {
+                const r = await fetch('/api/create-checkout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${currentToken}` },
+                    body: JSON.stringify({ tier, type: 'subscription' })
+                });
+                const data = await r.json();
+                if (data.url) {
+                    window.location.href = data.url;
+                } else {
+                    alert(data.error || 'Could not start checkout');
+                }
+            } catch (e) { alert('Checkout error'); }
         }
 
         async function updateProfile() {

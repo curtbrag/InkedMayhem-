@@ -941,6 +941,16 @@
             <div id="analRevenueChart" style="display:flex;align-items:flex-end;gap:2px;height:80px"></div>
         </div>
 
+        <div class="section-title" style="font-size:1.2rem;margin-top:2rem"><span class="icon">◆</span> Subscriber Growth</div>
+        <div class="stats-grid">
+            <div class="stat-card"><div class="label">Active VIP</div><div class="value" id="analActiveVip">—</div></div>
+            <div class="stat-card"><div class="label">Active Elite</div><div class="value" id="analActiveElite">—</div></div>
+            <div class="stat-card gold"><div class="label">Total Paid</div><div class="value" id="analTotalPaid">—</div></div>
+            <div class="stat-card"><div class="label">New Subs (90d)</div><div class="value" id="analNewSubs" style="color:var(--green)">—</div></div>
+            <div class="stat-card"><div class="label">Cancelled (90d)</div><div class="value" id="analCancelled" style="font-size:1.5rem">—</div></div>
+            <div class="stat-card"><div class="label">Churn Rate</div><div class="value" id="analChurnRateFull" style="font-size:1.5rem">—</div></div>
+        </div>
+
         <div class="section-title" style="font-size:1.2rem;margin-top:2rem"><span class="icon">◆</span> FAQ Bot Insights</div>
         <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-top:1rem">
             <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);padding:1.5rem;flex:1;min-width:280px">
@@ -987,6 +997,10 @@
                     <option value="telegram-logs">telegram-logs</option>
                     <option value="telegram-escalations">telegram-escalations</option>
                     <option value="telegram-faq-stats">telegram-faq-stats</option>
+                    <option value="promo-codes">promo-codes</option>
+                    <option value="revenue-events">revenue-events</option>
+                    <option value="auth-ratelimits">auth-ratelimits</option>
+                    <option value="contacts">contacts</option>
                 </select>
                 <button class="btn-sm" onclick="downloadStoreExport()" style="font-size:13px;padding:0.4rem 1rem">Export Store</button>
             </div>
@@ -1775,21 +1789,18 @@ async function loadRevenueMetrics() {
         const data = await r.json();
         if (!data.success) return;
 
-        const m = data.metrics;
-        document.getElementById('analRevenue30d').textContent = `$${((m.totalRevenue || 0) / 100).toFixed(2)}`;
-        document.getElementById('analNetRevenue').textContent = `$${((m.netRevenue || 0) / 100).toFixed(2)}`;
+        document.getElementById('analRevenue30d').textContent = `$${(data.totalRevenue || 0).toFixed(2)}`;
+        document.getElementById('analNetRevenue').textContent = `$${(data.netRevenue || 0).toFixed(2)}`;
 
-        // Daily revenue chart
-        if (m.revenueByDay && Object.keys(m.revenueByDay).length) {
-            const entries = Object.entries(m.revenueByDay).sort(([a],[b]) => a.localeCompare(b));
-            const maxVal = Math.max(1, ...entries.map(([,v]) => v));
+        // Daily revenue chart (revenueByDay is array of {date, amount})
+        if (data.revenueByDay && data.revenueByDay.length) {
+            const maxVal = Math.max(1, ...data.revenueByDay.map(d => d.amount));
             const chartEl = document.getElementById('analRevenueChart');
-            chartEl.innerHTML = entries.map(([date, amount]) => {
-                const h = Math.max(2, (amount / maxVal) * 80);
-                const label = date.split('-').slice(1).join('/');
-                const dollars = (amount / 100).toFixed(2);
+            chartEl.innerHTML = data.revenueByDay.map(d => {
+                const h = Math.max(2, (d.amount / maxVal) * 80);
+                const label = d.date.split('-').slice(1).join('/');
                 return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end">
-                    <div style="width:100%;height:${h}px;background:var(--green, #4ade80);border-radius:2px 2px 0 0;min-height:2px" title="${label}: $${dollars}"></div>
+                    <div style="width:100%;height:${h}px;background:var(--green, #4ade80);border-radius:2px 2px 0 0;min-height:2px" title="${label}: $${d.amount.toFixed(2)}"></div>
                 </div>`;
             }).join('');
         }
@@ -1802,13 +1813,20 @@ async function loadSubscriberMetrics() {
         const data = await r.json();
         if (!data.success) return;
 
-        const m = data.metrics;
-        const churn = m.churnRate !== undefined ? `${m.churnRate}%` : '—';
+        const churn = data.churnRate || '—';
         document.getElementById('analChurnRate').textContent = churn;
 
+        // Subscriber Growth cards
+        document.getElementById('analActiveVip').textContent = data.activeVip || 0;
+        document.getElementById('analActiveElite').textContent = data.activeElite || 0;
+        document.getElementById('analTotalPaid').textContent = data.totalPaid || 0;
+        document.getElementById('analNewSubs').textContent = data.newSubscribers || 0;
+        document.getElementById('analCancelled').textContent = data.cancelled || 0;
+        document.getElementById('analChurnRateFull').textContent = churn;
+
         // Update MRR from real data if available
-        if (m.mrr !== undefined) {
-            document.getElementById('analRevenue').textContent = `$${((m.mrr || 0) / 100).toFixed(2)}`;
+        if (data.mrr !== undefined) {
+            document.getElementById('analRevenue').textContent = `$${(data.mrr).toFixed(2)}`;
         }
     } catch (e) { console.error('Subscriber metrics error:', e); }
 }
