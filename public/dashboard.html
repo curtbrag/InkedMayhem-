@@ -991,6 +991,32 @@
             <div class="stat-card"><div class="label">Active (7d)</div><div class="value" id="anLogins7d">—</div></div>
         </div>
 
+        <!-- Revenue & MRR -->
+        <div class="section-title" style="font-size:1.2rem; margin-top:2rem"><span class="icon">◆</span> Revenue & MRR</div>
+        <div class="stats-grid" id="analyticsRevenueGrid">
+            <div class="stat-card gold"><div class="label">MRR</div><div class="value" id="anMrr">—</div></div>
+            <div class="stat-card"><div class="label">Revenue (30d)</div><div class="value" id="anRevenue30d" style="color:var(--green)">—</div></div>
+            <div class="stat-card"><div class="label">Refunds (30d)</div><div class="value" id="anRefunds30d" style="font-size:1.5rem">—</div></div>
+            <div class="stat-card"><div class="label">Net Revenue</div><div class="value" id="anNetRevenue" style="font-size:1.5rem;color:var(--green)">—</div></div>
+            <div class="stat-card"><div class="label">Failed Payments</div><div class="value" id="anFailedPayments" style="font-size:1.5rem">—</div></div>
+            <div class="stat-card red"><div class="label">Disputes</div><div class="value" id="anDisputes" style="font-size:1.5rem">—</div></div>
+        </div>
+        <div style="margin-top:1rem; background:var(--darker); border:1px solid var(--border); padding:1.5rem">
+            <div style="color:var(--muted); font-size:10px; text-transform:uppercase; letter-spacing:1px; margin-bottom:1rem">Daily Revenue (Last 30 Days)</div>
+            <div id="anRevenueChart" style="display:flex; align-items:flex-end; gap:2px; height:80px"></div>
+        </div>
+
+        <!-- Subscriber Growth -->
+        <div class="section-title" style="font-size:1.2rem; margin-top:2rem"><span class="icon">◆</span> Subscriber Growth</div>
+        <div class="stats-grid">
+            <div class="stat-card"><div class="label">Active VIP</div><div class="value" id="anActiveVip">—</div></div>
+            <div class="stat-card"><div class="label">Active Elite</div><div class="value" id="anActiveElite">—</div></div>
+            <div class="stat-card gold"><div class="label">Total Paid</div><div class="value" id="anTotalPaid">—</div></div>
+            <div class="stat-card"><div class="label">New Subs (90d)</div><div class="value" id="anNewSubs" style="color:var(--green)">—</div></div>
+            <div class="stat-card"><div class="label">Cancelled (90d)</div><div class="value" id="anCancelled" style="font-size:1.5rem">—</div></div>
+            <div class="stat-card"><div class="label">Churn Rate</div><div class="value" id="anChurnRate" style="font-size:1.5rem">—</div></div>
+        </div>
+
         <!-- Pipeline Metrics -->
         <div class="section-title" style="font-size:1.2rem; margin-top:2rem"><span class="icon">◆</span> Pipeline Performance</div>
         <div class="stats-grid" id="analyticsPipeGrid">
@@ -1076,6 +1102,10 @@
                     <option value="telegram-logs">telegram-logs</option>
                     <option value="telegram-escalations">telegram-escalations</option>
                     <option value="telegram-faq-stats">telegram-faq-stats</option>
+                    <option value="promo-codes">promo-codes</option>
+                    <option value="revenue-events">revenue-events</option>
+                    <option value="auth-ratelimits">auth-ratelimits</option>
+                    <option value="contacts">contacts</option>
                 </select>
                 <button class="login-btn" style="max-width:180px; background:var(--mid)" onclick="downloadStoreExport()">Export Store</button>
             </div>
@@ -1327,7 +1357,7 @@ document.querySelectorAll('.tab').forEach(tab => {
 const PROMO_API = '/api/promo-codes';
 
 async function promoApi(path, method = 'GET', body = null) {
-    const opts = { method, headers: authHeaders() };
+    const opts = { method, headers: headers() };
     if (body) opts.body = JSON.stringify(body);
     const r = await fetch(`${PROMO_API}${path}`, opts);
     return r.json();
@@ -2207,6 +2237,10 @@ async function loadAnalytics() {
     // Load activity chart
     loadActivityChart();
 
+    // Load revenue & subscriber metrics
+    loadRevenueMetrics();
+    loadSubscriberMetrics();
+
     // Load FAQ insights
     loadFaqInsights();
 
@@ -2214,9 +2248,53 @@ async function loadAnalytics() {
     loadExportStats();
 }
 
+async function loadRevenueMetrics() {
+    try {
+        const r = await fetch(`${AN_API}/revenue?days=30`, { headers: headers() });
+        const data = await r.json();
+        if (!data.success) return;
+
+        const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+        setEl('anRevenue30d', '$' + data.totalRevenue.toFixed(2));
+        setEl('anRefunds30d', '$' + data.totalRefunds.toFixed(2));
+        setEl('anNetRevenue', '$' + data.netRevenue.toFixed(2));
+        setEl('anFailedPayments', data.failedPayments);
+        setEl('anDisputes', data.disputes);
+
+        // Revenue chart
+        const chart = document.getElementById('anRevenueChart');
+        if (chart && data.revenueByDay?.length) {
+            const max = Math.max(...data.revenueByDay.map(d => d.amount), 1);
+            chart.innerHTML = data.revenueByDay.map(d => {
+                const h = Math.max(2, (d.amount / max) * 70);
+                return `<div style="flex:1;background:var(--red);height:${h}px;min-width:4px;border-radius:1px 1px 0 0" title="${d.date}: $${d.amount}"></div>`;
+            }).join('');
+        } else if (chart) {
+            chart.innerHTML = '<div style="color:var(--muted);font-size:11px;padding:1rem">No revenue data yet</div>';
+        }
+    } catch (e) { console.error('Revenue error:', e); }
+}
+
+async function loadSubscriberMetrics() {
+    try {
+        const r = await fetch(`${AN_API}/subscribers?days=90`, { headers: headers() });
+        const data = await r.json();
+        if (!data.success) return;
+
+        const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+        setEl('anMrr', '$' + data.mrr.toFixed(2));
+        setEl('anActiveVip', data.activeVip);
+        setEl('anActiveElite', data.activeElite);
+        setEl('anTotalPaid', data.totalPaid);
+        setEl('anNewSubs', data.newSubscribers);
+        setEl('anCancelled', data.cancelled);
+        setEl('anChurnRate', data.churnRate);
+    } catch (e) { console.error('Subscriber error:', e); }
+}
+
 async function loadFaqInsights() {
     try {
-        const r = await fetch(`${AN_API}/faq`, { headers: authHeaders() });
+        const r = await fetch(`${AN_API}/faq`, { headers: headers() });
         const data = await r.json();
         if (!data.success) return;
 
@@ -2253,7 +2331,7 @@ async function loadFaqInsights() {
 
 async function loadExportStats() {
     try {
-        const r = await fetch('/api/admin-export/stats', { headers: authHeaders() });
+        const r = await fetch('/api/admin-export/stats', { headers: headers() });
         const data = await r.json();
         if (!data.success) return;
         const el = document.getElementById('anExportStats');
@@ -2268,7 +2346,7 @@ async function loadExportStats() {
 async function downloadFullBackup() {
     try {
         showToast('Generating backup...');
-        const r = await fetch('/api/admin-export', { headers: authHeaders() });
+        const r = await fetch('/api/admin-export', { headers: headers() });
         const blob = await r.blob();
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -2284,7 +2362,7 @@ async function downloadStoreExport() {
     const storeName = document.getElementById('anExportStore')?.value || 'users';
     try {
         showToast(`Exporting ${storeName}...`);
-        const r = await fetch(`/api/admin-export/store?name=${storeName}`, { headers: authHeaders() });
+        const r = await fetch(`/api/admin-export/store?name=${storeName}`, { headers: headers() });
         const blob = await r.blob();
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');

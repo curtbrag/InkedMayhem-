@@ -917,10 +917,28 @@
         <div class="section-title" style="font-size:1.2rem;margin-top:2rem"><span class="icon">◆</span> Signup Timeline</div>
         <div id="signupChart" style="display:flex;align-items:flex-end;gap:3px;height:120px;margin:1rem 0;max-width:800px;padding-bottom:20px;position:relative"></div>
 
-        <div class="section-title" style="font-size:1.2rem;margin-top:2rem"><span class="icon">◆</span> Revenue Estimate</div>
-        <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);padding:1.5rem;max-width:400px">
-            <div style="font-size:2rem;font-weight:700;color:var(--gold)" id="analRevenue">$0</div>
-            <div style="color:var(--muted);font-size:12px;margin-top:4px">Estimated monthly recurring (VIP × $9.99 + Elite × $24.99)</div>
+        <div class="section-title" style="font-size:1.2rem;margin-top:2rem"><span class="icon">◆</span> Revenue & MRR</div>
+        <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-top:1rem">
+            <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);padding:1.5rem;flex:1;min-width:200px">
+                <div style="font-size:2rem;font-weight:700;color:var(--gold)" id="analRevenue">$0</div>
+                <div style="color:var(--muted);font-size:12px;margin-top:4px">Estimated MRR</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);padding:1.5rem;flex:1;min-width:200px">
+                <div style="font-size:2rem;font-weight:700;color:var(--green)" id="analRevenue30d">—</div>
+                <div style="color:var(--muted);font-size:12px;margin-top:4px">Revenue (30d)</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);padding:1.5rem;flex:1;min-width:200px">
+                <div style="font-size:2rem;font-weight:700;color:var(--off-white)" id="analNetRevenue">—</div>
+                <div style="color:var(--muted);font-size:12px;margin-top:4px">Net Revenue (30d)</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);padding:1.5rem;flex:1;min-width:200px">
+                <div style="font-size:2rem;font-weight:700;color:var(--off-white)" id="analChurnRate">—</div>
+                <div style="color:var(--muted);font-size:12px;margin-top:4px">Churn Rate (90d)</div>
+            </div>
+        </div>
+        <div style="margin-top:1rem;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);padding:1.5rem;max-width:800px">
+            <div style="color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:1px;margin-bottom:1rem">Daily Revenue (Last 30 Days)</div>
+            <div id="analRevenueChart" style="display:flex;align-items:flex-end;gap:2px;height:80px"></div>
         </div>
 
         <div class="section-title" style="font-size:1.2rem;margin-top:2rem"><span class="icon">◆</span> FAQ Bot Insights</div>
@@ -1746,6 +1764,53 @@ async function loadAnalytics() {
     loadFaqInsights();
     // Load export stats
     loadExportStats();
+    // Load revenue & subscriber analytics
+    loadRevenueMetrics();
+    loadSubscriberMetrics();
+}
+
+async function loadRevenueMetrics() {
+    try {
+        const r = await fetch('/api/analytics/revenue?days=30', { headers: headers() });
+        const data = await r.json();
+        if (!data.success) return;
+
+        const m = data.metrics;
+        document.getElementById('analRevenue30d').textContent = `$${((m.totalRevenue || 0) / 100).toFixed(2)}`;
+        document.getElementById('analNetRevenue').textContent = `$${((m.netRevenue || 0) / 100).toFixed(2)}`;
+
+        // Daily revenue chart
+        if (m.revenueByDay && Object.keys(m.revenueByDay).length) {
+            const entries = Object.entries(m.revenueByDay).sort(([a],[b]) => a.localeCompare(b));
+            const maxVal = Math.max(1, ...entries.map(([,v]) => v));
+            const chartEl = document.getElementById('analRevenueChart');
+            chartEl.innerHTML = entries.map(([date, amount]) => {
+                const h = Math.max(2, (amount / maxVal) * 80);
+                const label = date.split('-').slice(1).join('/');
+                const dollars = (amount / 100).toFixed(2);
+                return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end">
+                    <div style="width:100%;height:${h}px;background:var(--green, #4ade80);border-radius:2px 2px 0 0;min-height:2px" title="${label}: $${dollars}"></div>
+                </div>`;
+            }).join('');
+        }
+    } catch (e) { console.error('Revenue metrics error:', e); }
+}
+
+async function loadSubscriberMetrics() {
+    try {
+        const r = await fetch('/api/analytics/subscribers?days=90', { headers: headers() });
+        const data = await r.json();
+        if (!data.success) return;
+
+        const m = data.metrics;
+        const churn = m.churnRate !== undefined ? `${m.churnRate}%` : '—';
+        document.getElementById('analChurnRate').textContent = churn;
+
+        // Update MRR from real data if available
+        if (m.mrr !== undefined) {
+            document.getElementById('analRevenue').textContent = `$${((m.mrr || 0) / 100).toFixed(2)}`;
+        }
+    } catch (e) { console.error('Subscriber metrics error:', e); }
 }
 
 async function loadFaqInsights() {

@@ -489,9 +489,14 @@
         // ─── DYNAMIC CONTENT ─────────────────────
         let allContent = [];
 
-        async function loadExclusiveContent() {
+        async function loadExclusiveContent(search, category, sort) {
             try {
-                const r = await fetch('/api/content?tier=' + (currentUser?.tier || 'free'), {
+                let apiUrl = '/api/content?tier=' + (currentUser?.tier || 'free');
+                if (search) apiUrl += '&search=' + encodeURIComponent(search);
+                if (category) apiUrl += '&category=' + encodeURIComponent(category);
+                if (sort) apiUrl += '&sort=' + encodeURIComponent(sort);
+
+                const r = await fetch(apiUrl, {
                     headers: { 'Authorization': `Bearer ${currentToken}` }
                 });
                 const data = await r.json();
@@ -499,11 +504,13 @@
 
                 allContent = data.content || [];
 
-                // Build category filter options
-                const categories = [...new Set(allContent.map(c => c.category).filter(Boolean))];
-                const catSelect = document.getElementById('categoryFilter');
-                catSelect.innerHTML = '<option value="">All Categories</option>' +
-                    categories.map(c => `<option value="${escAttr(c)}">${escHtml(c.charAt(0).toUpperCase() + c.slice(1))}</option>`).join('');
+                // Build category filter options (only on initial load)
+                if (!search && !category) {
+                    const categories = [...new Set(allContent.map(c => c.category).filter(Boolean))];
+                    const catSelect = document.getElementById('categoryFilter');
+                    catSelect.innerHTML = '<option value="">All Categories</option>' +
+                        categories.map(c => `<option value="${escAttr(c)}">${escHtml(c.charAt(0).toUpperCase() + c.slice(1))}</option>`).join('');
+                }
 
                 renderAllContent(allContent);
             } catch (e) {
@@ -526,35 +533,16 @@
             renderContentGrid('freeContent', freeItems, 'free');
         }
 
+        let filterTimeout = null;
         function filterContent() {
-            const query = (document.getElementById('contentSearch').value || '').toLowerCase().trim();
-            const category = document.getElementById('categoryFilter').value;
-            const sort = document.getElementById('sortFilter').value;
-
-            let filtered = [...allContent];
-
-            // Text search
-            if (query) {
-                filtered = filtered.filter(c =>
-                    (c.title || '').toLowerCase().includes(query) ||
-                    (c.body || '').toLowerCase().includes(query) ||
-                    (c.category || '').toLowerCase().includes(query)
-                );
-            }
-
-            // Category filter
-            if (category) {
-                filtered = filtered.filter(c => c.category === category);
-            }
-
-            // Sort
-            if (sort === 'oldest') {
-                filtered.sort((a, b) => (a.createdAt || '').localeCompare(b.createdAt || ''));
-            } else {
-                filtered.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
-            }
-
-            renderAllContent(filtered);
+            // Debounce server calls (300ms)
+            clearTimeout(filterTimeout);
+            filterTimeout = setTimeout(() => {
+                const query = (document.getElementById('contentSearch').value || '').trim();
+                const category = document.getElementById('categoryFilter').value;
+                const sort = document.getElementById('sortFilter').value;
+                loadExclusiveContent(query || undefined, category || undefined, sort || undefined);
+            }, 300);
         }
 
         function renderContentGrid(containerId, items, tier) {
