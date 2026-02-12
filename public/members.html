@@ -255,15 +255,16 @@
     <nav id="navbar" class="scrolled">
         <a href="/" class="nav-logo">INKED<span>MAYHEM</span></a>
         <div class="nav-right">
-            <button class="btn-login" id="btnLogout">Sign Out</button>
+            <button class="btn-login" id="btnSignIn" style="display:none" onclick="window.location.href='/'">Sign In</button>
+            <button class="btn-login" id="btnLogout" style="display:none">Sign Out</button>
         </div>
     </nav>
 
     <!-- LOCKED STATE (shown if not authenticated) -->
-    <div class="locked-overlay" id="lockedOverlay">
+    <div class="locked-overlay" id="lockedOverlay" style="display:none">
         <span class="lock-big">🔒</span>
         <h2>MEMBERS ONLY</h2>
-        <p>You need to sign in to access exclusive content. Already a member? Sign in below.</p>
+        <p>Sign in to access exclusive content. Already a member? Hit the button below.</p>
         <a href="/" class="btn-primary">Sign In →</a>
     </div>
 
@@ -278,7 +279,7 @@
         <div class="content-sections" id="messagesSection">
             <h2>MESSAGES <span class="count" id="msgCount"></span></h2>
             <div class="msg-thread" id="msgThread">
-                <div id="msgLoading" style="color:var(--gray);text-align:center;padding:2rem;">Loading messages...</div>
+                <div class="msg-empty">No messages yet. Say hi! 👋</div>
             </div>
             <div class="msg-compose">
                 <textarea id="msgInput" placeholder="Send a message to InkedMayhem..." rows="2"></textarea>
@@ -307,7 +308,7 @@
         <div class="content-sections">
             <h2>LATEST DROPS <span class="count" id="latestCount"></span></h2>
             <div class="content-grid" id="latestContent">
-                <div class="loading-text" style="padding:2rem;text-align:center;color:var(--muted)">Loading...</div>
+                <div class="empty-state"><span class="placeholder-icon">🔥</span>New content drops coming soon — stay tuned!</div>
             </div>
         </div>
 
@@ -315,7 +316,7 @@
         <div class="content-sections">
             <h2>VIP EXCLUSIVES <span class="count">(Ink Insider+)</span></h2>
             <div class="content-grid" id="vipContent">
-                <div class="loading-text" style="padding:2rem;text-align:center;color:var(--muted)">Loading...</div>
+                <div class="empty-state"><span class="placeholder-icon">🔒</span>Exclusive VIP content drops soon. <a href="/#exclusive" style="color:var(--red)">Upgrade to unlock</a></div>
             </div>
         </div>
 
@@ -323,15 +324,15 @@
         <div class="content-sections">
             <h2>MAYHEM CIRCLE <span class="count">(Elite Only)</span></h2>
             <div class="content-grid" id="eliteContent">
-                <div class="loading-text" style="padding:2rem;text-align:center;color:var(--muted)">Loading...</div>
+                <div class="empty-state"><span class="placeholder-icon">👑</span>Premium content for the inner circle. <a href="/#exclusive" style="color:var(--gold)">Join the Mayhem Circle</a></div>
             </div>
         </div>
 
         <!-- FREE CONTENT / ANNOUNCEMENTS -->
         <div class="content-sections">
-            <h2>LATEST DROPS <span class="count">(All Members)</span></h2>
+            <h2>ANNOUNCEMENTS <span class="count">(All Members)</span></h2>
             <div class="content-grid" id="freeContent">
-                <div class="loading-text" style="padding:2rem;text-align:center;color:var(--muted)">Loading...</div>
+                <div class="empty-state"><span class="placeholder-icon">📢</span>No announcements yet — check back soon!</div>
             </div>
         </div>
 
@@ -422,9 +423,12 @@
             if (currentToken && userData) {
                 try {
                     currentUser = JSON.parse(userData);
+                    // Signed in: show content + Sign Out, hide locked + Sign In
                     document.getElementById('lockedOverlay').style.display = 'none';
                     document.getElementById('membersContent').style.display = 'block';
-                    
+                    document.getElementById('btnLogout').style.display = '';
+                    document.getElementById('btnSignIn').style.display = 'none';
+
                     const tierBadge = document.getElementById('userTierBadge');
                     const tierMap = { free: 'FREE', vip: 'INK INSIDER', elite: 'MAYHEM CIRCLE' };
                     tierBadge.textContent = tierMap[currentUser.tier] || 'FREE';
@@ -435,7 +439,13 @@
                     loadExclusiveContent();
                     // Load messages
                     loadMessages();
-                } catch (e) {}
+                } catch (e) {
+                    // Bad session data — show signed-out state
+                    showSignedOutState();
+                }
+            } else {
+                // Not signed in: show locked + Sign In, hide content + Sign Out
+                showSignedOutState();
             }
 
             document.getElementById('btnLogout').addEventListener('click', () => {
@@ -444,6 +454,13 @@
                 window.location.href = '/';
             });
         });
+
+        function showSignedOutState() {
+            document.getElementById('lockedOverlay').style.display = 'flex';
+            document.getElementById('membersContent').style.display = 'none';
+            document.getElementById('btnLogout').style.display = 'none';
+            document.getElementById('btnSignIn').style.display = '';
+        }
 
         // ─── PROFILE ─────────────────────────────
         async function loadProfile() {

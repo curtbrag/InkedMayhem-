@@ -291,6 +291,8 @@ nav.scrolled {
     line-height: 0.85;
     letter-spacing: 8px;
     margin-bottom: 0.5rem;
+    word-break: keep-all;
+    overflow-wrap: normal;
 }
 
 .hero-title .line1 {
@@ -304,6 +306,7 @@ nav.scrolled {
 .hero-title .line2 {
     display: block;
     font-size: clamp(5rem, 14vw, 12rem);
+    white-space: nowrap;
     opacity: 0;
     animation: fadeUp 0.8s var(--ease-out) 0.55s forwards;
 }
