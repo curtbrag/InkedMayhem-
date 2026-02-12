@@ -2053,7 +2053,13 @@ async function loadPipeline() {
         document.getElementById('pipeLoading').style.display = 'none';
         if (!data.success || !data.items.length) { document.getElementById('pipeEmpty').style.display = 'block'; return; }
         const statusBadge = (s) => { const colors = {inbox:'var(--gold)',processed:'var(--muted)',queued:'var(--gold)',published:'var(--green)',rejected:'var(--red)'}; const c = colors[s]||'var(--muted)'; return `<span style="color:${c};border:1px solid ${c};padding:2px 8px;font-size:10px;text-transform:uppercase;letter-spacing:1px">${s}</span>`; };
-        document.getElementById('pipeBody').innerHTML = data.items.map(item => `<tr><td>${statusBadge(item.status)}</td><td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(item.filename)}</td><td style="color:var(--muted);max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(item.caption||'—')}</td><td>${esc(item.category||'—')}</td><td><span class="tier-badge tier-${item.tier||'free'}">${(item.tier||'free').toUpperCase()}</span></td><td style="font-size:10px;color:var(--muted)">${esc(item.source||'upload')}</td><td style="white-space:nowrap">${formatDate(item.createdAt)}</td><td><button class="btn-sm primary" onclick="openPipeItem('${esc(item.id)}')">Open</button>${item.status==='inbox'?`<button class="btn-sm" onclick="quickProcess('${esc(item.id)}')">Process</button>`:''}${item.status==='queued'?`<button class="btn-sm" onclick="quickPublish('${esc(item.id)}')">Publish</button>`:''}<button class="btn-sm danger" onclick="pipeDeleteItem('${esc(item.id)}')">Del</button></td></tr>`).join('');
+        document.getElementById('pipeBody').innerHTML = data.items.map(item => {
+            const proc = item.processing||{};
+            const thumbUrl = item.mediaType==='image'&&item.storedAs ? `/api/pipeline/thumb/${esc(item.storedAs)}` : '';
+            const thumbHtml = thumbUrl ? `<img src="${thumbUrl}" style="width:32px;height:40px;object-fit:cover;vertical-align:middle;margin-right:6px;border:1px solid var(--border)" onerror="this.style.display='none'">` : '';
+            const savingsHtml = proc.savings ? `<span style="color:var(--green);font-size:9px;margin-left:4px" title="Compressed">${proc.savings}</span>` : '';
+            return `<tr><td>${statusBadge(item.status)}</td><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${thumbHtml}${esc(item.filename)}${savingsHtml}</td><td style="color:var(--muted);max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(item.caption||'—')}</td><td>${esc(item.category||'—')}</td><td><span class="tier-badge tier-${item.tier||'free'}">${(item.tier||'free').toUpperCase()}</span></td><td style="font-size:10px;color:var(--muted)">${esc(item.source||'upload')}</td><td style="white-space:nowrap">${formatDate(item.createdAt)}</td><td><button class="btn-sm primary" onclick="openPipeItem('${esc(item.id)}')">Open</button>${item.status==='inbox'?`<button class="btn-sm" onclick="quickProcess('${esc(item.id)}')">Process</button>`:''}${item.status==='queued'?`<button class="btn-sm" onclick="quickPublish('${esc(item.id)}')">Publish</button>`:''}<button class="btn-sm danger" onclick="pipeDeleteItem('${esc(item.id)}')">Del</button></td></tr>`;
+        }).join('');
         document.getElementById('pipeTable').style.display = 'block';
     } catch (e) { document.getElementById('pipeLoading').style.display = 'none'; toast('Failed to load pipeline', true); }
 }
@@ -2072,7 +2078,16 @@ async function openPipeItem(id) {
         else if (item.mediaType==='video') { preview.innerHTML = `<div style="color:var(--muted);padding:2rem">Video file — ${esc(item.filename)}</div>`; }
         else { preview.innerHTML = '<span style="color:var(--gray)">Preview unavailable</span>'; }
         const checks = item.checks||{};
-        document.getElementById('pipeDetailChecks').innerHTML = `<div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:0.5rem">Content Checks</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:0.3rem;font-size:11px"><span>${checks.fileTypeValid?'✅':'❌'} File type valid</span><span>${checks.fileSizeValid?'✅':'❌'} File size valid</span><span>${checks.exifStripped?'✅':'⏳'} EXIF stripped</span><span>${checks.compressed?'✅':'⏳'} Compressed</span><span>${checks.thumbnailGenerated?'✅':'⏳'} Thumbnail</span></div>`;
+        const proc = item.processing||{};
+        let checksHtml = `<div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:0.5rem">Content Checks</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:0.3rem;font-size:11px"><span>${checks.fileTypeValid?'✅':'❌'} File type valid</span><span>${checks.fileSizeValid?'✅':'❌'} File size valid</span><span>${checks.exifStripped?'✅':'⏳'} EXIF stripped</span><span>${checks.compressed?'✅':'⏳'} Compressed</span><span>${checks.thumbnailGenerated?'✅':'⏳'} Thumbnail</span>${proc.watermarked?'<span>✅ Watermarked</span>':''}</div>`;
+        if (proc.originalSizeBytes) {
+            const origKB = (proc.originalSizeBytes/1024).toFixed(0);
+            const procKB = (proc.processedSizeBytes/1024).toFixed(0);
+            checksHtml += `<div style="margin-top:0.7rem;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:0.3rem">Processing Results</div><div style="font-size:11px;display:grid;grid-template-columns:1fr 1fr;gap:0.3rem"><span>Original: ${origKB} KB</span><span>Processed: ${procKB} KB</span><span>Savings: <span style="color:var(--green)">${proc.savings||'—'}</span></span>${proc.width?`<span>Dimensions: ${proc.width}×${proc.height}</span>`:''}${proc.format?`<span>Format: ${proc.format}</span>`:''}</div>`;
+        }
+        if (proc.errors&&proc.errors.length) { checksHtml += `<div style="margin-top:0.5rem;color:var(--red);font-size:11px">${proc.errors.map(e=>'⚠ '+esc(e)).join('<br>')}</div>`; }
+        if (proc.note) { checksHtml += `<div style="margin-top:0.5rem;color:var(--muted);font-size:11px;font-style:italic">${esc(proc.note)}</div>`; }
+        document.getElementById('pipeDetailChecks').innerHTML = checksHtml;
         document.getElementById('pipeEditCaption').value = item.caption||'';
         document.getElementById('pipeEditCategory').value = item.category||'photos';
         document.getElementById('pipeEditTier').value = item.tier||'free';

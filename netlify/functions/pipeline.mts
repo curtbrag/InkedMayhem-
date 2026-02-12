@@ -929,6 +929,39 @@ export default async (req: Request, context: any) => {
         }
     }
 
+    // ─── SERVE THUMBNAIL ──────────────────────────────────
+    // GET /api/pipeline/thumb/:filename — auto-resolves to {base}-thumb.webp
+    if (path.startsWith("/thumb/") && req.method === "GET") {
+        try {
+            const assetKey = path.replace("/thumb/", "");
+            const baseName = assetKey.replace(/\.[^.]+$/, "");
+            const thumbKey = `${baseName}-thumb.webp`;
+            const assetStore = getStore("pipeline-assets");
+            const data = await assetStore.get(thumbKey);
+
+            if (!data) {
+                // Fall back to original asset if no thumbnail exists
+                const original = await assetStore.get(assetKey);
+                if (!original) return new Response("Not found", { status: 404 });
+                const ext = assetKey.split(".").pop()?.toLowerCase() || "";
+                const ct: Record<string, string> = { jpg: "image/jpeg", jpeg: "image/jpeg", png: "image/png", webp: "image/webp", gif: "image/gif" };
+                return new Response(original, {
+                    headers: { "Content-Type": ct[ext] || "image/jpeg", "Cache-Control": "public, max-age=31536000", "Access-Control-Allow-Origin": "*" }
+                });
+            }
+
+            return new Response(data, {
+                headers: {
+                    "Content-Type": "image/webp",
+                    "Cache-Control": "public, max-age=31536000",
+                    "Access-Control-Allow-Origin": "*"
+                }
+            });
+        } catch (err) {
+            return new Response("Thumbnail not found", { status: 404 });
+        }
+    }
+
     // ─── LOGS: Get pipeline activity logs ───────────────────
     // GET /api/pipeline/logs?limit=50
     if (path === "/logs" && req.method === "GET") {
