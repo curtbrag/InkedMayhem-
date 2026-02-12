@@ -39,6 +39,14 @@
             line-height: 1.7;
             margin-bottom: 2rem;
         }
+        #tierInfo {
+            font-size: 0.7rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: #c22020;
+            margin-bottom: 1.5rem;
+            display: none;
+        }
         a {
             display: inline-block;
             padding: 0.85rem 2.5rem;
@@ -60,8 +68,36 @@
     <div class="container">
         <div class="check">✦</div>
         <h1>YOU'RE <span>IN</span></h1>
+        <div id="tierInfo"></div>
         <p>Welcome to the inner circle. Your payment was successful and your access is now active. Time to see what you've been missing.</p>
         <a href="/members">Enter Members Area →</a>
     </div>
+    <script>
+    // Refresh user profile from API so their tier is up-to-date in local storage
+    (async function() {
+        const token = localStorage.getItem('im_token');
+        if (!token) return;
+
+        try {
+            const res = await fetch('/api/me', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            const data = await res.json();
+            if (data.success && data.user) {
+                localStorage.setItem('im_user', JSON.stringify(data.user));
+                // Show upgraded tier
+                const tierMap = { free: 'FREE', vip: 'INK INSIDER', elite: 'MAYHEM CIRCLE' };
+                const tierName = tierMap[data.user.tier] || data.user.tier;
+                if (data.user.tier !== 'free') {
+                    const tierEl = document.getElementById('tierInfo');
+                    tierEl.textContent = tierName + ' member';
+                    tierEl.style.display = 'block';
+                }
+            }
+        } catch (e) {
+            // Silent fail — they'll get refreshed on the members page anyway
+        }
+    })();
+    </script>
 </body>
 </html>
