@@ -104,7 +104,7 @@ export default async (req, context) => {
         if (!auth) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: CORS });
         try {
             const d = jwt.verify(auth.replace("Bearer ", ""), getSecret());
-            if (!d.admin) throw new Error();
+            if (!d.admin && !d.isAdmin) throw new Error();
         } catch {
             return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: CORS });
         }

@@ -2,30 +2,39 @@ import { getStore } from "@netlify/blobs";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
+const CORS = {
+    "Content-Type": "application/json",
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    "Access-Control-Allow-Methods": "POST, OPTIONS"
+};
+
 async function notifyAdmin(type, data, secret) {
+    const siteUrl = Netlify.env.get("URL") || "https://inkedmayhem.netlify.app";
     try {
-        await fetch("https://inkedmayhem.netlify.app/api/notify", {
+        await fetch(`${siteUrl}/api/notify`, {
             method: "POST",
             headers: { "Content-Type": "application/json", "x-internal-key": secret },
             body: JSON.stringify({ type, data })
         });
-    } catch {}
+    } catch (err) { console.error("Notify error:", err); }
 }
 
 export default async (req, context) => {
+    if (req.method === "OPTIONS") return new Response("", { headers: CORS });
     if (req.method !== "POST") {
-        return new Response(JSON.stringify({ error: "Method not allowed" }), { status: 405 });
+        return new Response(JSON.stringify({ error: "Method not allowed" }), { status: 405, headers: CORS });
     }
 
     try {
         const { email, password, name } = await req.json();
 
         if (!email || !password) {
-            return new Response(JSON.stringify({ error: "Email and password required" }), { status: 400 });
+            return new Response(JSON.stringify({ error: "Email and password required" }), { status: 400, headers: CORS });
         }
 
         if (password.length < 6) {
-            return new Response(JSON.stringify({ error: "Password must be at least 6 characters" }), { status: 400 });
+            return new Response(JSON.stringify({ error: "Password must be at least 6 characters" }), { status: 400, headers: CORS });
         }
 
         const store = getStore("users");
@@ -33,7 +42,7 @@ export default async (req, context) => {
 
         const existing = await store.get(userKey, { type: "json" });
         if (existing) {
-            return new Response(JSON.stringify({ error: "Account already exists" }), { status: 409 });
+            return new Response(JSON.stringify({ error: "Account already exists" }), { status: 409, headers: CORS });
         }
 
         const hash = await bcrypt.hash(password, 10);
@@ -58,13 +67,11 @@ export default async (req, context) => {
             success: true,
             token,
             user: { email: user.email, name: user.name, tier: user.tier }
-        }), {
-            headers: { "Content-Type": "application/json" }
-        });
+        }), { headers: CORS });
 
     } catch (err) {
         console.error("Register error:", err);
-        return new Response(JSON.stringify({ error: "Server error" }), { status: 500 });
+        return new Response(JSON.stringify({ error: "Server error" }), { status: 500, headers: CORS });
     }
 };
 

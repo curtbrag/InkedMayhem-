@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔥</text></svg>">
     <title>Members — InkedMayhem</title>
+    <meta name="description" content="InkedMayhem members area — exclusive content, direct messaging, and premium drops.">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="theme-color" content="#0a0a0a">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@0,400;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -229,6 +232,7 @@
     <nav id="navbar" class="scrolled">
         <a href="/" class="nav-logo">INKED<span>MAYHEM</span></a>
         <div class="nav-right">
+            <a href="/" style="font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--light-gray);transition:color 0.3s" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--light-gray)'">Home</a>
             <button class="btn-login" id="btnLogout">Sign Out</button>
         </div>
     </nav>
@@ -257,17 +261,6 @@
             <div class="msg-compose">
                 <textarea id="msgInput" placeholder="Send a message to InkedMayhem..." rows="2"></textarea>
                 <button class="msg-send-btn" id="msgSendBtn" onclick="sendMsg()">Send →</button>
-            </div>
-        </div>
-
-        <!-- LATEST DROPS -->
-        <div class="content-sections">
-            <h2>LATEST DROPS</h2>
-            <div class="content-grid" id="latestContent">
-                <div class="empty-state">
-                    <span class="placeholder-icon">✦</span>
-                    <p>New content drops coming soon. Stay tuned.</p>
-                </div>
             </div>
         </div>
 
@@ -343,9 +336,19 @@
                     loadProfile();
                     // Load dynamic content
                     loadExclusiveContent();
-                    // Load messages
-                    loadMessages();
-                } catch (e) {}
+                    // Load messages (elite only — DMs are an elite perk)
+                    if (currentUser.tier === 'elite') {
+                        loadMessages();
+                    } else {
+                        document.getElementById('msgThread').innerHTML = '';
+                        document.getElementById('messagesSection').innerHTML = `
+                            <h2>MESSAGES</h2>
+                            <div style="padding:2rem;text-align:center;border:1px dashed var(--border)">
+                                <p style="color:var(--muted);font-size:0.8rem;margin-bottom:1rem">Direct messaging is available to <strong style="color:var(--white)">Mayhem Circle (Elite)</strong> members.</p>
+                                <a href="/#exclusive" style="color:var(--red);font-size:0.65rem;letter-spacing:2px;text-transform:uppercase">Upgrade to Elite &rarr;</a>
+                            </div>`;
+                    }
+                } catch (e) { console.error('Session restore error:', e); }
             }
 
             document.getElementById('btnLogout').addEventListener('click', () => {
@@ -361,13 +364,18 @@
                 const r = await fetch('/api/me', { headers: { 'Authorization': `Bearer ${currentToken}` }});
                 const data = await r.json();
                 if (data.success) {
+                    const oldTier = currentUser?.tier;
                     currentUser = data.user;
                     localStorage.setItem('im_user', JSON.stringify(data.user));
                     document.getElementById('profileName').value = data.user.name || '';
                     const tierMap = { free: 'FREE', vip: 'INK INSIDER', elite: 'MAYHEM CIRCLE' };
                     document.getElementById('userTierBadge').textContent = tierMap[data.user.tier] || 'FREE';
+                    // If tier upgraded to elite, enable messaging
+                    if (oldTier !== 'elite' && data.user.tier === 'elite') {
+                        location.reload();
+                    }
                 }
-            } catch (e) {}
+            } catch (e) { console.error('Profile load error:', e); }
         }
 
         async function updateProfile() {
@@ -392,7 +400,7 @@
                 }
                 msg.style.display = 'block';
                 setTimeout(() => { msg.style.display = 'none'; }, 3000);
-            } catch (e) {}
+            } catch (e) { console.error('Profile update error:', e); }
         }
 
         async function changePassword() {
@@ -449,7 +457,7 @@
         // ─── DYNAMIC CONTENT ─────────────────────
         async function loadExclusiveContent() {
             try {
-                const r = await fetch('/api/content?tier=' + (currentUser?.tier || 'free'), {
+                const r = await fetch('/api/content', {
                     headers: { 'Authorization': `Bearer ${currentToken}` }
                 });
                 const data = await r.json();
@@ -476,23 +484,24 @@
 
             if (!items.length) {
                 if (tier === 'free') {
-                    container.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--muted);font-style:italic">New content drops coming soon! 🔥</div>';
+                    container.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--muted);font-style:italic">New content drops coming soon!</div>';
                 } else if (!hasAccess) {
-                    container.innerHTML = `<div style="padding:2rem;text-align:center;color:var(--muted)">🔒 Upgrade to ${tier.toUpperCase()} to unlock exclusive content <a href="/#exclusive" style="color:var(--red)">→ View Plans</a></div>`;
+                    container.innerHTML = `<div style="padding:2rem;text-align:center;color:var(--muted)">Upgrade to ${tier.toUpperCase()} to unlock exclusive content <a href="/#exclusive" style="color:var(--red)">View Plans</a></div>`;
                 } else {
-                    container.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--muted);font-style:italic">Exclusive content coming soon — stay tuned! 🔥</div>';
+                    container.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--muted);font-style:italic">Exclusive content coming soon — stay tuned!</div>';
                 }
                 return;
             }
 
             container.innerHTML = items.map(c => {
-                if (!hasAccess) {
+                // Server returns locked flag for content user can't access
+                if (c.locked) {
                     return `<div class="content-card" style="opacity:0.5;cursor:pointer" onclick="window.location.href='/#exclusive'">
                         <div class="content-card-media">
                             <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:var(--surface)">
-                                <span style="font-size:2rem;opacity:0.4">🔒</span>
+                                <span style="font-size:2rem;opacity:0.4">&#128274;</span>
                             </div>
-                            <span class="content-tier-tag">${tier.toUpperCase()}</span>
+                            <span class="content-tier-tag">${(c.tier || tier).toUpperCase()}</span>
                         </div>
                         <div class="content-card-info">
                             <h3>${escHtml(c.title)}</h3>
@@ -501,17 +510,16 @@
                     </div>`;
                 }
 
-                const typeIcons = { post: '📝', gallery: '🖼️', announcement: '📢' };
+                const typeIcons = { post: '&#128221;', gallery: '&#128444;', announcement: '&#128226;' };
                 const hasImage = c.imageUrl && c.imageUrl.startsWith('http');
-                const preview = c.body ? c.body.replace(/<[^>]*>/g, '').substring(0, 100) + '...' : '';
 
                 return `<div class="content-card" onclick="openContent(this)" data-body="${escAttr(c.body)}" data-title="${escAttr(c.title)}" data-image="${escAttr(c.imageUrl || '')}">
                     <div class="content-card-media">
-                        ${hasImage 
+                        ${hasImage
                             ? `<img src="${escHtml(c.imageUrl)}" alt="${escHtml(c.title)}" style="width:100%;height:100%;object-fit:cover">`
-                            : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:var(--surface);font-size:2rem">${typeIcons[c.type] || '📝'}</div>`
+                            : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:var(--surface);font-size:2rem">${typeIcons[c.type] || '&#128221;'}</div>`
                         }
-                        <span class="content-tier-tag">${tier.toUpperCase()}</span>
+                        <span class="content-tier-tag">${(c.tier || tier).toUpperCase()}</span>
                     </div>
                     <div class="content-card-info">
                         <h3>${escHtml(c.title)}</h3>
@@ -539,6 +547,8 @@
             `;
             document.body.appendChild(overlay);
             overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+            const escHandler = (e) => { if (e.key === 'Escape') { overlay.remove(); document.removeEventListener('keydown', escHandler); } };
+            document.addEventListener('keydown', escHandler);
         }
 
         // ─── MESSAGES ────────────────────────────
@@ -558,7 +568,7 @@
                     <div class="msg-bubble from-${m.from}">
                         ${m.from === 'admin' ? '<div class="msg-from">InkedMayhem</div>' : ''}
                         ${escHtml(m.text)}
-                        <span class="msg-time">${new Date(m.at).toLocaleString()}</span>
+                        <span class="msg-time">${new Date(m.sentAt).toLocaleString()}</span>
                     </div>
                 `).join('');
                 thread.scrollTop = thread.scrollHeight;
@@ -585,7 +595,7 @@
                     input.value = '';
                     loadMessages();
                 }
-            } catch (e) {}
+            } catch (e) { console.error('Send message error:', e); }
             btn.textContent = 'Send →';
             btn.disabled = false;
         }

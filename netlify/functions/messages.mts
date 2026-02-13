@@ -39,7 +39,7 @@ export default async (req, context) => {
             const store = getStore("conversations");
             const convKey = `conv-${user.email.toLowerCase().replace(/[^a-z0-9@._-]/g, '')}`;
             let conv = null;
-            try { conv = await store.get(convKey, { type: "json" }); } catch {}
+            try { conv = await store.get(convKey, { type: "json" }); } catch (err) { console.error("Conv lookup:", err); }
             if (!conv) conv = { email: user.email, messages: [] };
 
             conv.messages.push({
@@ -75,7 +75,7 @@ export default async (req, context) => {
             const store = getStore("conversations");
             const convKey = `conv-${user.email.toLowerCase().replace(/[^a-z0-9@._-]/g, '')}`;
             let conv = null;
-            try { conv = await store.get(convKey, { type: "json" }); } catch {}
+            try { conv = await store.get(convKey, { type: "json" }); } catch (err) { console.error("Conv lookup:", err); }
 
             return new Response(JSON.stringify({
                 success: true,

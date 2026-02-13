@@ -257,7 +257,6 @@
             border: 1px solid;
         }
         .tier-free { color: var(--muted); border-color: var(--mid); }
-        .tier-peek { color: var(--red); border-color: var(--red); }
         .tier-vip { color: var(--gold); border-color: var(--gold); }
         .tier-elite { color: #fff; border-color: #fff; background: rgba(255,255,255,0.08); }
 
@@ -559,7 +558,6 @@
         <div class="section-title" style="font-size:1.3rem; margin-top: 2rem;"><span class="icon">◆</span> Tier Breakdown</div>
         <div class="stats-grid" id="tierGrid">
             <div class="stat-card"><div class="label">Free</div><div class="value" id="tierFree">—</div></div>
-            <div class="stat-card"><div class="label">Peek</div><div class="value" id="tierPeek" style="color:var(--red)">—</div></div>
             <div class="stat-card"><div class="label">VIP</div><div class="value" id="tierVip" style="color:var(--gold)">—</div></div>
             <div class="stat-card"><div class="label">Elite</div><div class="value" id="tierElite" style="color:#fff">—</div></div>
         </div>
@@ -734,8 +732,16 @@
                     </select>
                 </div>
             </div>
-            <label style="color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;display:block">Image URL (optional)</label>
-            <input type="text" id="contentImage" placeholder="https://..." style="width:100%;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.1);color:var(--off-white);padding:0.6rem;margin-bottom:1rem;font-size:14px">
+            <div style="display:flex;gap:1rem;margin-bottom:1rem;flex-wrap:wrap">
+                <div style="flex:2;min-width:200px">
+                    <label style="color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;display:block">Image URL (optional)</label>
+                    <input type="text" id="contentImage" placeholder="https://..." style="width:100%;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.1);color:var(--off-white);padding:0.6rem;font-size:14px">
+                </div>
+                <div style="flex:1;min-width:120px">
+                    <label style="color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;display:block">PPV Price $ (optional)</label>
+                    <input type="number" id="contentPrice" placeholder="4.99" step="0.01" min="0" style="width:100%;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.1);color:var(--off-white);padding:0.6rem;font-size:14px">
+                </div>
+            </div>
             <label style="color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;display:block">Content</label>
             <textarea id="contentBody" placeholder="Write your post content here... HTML is supported." style="width:100%;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.1);color:var(--off-white);padding:0.6rem;min-height:200px;font-size:14px;font-family:inherit;line-height:1.6;resize:vertical"></textarea>
             <div style="display:flex;gap:1rem;margin-top:1rem;flex-wrap:wrap">
@@ -915,7 +921,6 @@ async function loadStats() {
         document.getElementById('statConvos').textContent = s.totalConversations;
         document.getElementById('statMsgs').textContent = s.totalMessages;
         document.getElementById('tierFree').textContent = s.tiers.free || 0;
-        document.getElementById('tierPeek').textContent = s.tiers.peek || 0;
         document.getElementById('tierVip').textContent = s.tiers.vip || 0;
         document.getElementById('tierElite').textContent = s.tiers.elite || 0;
 
@@ -951,7 +956,7 @@ async function loadUsers() {
                 <td>${esc(u.name)}</td>
                 <td>
                     <select onchange="updateUserTier('${esc(u.key)}', this.value)">
-                        ${['free','peek','vip','elite'].map(t =>
+                        ${['free','vip','elite'].map(t =>
                             `<option value="${t}" ${u.tier===t?'selected':''}>${t.toUpperCase()}</option>`
                         ).join('')}
                     </select>
@@ -1286,6 +1291,7 @@ function showContentEditor() {
     document.getElementById('contentTier').value = 'free';
     document.getElementById('contentType').value = 'post';
     document.getElementById('contentImage').value = '';
+    document.getElementById('contentPrice').value = '';
     document.getElementById('editorTitle').textContent = 'New Post';
     document.getElementById('contentEditor').style.display = 'block';
     document.getElementById('contentTitleInput').focus();
@@ -1303,12 +1309,14 @@ function editContent(jsonStr) {
     document.getElementById('contentTier').value = c.tier || 'free';
     document.getElementById('contentType').value = c.type || 'post';
     document.getElementById('contentImage').value = c.imageUrl || '';
+    document.getElementById('contentPrice').value = c.price || '';
     document.getElementById('editorTitle').textContent = 'Edit Post';
     document.getElementById('contentEditor').style.display = 'block';
     document.getElementById('contentTitleInput').focus();
 }
 
 async function saveContent(draft) {
+    const priceVal = document.getElementById('contentPrice').value;
     const payload = {
         key: document.getElementById('contentKey').value || undefined,
         title: document.getElementById('contentTitleInput').value.trim(),
@@ -1316,6 +1324,7 @@ async function saveContent(draft) {
         tier: document.getElementById('contentTier').value,
         type: document.getElementById('contentType').value,
         imageUrl: document.getElementById('contentImage').value.trim(),
+        price: priceVal ? parseFloat(priceVal) : null,
         draft: draft
     };
 
@@ -1362,7 +1371,6 @@ async function loadAnalytics() {
         const total = s.totalUsers || 1;
         const tiers = [
             { name: 'Free', count: s.tiers.free || 0, color: '#444' },
-            { name: 'Peek', count: s.tiers.peek || 0, color: 'var(--red)' },
             { name: 'VIP', count: s.tiers.vip || 0, color: 'var(--gold)' },
             { name: 'Elite', count: s.tiers.elite || 0, color: '#fff' }
         ].filter(t => t.count > 0);
