@@ -289,7 +289,7 @@ nav.scrolled {
 .hero-title {
     font-family: var(--font-display);
     line-height: 0.85;
-    letter-spacing: 8px;
+    letter-spacing: 4px;
     margin-bottom: 0.5rem;
     word-break: keep-all;
     overflow-wrap: normal;
@@ -307,6 +307,8 @@ nav.scrolled {
     display: block;
     font-size: clamp(5rem, 14vw, 12rem);
     white-space: nowrap;
+    width: max-content;
+    margin: 0 auto;
     opacity: 0;
     animation: fadeUp 0.8s var(--ease-out) 0.55s forwards;
     color: var(--red);
@@ -1159,7 +1161,7 @@ nav.scrolled {
     }
 
     .hero-title {
-        letter-spacing: 5px;
+        letter-spacing: 3px;
     }
 }
 
@@ -1196,6 +1198,6 @@ nav.scrolled {
     }
 
     .hero-title {
-        letter-spacing: 3px;
+        letter-spacing: 2px;
     }
 }

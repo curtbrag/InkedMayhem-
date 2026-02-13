@@ -264,7 +264,7 @@
         <a href="/" class="nav-logo">INKED<span>MAYHEM</span></a>
         <div class="nav-right">
             <a href="/" style="font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--light-gray);transition:color 0.3s" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--light-gray)'">Home</a>
-            <button class="btn-login" id="btnSignIn" style="display:none" onclick="window.location.href='/'">Sign In</button>
+            <button class="btn-login" id="btnSignIn" onclick="window.location.href='/'">Sign In</button>
             <button class="btn-login" id="btnLogout" style="display:none">Sign Out</button>
         </div>
     </nav>
@@ -843,10 +843,10 @@
                     'all': { icon: '&#10022;', title: 'NO DROPS YET', desc: 'New drops appear as they\'re published. Check back soon.' },
                     'free': { icon: '&#128227;', title: 'ANNOUNCEMENTS', desc: 'Updates and free content for all members. Stay tuned.' },
                     'vip': hasAccess
-                        ? { icon: '&#128274;', title: 'VIP EXCLUSIVES', desc: 'No VIP content yet. New drops coming soon.' }
+                        ? { icon: '&#128274;', title: 'VIP EXCLUSIVES', desc: 'This space is reserved for your VIP exclusives.' }
                         : { icon: '&#128274;', title: 'VIP EXCLUSIVES', desc: 'Photo sets and behind-the-scenes content for Ink Insider members.', cta: '<a href="/#exclusive" class="empty-cta" style="color:var(--red)">Upgrade to Ink Insider &rarr;</a>' },
                     'elite': hasAccess
-                        ? { icon: '&#128081;', title: 'MAYHEM CIRCLE', desc: 'No Elite content yet. New drops coming soon.' }
+                        ? { icon: '&#128081;', title: 'MAYHEM CIRCLE', desc: 'This space is reserved for your Elite drops.' }
                         : { icon: '&#128081;', title: 'MAYHEM CIRCLE', desc: 'Premium drops and custom content for Elite members.', cta: '<a href="/#exclusive" class="empty-cta" style="color:var(--gold)">Join the Mayhem Circle &rarr;</a>' }
                 };
                 const e = emptyMap[tier] || emptyMap['all'];

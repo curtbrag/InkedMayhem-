@@ -1,5 +1,5 @@
 // InkedMayhem Service Worker — Offline support & caching
-const CACHE_NAME = 'inkedmayhem-v2';
+const CACHE_NAME = 'inkedmayhem-v3';
 const STATIC_ASSETS = [
     '/',
     '/js/app.js',
