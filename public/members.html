@@ -145,11 +145,16 @@
         }
         .empty-state {
             text-align: center;
-            padding: 4rem 2rem;
-            color: var(--gray);
-            border: 1px dashed var(--border);
+            padding: 3rem 2rem;
+            color: var(--muted);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 2px;
         }
-        .empty-state .placeholder-icon { font-size: 2rem; opacity: 0.3; margin-bottom: 1rem; display: block; }
+        .empty-state .placeholder-icon { font-size: 1.5rem; opacity: 0.4; margin-bottom: 0.75rem; display: block; }
+        .empty-state .empty-title { font-family: var(--font-display); font-size: 0.9rem; letter-spacing: 3px; color: var(--off-white); margin-bottom: 0.5rem; }
+        .empty-state .empty-desc { font-size: 0.75rem; line-height: 1.6; color: var(--gray); max-width: 300px; margin: 0 auto; }
+        .empty-state .empty-cta { display: inline-block; margin-top: 1rem; font-size: 0.6rem; letter-spacing: 2px; text-transform: uppercase; text-decoration: none; }
         .msg-thread {
             background: var(--surface, #111);
             border: 1px solid var(--border);
@@ -265,8 +270,12 @@
     </nav>
 
     <!-- LOCKED STATE (shown if not authenticated) — full landing page -->
-    <div class="locked-overlay" id="lockedOverlay" style="display:none">
-        <div style="max-width:900px;width:100%;padding:0 1.5rem;overflow-y:auto;max-height:100vh">
+    <div class="locked-overlay" id="lockedOverlay" style="display:flex">
+        <div id="authLoading" style="display:none;text-align:center;padding:4rem 2rem">
+            <div style="font-size:2rem;opacity:0.3;margin-bottom:1rem;animation:pulse 1.5s ease-in-out infinite">&#10022;</div>
+            <p style="color:var(--muted);font-size:0.7rem;letter-spacing:3px;text-transform:uppercase">Verifying access...</p>
+        </div>
+        <div id="lockedContent" style="max-width:900px;width:100%;padding:0 1.5rem;overflow-y:auto;max-height:100vh">
             <div style="text-align:center;margin-bottom:3rem">
                 <div style="font-size:3rem;opacity:0.3;margin-bottom:1rem">✦</div>
                 <h2 style="font-family:var(--font-display);font-size:clamp(2rem,6vw,3.5rem);letter-spacing:4px;margin-bottom:0.5rem">MEMBERS <span style="color:var(--red)">ONLY</span></h2>
@@ -375,7 +384,7 @@
         <div class="content-sections">
             <h2>LATEST DROPS <span class="count" id="latestCount"></span></h2>
             <div class="content-grid" id="latestContent">
-                <div class="empty-state"><span class="placeholder-icon">🔥</span>Your latest content will appear here once published.</div>
+                <div class="empty-state"><span class="placeholder-icon">&#10022;</span><div class="empty-title">NO DROPS YET</div><div class="empty-desc">New drops appear as they're published. Check back soon.</div></div>
             </div>
         </div>
 
@@ -383,7 +392,7 @@
         <div class="content-sections">
             <h2>VIP EXCLUSIVES <span class="count">(Ink Insider+)</span></h2>
             <div class="content-grid" id="vipContent">
-                <div class="empty-state"><span class="placeholder-icon">🔒</span>VIP photo sets and behind-the-scenes drops appear here. <a href="/#exclusive" style="color:var(--red)">Upgrade to Ink Insider</a></div>
+                <div class="empty-state"><span class="placeholder-icon">&#128274;</span><div class="empty-title">VIP EXCLUSIVES</div><div class="empty-desc">Photo sets and behind-the-scenes content for Ink Insider members.</div><a href="/#exclusive" class="empty-cta" style="color:var(--red)">Upgrade to Ink Insider &rarr;</a></div>
             </div>
         </div>
 
@@ -391,7 +400,7 @@
         <div class="content-sections">
             <h2>MAYHEM CIRCLE <span class="count">(Elite Only)</span></h2>
             <div class="content-grid" id="eliteContent">
-                <div class="empty-state"><span class="placeholder-icon">👑</span>Elite-only premium drops and custom content. <a href="/#exclusive" style="color:var(--gold)">Join the Mayhem Circle</a></div>
+                <div class="empty-state"><span class="placeholder-icon">&#128081;</span><div class="empty-title">MAYHEM CIRCLE</div><div class="empty-desc">Premium drops and custom content for Elite members.</div><a href="/#exclusive" class="empty-cta" style="color:var(--gold)">Join the Mayhem Circle &rarr;</a></div>
             </div>
         </div>
 
@@ -399,7 +408,7 @@
         <div class="content-sections">
             <h2>ANNOUNCEMENTS <span class="count">(All Members)</span></h2>
             <div class="content-grid" id="freeContent">
-                <div class="empty-state"><span class="placeholder-icon">📢</span>Announcements and free updates for all members will post here.</div>
+                <div class="empty-state"><span class="placeholder-icon">&#128227;</span><div class="empty-title">ANNOUNCEMENTS</div><div class="empty-desc">Updates and free content for all members. Stay tuned.</div></div>
             </div>
         </div>
 
@@ -502,7 +511,9 @@
             }
 
             if (currentToken && currentUser) {
-                // Validate token with server before showing signed-in state
+                // Show loading spinner while we validate the token
+                document.getElementById('lockedContent').style.display = 'none';
+                document.getElementById('authLoading').style.display = 'block';
                 validateAndInit();
             } else {
                 showSignedOutState();
@@ -547,6 +558,7 @@
         }
 
         function showSignedInState(user) {
+            document.getElementById('authLoading').style.display = 'none';
             document.getElementById('lockedOverlay').style.display = 'none';
             document.getElementById('membersContent').style.display = 'block';
             document.getElementById('btnLogout').style.display = '';
@@ -566,8 +578,8 @@
                 tierBadge.style.background = 'rgba(194,32,32,0.1)';
             }
 
-            // Load fresh profile data (subscription info, account details)
-            loadProfile();
+            // Load profile data (use prefetched user from validateAndInit)
+            loadProfile(user);
             // Load dynamic content
             loadExclusiveContent();
             // Load messages (elite only — DMs are an elite perk)
@@ -585,6 +597,8 @@
         }
 
         function showSignedOutState() {
+            document.getElementById('authLoading').style.display = 'none';
+            document.getElementById('lockedContent').style.display = '';
             document.getElementById('lockedOverlay').style.display = 'flex';
             document.getElementById('membersContent').style.display = 'none';
             document.getElementById('btnLogout').style.display = 'none';
@@ -592,26 +606,31 @@
         }
 
         // ─── PROFILE ─────────────────────────────
-        async function loadProfile() {
+        async function loadProfile(prefetchedUser) {
             try {
-                const r = await fetch('/api/me', { headers: { 'Authorization': `Bearer ${currentToken}` }});
-                const data = await r.json();
-                if (!data.success || !data.user) {
-                    // Token expired mid-session
-                    forceSignOut();
-                    return;
+                let user;
+                if (prefetchedUser) {
+                    user = prefetchedUser;
+                } else {
+                    const r = await fetch('/api/me', { headers: { 'Authorization': `Bearer ${currentToken}` }});
+                    const data = await r.json();
+                    if (!data.success || !data.user) {
+                        forceSignOut();
+                        return;
+                    }
+                    user = data.user;
+                    currentUser = user;
+                    localStorage.setItem('im_user', JSON.stringify(user));
                 }
 
                 const oldTier = currentUser?.tier;
-                currentUser = data.user;
-                localStorage.setItem('im_user', JSON.stringify(data.user));
-                document.getElementById('profileName').value = data.user.name || '';
+                document.getElementById('profileName').value = user.name || '';
                 const tierMap = { free: 'FREE', vip: 'INK INSIDER', elite: 'MAYHEM CIRCLE' };
                 const priceMap = { vip: '$9.99/mo', elite: '$24.99/mo' };
-                document.getElementById('userTierBadge').textContent = tierMap[data.user.tier] || 'FREE';
+                document.getElementById('userTierBadge').textContent = tierMap[user.tier] || 'FREE';
 
                 // Subscription info
-                const u = data.user;
+                const u = user;
                 document.getElementById('subTierName').textContent = tierMap[u.tier] || 'FREE';
                 document.getElementById('subTierName').style.color = u.tier === 'elite' ? 'var(--gold)' : u.tier === 'vip' ? 'var(--red)' : 'var(--muted)';
 
@@ -651,7 +670,7 @@
                 document.getElementById('acctPurchases').textContent = (u.purchases || []).length;
 
                 // If tier upgraded to elite, enable messaging by reloading
-                if (oldTier !== 'elite' && data.user.tier === 'elite') {
+                if (oldTier !== 'elite' && user.tier === 'elite') {
                     location.reload();
                 }
             } catch (e) {
@@ -821,16 +840,17 @@
 
             if (!items.length) {
                 const emptyMap = {
-                    'all': 'Your latest content will appear here once published.',
-                    'free': 'Announcements and free updates for all members will post here.',
+                    'all': { icon: '&#10022;', title: 'NO DROPS YET', desc: 'New drops appear as they\'re published. Check back soon.' },
+                    'free': { icon: '&#128227;', title: 'ANNOUNCEMENTS', desc: 'Updates and free content for all members. Stay tuned.' },
                     'vip': hasAccess
-                        ? 'VIP photo sets and behind-the-scenes drops appear here.'
-                        : '🔒 VIP photo sets and behind-the-scenes drops. <a href="/#exclusive" style="color:var(--red)">Upgrade to Ink Insider</a>',
+                        ? { icon: '&#128274;', title: 'VIP EXCLUSIVES', desc: 'No VIP content yet. New drops coming soon.' }
+                        : { icon: '&#128274;', title: 'VIP EXCLUSIVES', desc: 'Photo sets and behind-the-scenes content for Ink Insider members.', cta: '<a href="/#exclusive" class="empty-cta" style="color:var(--red)">Upgrade to Ink Insider &rarr;</a>' },
                     'elite': hasAccess
-                        ? 'Elite-only premium drops and custom content appear here.'
-                        : '🔒 Elite-only premium drops and custom content. <a href="/#exclusive" style="color:var(--gold)">Join the Mayhem Circle</a>'
+                        ? { icon: '&#128081;', title: 'MAYHEM CIRCLE', desc: 'No Elite content yet. New drops coming soon.' }
+                        : { icon: '&#128081;', title: 'MAYHEM CIRCLE', desc: 'Premium drops and custom content for Elite members.', cta: '<a href="/#exclusive" class="empty-cta" style="color:var(--gold)">Join the Mayhem Circle &rarr;</a>' }
                 };
-                container.innerHTML = `<div style="padding:2rem;text-align:center;color:var(--muted)">${emptyMap[tier] || emptyMap['all']}</div>`;
+                const e = emptyMap[tier] || emptyMap['all'];
+                container.innerHTML = `<div class="empty-state"><span class="placeholder-icon">${e.icon}</span><div class="empty-title">${e.title}</div><div class="empty-desc">${e.desc}</div>${e.cta || ''}</div>`;
                 return;
             }
 
