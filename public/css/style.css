@@ -309,15 +309,13 @@ nav.scrolled {
     white-space: nowrap;
     opacity: 0;
     animation: fadeUp 0.8s var(--ease-out) 0.55s forwards;
-}
-
-.hero-title .outline {
+    /* Two-tone: outline "MAY" + filled "HEM" as single unbreakable word */
+    background: linear-gradient(90deg, transparent 0%, transparent 50%, var(--red) 50%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
     -webkit-text-stroke: 1.5px var(--off-white);
-    color: transparent;
-}
-
-.hero-title .red {
-    color: var(--red);
+    paint-order: stroke fill;
 }
 
 .hero-tagline {

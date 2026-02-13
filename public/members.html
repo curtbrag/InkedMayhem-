@@ -336,7 +336,10 @@
     <div class="members-page" id="membersContent" style="display: none;">
         <div class="members-header">
             <h1>YOUR <span>CONTENT</span></h1>
-            <span class="tier-badge-display" id="userTierBadge">FREE</span>
+            <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;justify-content:center">
+                <span class="tier-badge-display" id="userTierBadge">FREE</span>
+                <span id="memberSinceHeader" style="display:none;font-size:0.55rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted)"></span>
+            </div>
         </div>
 
         <!-- MESSAGES -->
@@ -372,7 +375,7 @@
         <div class="content-sections">
             <h2>LATEST DROPS <span class="count" id="latestCount"></span></h2>
             <div class="content-grid" id="latestContent">
-                <div class="empty-state"><span class="placeholder-icon">🔥</span>New content drops coming soon — stay tuned!</div>
+                <div class="empty-state"><span class="placeholder-icon">🔥</span>Your latest content will appear here once published.</div>
             </div>
         </div>
 
@@ -380,7 +383,7 @@
         <div class="content-sections">
             <h2>VIP EXCLUSIVES <span class="count">(Ink Insider+)</span></h2>
             <div class="content-grid" id="vipContent">
-                <div class="empty-state"><span class="placeholder-icon">🔒</span>Exclusive VIP content drops soon. <a href="/#exclusive" style="color:var(--red)">Upgrade to unlock</a></div>
+                <div class="empty-state"><span class="placeholder-icon">🔒</span>VIP photo sets and behind-the-scenes drops appear here. <a href="/#exclusive" style="color:var(--red)">Upgrade to Ink Insider</a></div>
             </div>
         </div>
 
@@ -388,7 +391,7 @@
         <div class="content-sections">
             <h2>MAYHEM CIRCLE <span class="count">(Elite Only)</span></h2>
             <div class="content-grid" id="eliteContent">
-                <div class="empty-state"><span class="placeholder-icon">👑</span>Premium content for the inner circle. <a href="/#exclusive" style="color:var(--gold)">Join the Mayhem Circle</a></div>
+                <div class="empty-state"><span class="placeholder-icon">👑</span>Elite-only premium drops and custom content. <a href="/#exclusive" style="color:var(--gold)">Join the Mayhem Circle</a></div>
             </div>
         </div>
 
@@ -396,7 +399,7 @@
         <div class="content-sections">
             <h2>ANNOUNCEMENTS <span class="count">(All Members)</span></h2>
             <div class="content-grid" id="freeContent">
-                <div class="empty-state"><span class="placeholder-icon">📢</span>No announcements yet — check back soon!</div>
+                <div class="empty-state"><span class="placeholder-icon">📢</span>Announcements and free updates for all members will post here.</div>
             </div>
         </div>
 
@@ -493,38 +496,15 @@
             if (currentToken && userData) {
                 try {
                     currentUser = JSON.parse(userData);
-                    // Signed in: show content + Sign Out, hide locked + Sign In
-                    document.getElementById('lockedOverlay').style.display = 'none';
-                    document.getElementById('membersContent').style.display = 'block';
-                    document.getElementById('btnLogout').style.display = '';
-                    document.getElementById('btnSignIn').style.display = 'none';
-
-                    const tierBadge = document.getElementById('userTierBadge');
-                    const tierMap = { free: 'FREE', vip: 'INK INSIDER', elite: 'MAYHEM CIRCLE' };
-                    tierBadge.textContent = tierMap[currentUser.tier] || 'FREE';
-
-                    // Load fresh profile data
-                    loadProfile();
-                    // Load dynamic content
-                    loadExclusiveContent();
-                    // Load messages (elite only — DMs are an elite perk)
-                    if (currentUser.tier === 'elite') {
-                        loadMessages();
-                    } else {
-                        document.getElementById('msgThread').innerHTML = '';
-                        document.getElementById('messagesSection').innerHTML = `
-                            <h2>MESSAGES</h2>
-                            <div style="padding:2rem;text-align:center;border:1px dashed var(--border)">
-                                <p style="color:var(--muted);font-size:0.8rem;margin-bottom:1rem">Direct messaging is available to <strong style="color:var(--white)">Mayhem Circle (Elite)</strong> members.</p>
-                                <a href="/#exclusive" style="color:var(--red);font-size:0.65rem;letter-spacing:2px;text-transform:uppercase">Upgrade to Elite &rarr;</a>
-                            </div>`;
-                    }
                 } catch (e) {
-                    // Bad session data — show signed-out state
-                    showSignedOutState();
+                    currentUser = null;
                 }
+            }
+
+            if (currentToken && currentUser) {
+                // Validate token with server before showing signed-in state
+                validateAndInit();
             } else {
-                // Not signed in: show locked + Sign In, hide content + Sign Out
                 showSignedOutState();
             }
 
@@ -534,6 +514,75 @@
                 window.location.href = '/';
             });
         });
+
+        async function validateAndInit() {
+            try {
+                const r = await fetch('/api/me', { headers: { 'Authorization': `Bearer ${currentToken}` }});
+                const data = await r.json();
+                if (!data.success || !data.user) {
+                    // Token expired or invalid — force signed-out state
+                    forceSignOut();
+                    return;
+                }
+                // Token valid — show signed-in state with fresh data
+                currentUser = data.user;
+                localStorage.setItem('im_user', JSON.stringify(data.user));
+                showSignedInState(data.user);
+            } catch (e) {
+                // Network error — use cached data but still show signed-in
+                if (currentUser) {
+                    showSignedInState(currentUser);
+                } else {
+                    forceSignOut();
+                }
+            }
+        }
+
+        function forceSignOut() {
+            localStorage.removeItem('im_token');
+            localStorage.removeItem('im_user');
+            currentToken = null;
+            currentUser = null;
+            showSignedOutState();
+        }
+
+        function showSignedInState(user) {
+            document.getElementById('lockedOverlay').style.display = 'none';
+            document.getElementById('membersContent').style.display = 'block';
+            document.getElementById('btnLogout').style.display = '';
+            document.getElementById('btnSignIn').style.display = 'none';
+
+            const tierBadge = document.getElementById('userTierBadge');
+            const tierMap = { free: 'FREE', vip: 'INK INSIDER', elite: 'MAYHEM CIRCLE' };
+            tierBadge.textContent = tierMap[user.tier] || 'FREE';
+            // Color the badge by tier
+            if (user.tier === 'elite') {
+                tierBadge.style.borderColor = 'var(--gold)';
+                tierBadge.style.color = 'var(--gold)';
+                tierBadge.style.background = 'rgba(212,168,83,0.1)';
+            } else if (user.tier === 'vip') {
+                tierBadge.style.borderColor = 'var(--red)';
+                tierBadge.style.color = 'var(--red)';
+                tierBadge.style.background = 'rgba(194,32,32,0.1)';
+            }
+
+            // Load fresh profile data (subscription info, account details)
+            loadProfile();
+            // Load dynamic content
+            loadExclusiveContent();
+            // Load messages (elite only — DMs are an elite perk)
+            if (user.tier === 'elite') {
+                loadMessages();
+            } else {
+                document.getElementById('msgThread').innerHTML = '';
+                document.getElementById('messagesSection').innerHTML = `
+                    <h2>MESSAGES</h2>
+                    <div style="padding:2rem;text-align:center;border:1px dashed var(--border)">
+                        <p style="color:var(--muted);font-size:0.8rem;margin-bottom:1rem">Direct messaging is available to <strong style="color:var(--white)">Mayhem Circle (Elite)</strong> members.</p>
+                        <a href="/#exclusive" style="color:var(--red);font-size:0.65rem;letter-spacing:2px;text-transform:uppercase">Upgrade to Elite &rarr;</a>
+                    </div>`;
+            }
+        }
 
         function showSignedOutState() {
             document.getElementById('lockedOverlay').style.display = 'flex';
@@ -547,55 +596,68 @@
             try {
                 const r = await fetch('/api/me', { headers: { 'Authorization': `Bearer ${currentToken}` }});
                 const data = await r.json();
-                if (data.success) {
-                    const oldTier = currentUser?.tier;
-                    currentUser = data.user;
-                    localStorage.setItem('im_user', JSON.stringify(data.user));
-                    document.getElementById('profileName').value = data.user.name || '';
-                    const tierMap = { free: 'FREE', vip: 'INK INSIDER', elite: 'MAYHEM CIRCLE' };
-                    const priceMap = { vip: '$9.99/mo', elite: '$24.99/mo' };
-                    document.getElementById('userTierBadge').textContent = tierMap[data.user.tier] || 'FREE';
-
-                    // Subscription info
-                    const u = data.user;
-                    document.getElementById('subTierName').textContent = tierMap[u.tier] || 'FREE';
-                    document.getElementById('subTierName').style.color = u.tier === 'elite' ? 'var(--gold)' : u.tier === 'vip' ? 'var(--red)' : 'var(--muted)';
-
-                    if (priceMap[u.tier]) {
-                        document.getElementById('subPriceInfo').style.display = 'block';
-                        document.getElementById('subPrice').textContent = priceMap[u.tier];
-                    }
-
-                    if (u.subscribedAt) {
-                        document.getElementById('subSinceInfo').style.display = 'block';
-                        document.getElementById('subSince').textContent = new Date(u.subscribedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-                    }
-
-                    if (u.cancelPending && u.cancelAt) {
-                        document.getElementById('subCancelInfo').style.display = 'block';
-                        document.getElementById('subCancelDate').textContent = new Date(u.cancelAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-                    }
-
-                    // Show upgrade buttons based on tier
-                    if (u.tier === 'free') {
-                        document.getElementById('btnUpgradeVip').style.display = 'inline-block';
-                        document.getElementById('btnUpgradeElite').style.display = 'inline-block';
-                    } else if (u.tier === 'vip') {
-                        document.getElementById('btnUpgradeElite').style.display = 'inline-block';
-                    }
-
-                    // Account info
-                    document.getElementById('acctEmail').textContent = u.email || '—';
-                    document.getElementById('acctJoined').textContent = u.createdAt ? new Date(u.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
-                    document.getElementById('acctLastLogin').textContent = u.lastLogin ? new Date(u.lastLogin).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' }) : '—';
-                    document.getElementById('acctPurchases').textContent = (u.purchases || []).length;
-
-                    // If tier upgraded to elite, enable messaging by reloading
-                    if (oldTier !== 'elite' && data.user.tier === 'elite') {
-                        location.reload();
-                    }
+                if (!data.success || !data.user) {
+                    // Token expired mid-session
+                    forceSignOut();
+                    return;
                 }
-            } catch (e) { console.error('Profile load error:', e); }
+
+                const oldTier = currentUser?.tier;
+                currentUser = data.user;
+                localStorage.setItem('im_user', JSON.stringify(data.user));
+                document.getElementById('profileName').value = data.user.name || '';
+                const tierMap = { free: 'FREE', vip: 'INK INSIDER', elite: 'MAYHEM CIRCLE' };
+                const priceMap = { vip: '$9.99/mo', elite: '$24.99/mo' };
+                document.getElementById('userTierBadge').textContent = tierMap[data.user.tier] || 'FREE';
+
+                // Subscription info
+                const u = data.user;
+                document.getElementById('subTierName').textContent = tierMap[u.tier] || 'FREE';
+                document.getElementById('subTierName').style.color = u.tier === 'elite' ? 'var(--gold)' : u.tier === 'vip' ? 'var(--red)' : 'var(--muted)';
+
+                if (priceMap[u.tier]) {
+                    document.getElementById('subPriceInfo').style.display = 'block';
+                    document.getElementById('subPrice').textContent = priceMap[u.tier];
+                }
+
+                if (u.subscribedAt) {
+                    document.getElementById('subSinceInfo').style.display = 'block';
+                    const sinceDate = new Date(u.subscribedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                    document.getElementById('subSince').textContent = sinceDate;
+                    const headerSince = document.getElementById('memberSinceHeader');
+                    if (headerSince) { headerSince.textContent = 'Member since ' + sinceDate; headerSince.style.display = ''; }
+                } else if (u.createdAt) {
+                    const headerSince = document.getElementById('memberSinceHeader');
+                    if (headerSince) { headerSince.textContent = 'Joined ' + new Date(u.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }); headerSince.style.display = ''; }
+                }
+
+                if (u.cancelPending && u.cancelAt) {
+                    document.getElementById('subCancelInfo').style.display = 'block';
+                    document.getElementById('subCancelDate').textContent = new Date(u.cancelAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                }
+
+                // Show upgrade buttons based on tier
+                if (u.tier === 'free') {
+                    document.getElementById('btnUpgradeVip').style.display = 'inline-block';
+                    document.getElementById('btnUpgradeElite').style.display = 'inline-block';
+                } else if (u.tier === 'vip') {
+                    document.getElementById('btnUpgradeElite').style.display = 'inline-block';
+                }
+
+                // Account info
+                document.getElementById('acctEmail').textContent = u.email || '—';
+                document.getElementById('acctJoined').textContent = u.createdAt ? new Date(u.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
+                document.getElementById('acctLastLogin').textContent = u.lastLogin ? new Date(u.lastLogin).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' }) : '—';
+                document.getElementById('acctPurchases').textContent = (u.purchases || []).length;
+
+                // If tier upgraded to elite, enable messaging by reloading
+                if (oldTier !== 'elite' && data.user.tier === 'elite') {
+                    location.reload();
+                }
+            } catch (e) {
+                console.error('Profile load error:', e);
+                // Network error — don't sign out, keep cached data
+            }
         }
 
         async function upgradeTier(tier) {
@@ -758,13 +820,17 @@
             const hasAccess = tier === 'all' || tierOrder[userTier] >= tierOrder[tier];
 
             if (!items.length) {
-                if (tier === 'free' || tier === 'all') {
-                    container.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--muted);font-style:italic">New content drops coming soon!</div>';
-                } else if (!hasAccess) {
-                    container.innerHTML = `<div style="padding:2rem;text-align:center;color:var(--muted)">🔒 Upgrade to ${tier.toUpperCase()} to unlock exclusive content <a href="/#exclusive" style="color:var(--red)">View Plans</a></div>`;
-                } else {
-                    container.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--muted);font-style:italic">Exclusive content coming soon — stay tuned!</div>';
-                }
+                const emptyMap = {
+                    'all': 'Your latest content will appear here once published.',
+                    'free': 'Announcements and free updates for all members will post here.',
+                    'vip': hasAccess
+                        ? 'VIP photo sets and behind-the-scenes drops appear here.'
+                        : '🔒 VIP photo sets and behind-the-scenes drops. <a href="/#exclusive" style="color:var(--red)">Upgrade to Ink Insider</a>',
+                    'elite': hasAccess
+                        ? 'Elite-only premium drops and custom content appear here.'
+                        : '🔒 Elite-only premium drops and custom content. <a href="/#exclusive" style="color:var(--gold)">Join the Mayhem Circle</a>'
+                };
+                container.innerHTML = `<div style="padding:2rem;text-align:center;color:var(--muted)">${emptyMap[tier] || emptyMap['all']}</div>`;
                 return;
             }
 
