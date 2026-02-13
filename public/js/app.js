@@ -242,12 +242,15 @@ function initAuthModal() {
 function updateAuthUI(user) {
     const btnLogin = document.getElementById('btnLogin');
     if (user) {
-        btnLogin.textContent = user.name || 'Account';
+        const tierLabels = { free: '', vip: ' [VIP]', elite: ' [ELITE]' };
+        btnLogin.textContent = (user.name || 'Account') + (tierLabels[user.tier] || '');
+        btnLogin.style.fontSize = '0.6rem';
         btnLogin.onclick = () => {
             if (confirm('Sign out?')) {
                 localStorage.removeItem('im_token');
                 localStorage.removeItem('im_user');
                 btnLogin.textContent = 'Sign In';
+                btnLogin.style.fontSize = '';
                 btnLogin.onclick = () => document.getElementById('authModal').classList.add('active');
                 showToast('Signed out');
             }

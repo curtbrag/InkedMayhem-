@@ -289,7 +289,7 @@ nav.scrolled {
 .hero-title {
     font-family: var(--font-display);
     line-height: 0.85;
-    letter-spacing: 8px;
+    letter-spacing: 4px;
     margin-bottom: 0.5rem;
     word-break: keep-all;
     overflow-wrap: normal;
@@ -307,16 +307,10 @@ nav.scrolled {
     display: block;
     font-size: clamp(5rem, 14vw, 12rem);
     white-space: nowrap;
+    width: max-content;
+    margin: 0 auto;
     opacity: 0;
     animation: fadeUp 0.8s var(--ease-out) 0.55s forwards;
-}
-
-.hero-title .outline {
-    -webkit-text-stroke: 1.5px var(--off-white);
-    color: transparent;
-}
-
-.hero-title .red {
     color: var(--red);
 }
 
@@ -1165,6 +1159,10 @@ nav.scrolled {
     nav {
         padding: 1rem 1.5rem;
     }
+
+    .hero-title {
+        letter-spacing: 3px;
+    }
 }
 
 @media (max-width: 600px) {
@@ -1197,5 +1195,9 @@ nav.scrolled {
     .footer-bottom {
         flex-direction: column;
         text-align: center;
+    }
+
+    .hero-title {
+        letter-spacing: 2px;
     }
 }
