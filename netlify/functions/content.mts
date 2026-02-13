@@ -38,10 +38,26 @@ export default async (req, context) => {
 
     // ─── PUBLIC: GET CONTENT LIST ─────────────────
     if (path === "" && req.method === "GET") {
-        const tier = url.searchParams.get("tier") || "all";
         const search = (url.searchParams.get("search") || "").toLowerCase().trim();
         const category = (url.searchParams.get("category") || "").toLowerCase().trim();
         const sort = url.searchParams.get("sort") || "newest"; // newest, oldest, title
+
+        // Look up fresh tier from user store (JWT tier may be stale after upgrade)
+        const jwtUser = verifyUser(req);
+        let userTier = "free";
+        let userPurchases = [];
+        if (jwtUser?.email) {
+            try {
+                const userStore = getStore("users");
+                const userKey = jwtUser.email.toLowerCase().replace(/[^a-z0-9@._-]/g, '');
+                const freshUser = await userStore.get(userKey, { type: "json" });
+                if (freshUser) {
+                    userTier = freshUser.tier || "free";
+                    userPurchases = (freshUser.purchases || []).map(p => p.postId);
+                }
+            } catch (err) { console.error("User lookup for content access:", err); }
+        }
+
         try {
             const { blobs } = await store.list();
             const items = [];
@@ -52,12 +68,16 @@ export default async (req, context) => {
                 } catch (err) { console.error("Content item read error:", err); }
             }
 
-            // Filter by tier access
-            let filtered = tier === "all" ? items : items.filter(i => {
-                if (i.tier === "free") return true;
-                if (tier === "elite") return true;
-                if (tier === "vip" && i.tier !== "elite") return true;
-                return false;
+            // Enforce access: show metadata for all, but redact body/image for locked tiers
+            const tierOrder = { free: 0, vip: 1, elite: 2 };
+            const userLevel = tierOrder[userTier] || 0;
+
+            let filtered = items.map(i => {
+                const itemLevel = tierOrder[i.tier] || 0;
+                // Grant access if user tier is high enough OR they purchased this post
+                if (userLevel >= itemLevel || userPurchases.includes(i.key)) return i;
+                // User doesn't have access — return metadata only, no body or image
+                return { key: i.key, title: i.title, tier: i.tier, type: i.type, createdAt: i.createdAt, price: i.price, category: i.category, locked: true };
             });
 
             // Server-side search

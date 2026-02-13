@@ -258,6 +258,7 @@
     <nav id="navbar" class="scrolled">
         <a href="/" class="nav-logo">INKED<span>MAYHEM</span></a>
         <div class="nav-right">
+            <a href="/" style="font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--light-gray);transition:color 0.3s" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--light-gray)'">Home</a>
             <button class="btn-login" id="btnSignIn" style="display:none" onclick="window.location.href='/'">Sign In</button>
             <button class="btn-login" id="btnLogout" style="display:none">Sign Out</button>
         </div>
@@ -446,8 +447,18 @@
                     loadProfile();
                     // Load dynamic content
                     loadExclusiveContent();
-                    // Load messages
-                    loadMessages();
+                    // Load messages (elite only — DMs are an elite perk)
+                    if (currentUser.tier === 'elite') {
+                        loadMessages();
+                    } else {
+                        document.getElementById('msgThread').innerHTML = '';
+                        document.getElementById('messagesSection').innerHTML = `
+                            <h2>MESSAGES</h2>
+                            <div style="padding:2rem;text-align:center;border:1px dashed var(--border)">
+                                <p style="color:var(--muted);font-size:0.8rem;margin-bottom:1rem">Direct messaging is available to <strong style="color:var(--white)">Mayhem Circle (Elite)</strong> members.</p>
+                                <a href="/#exclusive" style="color:var(--red);font-size:0.65rem;letter-spacing:2px;text-transform:uppercase">Upgrade to Elite &rarr;</a>
+                            </div>`;
+                    }
                 } catch (e) {
                     // Bad session data — show signed-out state
                     showSignedOutState();
@@ -518,6 +529,11 @@
                     document.getElementById('acctJoined').textContent = u.createdAt ? new Date(u.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
                     document.getElementById('acctLastLogin').textContent = u.lastLogin ? new Date(u.lastLogin).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' }) : '—';
                     document.getElementById('acctPurchases').textContent = (u.purchases || []).length;
+
+                    // If tier upgraded to elite, enable messaging by reloading
+                    if (oldTier !== 'elite' && data.user.tier === 'elite') {
+                        location.reload();
+                    }
                 }
             } catch (e) { console.error('Profile load error:', e); }
         }
@@ -619,10 +635,12 @@
 
         async function loadExclusiveContent(search, category, sort) {
             try {
-                let apiUrl = '/api/content?tier=' + (currentUser?.tier || 'free');
-                if (search) apiUrl += '&search=' + encodeURIComponent(search);
-                if (category) apiUrl += '&category=' + encodeURIComponent(category);
-                if (sort) apiUrl += '&sort=' + encodeURIComponent(sort);
+                let apiUrl = '/api/content';
+                const params = [];
+                if (search) params.push('search=' + encodeURIComponent(search));
+                if (category) params.push('category=' + encodeURIComponent(category));
+                if (sort) params.push('sort=' + encodeURIComponent(sort));
+                if (params.length) apiUrl += '?' + params.join('&');
 
                 const r = await fetch(apiUrl, {
                     headers: { 'Authorization': `Bearer ${currentToken}` }
@@ -692,30 +710,25 @@
 
             container.innerHTML = items.map(c => {
                 const itemTier = c.tier || 'free';
-                const itemHasAccess = tier === 'all' || tierOrder[userTier] >= tierOrder[itemTier];
 
-                if (!itemHasAccess) {
-                    const purchased = currentUser?.purchases?.some(p => p.postId === c.key);
-                    if (purchased) {
-                        // User purchased this individual post — show it
-                    } else {
-                        const priceLabel = c.price ? `$${Number(c.price).toFixed(2)}` : '$4.99';
-                        return `<div class="content-card" style="opacity:0.6">
-                            <div class="content-card-media">
-                                <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:var(--surface)">
-                                    <span style="font-size:2rem;opacity:0.4">🔒</span>
-                                </div>
-                                <span class="content-tier-tag">${itemTier.toUpperCase()}</span>
+                // Server returns locked flag for content user can't access
+                if (c.locked) {
+                    const priceLabel = c.price ? `$${Number(c.price).toFixed(2)}` : '$4.99';
+                    return `<div class="content-card" style="opacity:0.6">
+                        <div class="content-card-media">
+                            <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:var(--surface)">
+                                <span style="font-size:2rem;opacity:0.4">🔒</span>
                             </div>
-                            <div class="content-card-info">
-                                <h3>${escHtml(c.title)}</h3>
-                                <span class="content-date">
-                                    <a href="/#exclusive" style="color:var(--red);text-decoration:none">Upgrade</a>
-                                    ${c.key ? ` or <a href="#" onclick="unlockPost('${escAttr(c.key)}');return false" style="color:var(--gold);text-decoration:none">Unlock ${priceLabel}</a>` : ''}
-                                </span>
-                            </div>
-                        </div>`;
-                    }
+                            <span class="content-tier-tag">${itemTier.toUpperCase()}</span>
+                        </div>
+                        <div class="content-card-info">
+                            <h3>${escHtml(c.title)}</h3>
+                            <span class="content-date">
+                                <a href="/#exclusive" style="color:var(--red);text-decoration:none">Upgrade</a>
+                                ${c.key ? ` or <a href="#" onclick="unlockPost('${escAttr(c.key)}');return false" style="color:var(--gold);text-decoration:none">Unlock ${priceLabel}</a>` : ''}
+                            </span>
+                        </div>
+                    </div>`;
                 }
 
                 const typeIcons = { post: '📝', gallery: '🖼️', video: '🎬', announcement: '📢' };
