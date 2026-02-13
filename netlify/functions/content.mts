@@ -17,7 +17,7 @@ function verifyAdmin(req) {
     if (!auth) return false;
     try {
         const d = jwt.verify(auth.replace("Bearer ", ""), getSecret());
-        return d.admin === true || d.isAdmin === true;
+        return d.isAdmin === true;
     } catch { return false; }
 }
 
@@ -49,7 +49,7 @@ export default async (req, context) => {
                 try {
                     const item = await store.get(blob.key, { type: "json" });
                     if (item && !item.draft) items.push({ ...item, key: blob.key });
-                } catch {}
+                } catch (err) { console.error("Content item read error:", err); }
             }
 
             // Filter by tier access
@@ -108,16 +108,31 @@ export default async (req, context) => {
         try {
             const item = await store.get(key, { type: "json" });
             if (!item) return new Response(JSON.stringify({ error: "Not found" }), { status: 404, headers: CORS });
-            
-            // Check tier access
-            const user = verifyUser(req);
-            const userTier = user?.tier || "free";
-            
-            if (item.tier === "vip" && userTier === "free") {
-                return new Response(JSON.stringify({ error: "VIP content", locked: true, tier: "vip" }), { status: 403, headers: CORS });
+
+            // Check tier access using fresh user data
+            const jwtUser = verifyUser(req);
+            let userTier = "free";
+            let purchased = false;
+            if (jwtUser?.email) {
+                try {
+                    const userStore = getStore("users");
+                    const userKey = jwtUser.email.toLowerCase().replace(/[^a-z0-9@._-]/g, '');
+                    const freshUser = await userStore.get(userKey, { type: "json" });
+                    if (freshUser) {
+                        userTier = freshUser.tier || "free";
+                        purchased = (freshUser.purchases || []).some(p => p.postId === key);
+                    }
+                } catch (err) { console.error("User lookup for view access:", err); }
             }
-            if (item.tier === "elite" && userTier !== "elite") {
-                return new Response(JSON.stringify({ error: "Elite content", locked: true, tier: "elite" }), { status: 403, headers: CORS });
+
+            // Allow access if purchased via PPV
+            if (!purchased) {
+                if (item.tier === "vip" && userTier === "free") {
+                    return new Response(JSON.stringify({ error: "VIP content", locked: true, tier: "vip" }), { status: 403, headers: CORS });
+                }
+                if (item.tier === "elite" && userTier !== "elite") {
+                    return new Response(JSON.stringify({ error: "Elite content", locked: true, tier: "elite" }), { status: 403, headers: CORS });
+                }
             }
 
             return new Response(JSON.stringify({ success: true, content: item }), { headers: CORS });
@@ -130,13 +145,13 @@ export default async (req, context) => {
     if (path === "/save" && req.method === "POST") {
         if (!verifyAdmin(req)) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: CORS });
         try {
-            const { key, title, body, tier, type, imageUrl, draft } = await req.json();
+            const { key, title, body, tier, type, imageUrl, draft, price } = await req.json();
             if (!title || !body) return new Response(JSON.stringify({ error: "Title and body required" }), { status: 400, headers: CORS });
 
             const contentKey = key || `content-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`;
             
             let existing = null;
-            try { existing = await store.get(contentKey, { type: "json" }); } catch {}
+            try { existing = await store.get(contentKey, { type: "json" }); } catch (err) { console.error("Content lookup:", err); }
 
             const item = {
                 title,
@@ -144,6 +159,7 @@ export default async (req, context) => {
                 tier: tier || "free",
                 type: type || "post", // post, gallery, announcement
                 imageUrl: imageUrl || "",
+                price: price ? parseFloat(price) : null,
                 draft: draft || false,
                 createdAt: existing?.createdAt || new Date().toISOString(),
                 updatedAt: new Date().toISOString()
@@ -178,7 +194,7 @@ export default async (req, context) => {
                 try {
                     const item = await store.get(blob.key, { type: "json" });
                     if (item) items.push({ ...item, key: blob.key });
-                } catch {}
+                } catch (err) { console.error("Admin content read error:", err); }
             }
             items.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
             return new Response(JSON.stringify({ success: true, content: items }), { headers: CORS });

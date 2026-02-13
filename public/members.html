@@ -7,6 +7,9 @@
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#0a0a0a">
     <title>Members — InkedMayhem</title>
+    <meta name="description" content="InkedMayhem members area — exclusive content, direct messaging, and premium drops.">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="theme-color" content="#0a0a0a">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@0,400;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -474,6 +477,7 @@
                 const r = await fetch('/api/me', { headers: { 'Authorization': `Bearer ${currentToken}` }});
                 const data = await r.json();
                 if (data.success) {
+                    const oldTier = currentUser?.tier;
                     currentUser = data.user;
                     localStorage.setItem('im_user', JSON.stringify(data.user));
                     document.getElementById('profileName').value = data.user.name || '';
@@ -515,7 +519,7 @@
                     document.getElementById('acctLastLogin').textContent = u.lastLogin ? new Date(u.lastLogin).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' }) : '—';
                     document.getElementById('acctPurchases').textContent = (u.purchases || []).length;
                 }
-            } catch (e) {}
+            } catch (e) { console.error('Profile load error:', e); }
         }
 
         async function upgradeTier(tier) {
@@ -556,7 +560,7 @@
                 }
                 msg.style.display = 'block';
                 setTimeout(() => { msg.style.display = 'none'; }, 3000);
-            } catch (e) {}
+            } catch (e) { console.error('Profile update error:', e); }
         }
 
         async function changePassword() {
@@ -782,6 +786,8 @@
             `;
             document.body.appendChild(overlay);
             overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+            const escHandler = (e) => { if (e.key === 'Escape') { overlay.remove(); document.removeEventListener('keydown', escHandler); } };
+            document.addEventListener('keydown', escHandler);
         }
 
         // ─── MESSAGES ────────────────────────────
@@ -801,7 +807,7 @@
                     <div class="msg-bubble from-${m.from}">
                         ${m.from === 'admin' ? '<div class="msg-from">InkedMayhem</div>' : ''}
                         ${escHtml(m.text)}
-                        <span class="msg-time">${new Date(m.at).toLocaleString()}</span>
+                        <span class="msg-time">${new Date(m.sentAt).toLocaleString()}</span>
                     </div>
                 `).join('');
                 thread.scrollTop = thread.scrollHeight;
@@ -828,7 +834,7 @@
                     input.value = '';
                     loadMessages();
                 }
-            } catch (e) {}
+            } catch (e) { console.error('Send message error:', e); }
             btn.textContent = 'Send →';
             btn.disabled = false;
         }

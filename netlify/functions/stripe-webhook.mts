@@ -10,7 +10,7 @@ async function notifyAdmin(type, data) {
             headers: { "Content-Type": "application/json", "x-internal-key": secret },
             body: JSON.stringify({ type, data })
         });
-    } catch {}
+    } catch (err) { console.error("Notify error:", err); }
 }
 
 async function sendTelegramNotification(text) {

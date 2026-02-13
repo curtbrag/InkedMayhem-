@@ -245,7 +245,7 @@ export default async (req, context) => {
             const userStore = getStore("conversations");
             const convKey = `conv-${msg.email.toLowerCase().replace(/[^a-z0-9@._-]/g, '')}`;
             let conv = null;
-            try { conv = await userStore.get(convKey, { type: "json" }); } catch {}
+            try { conv = await userStore.get(convKey, { type: "json" }); } catch (err) { console.error("Conv lookup:", err); }
             if (!conv) conv = { email: msg.email, messages: [] };
             conv.messages.push({
                 from: "admin",
@@ -322,7 +322,7 @@ export default async (req, context) => {
             const store = getStore("conversations");
             const convKey = `conv-${email.toLowerCase().replace(/[^a-z0-9@._-]/g, '')}`;
             let conv = null;
-            try { conv = await store.get(convKey, { type: "json" }); } catch {}
+            try { conv = await store.get(convKey, { type: "json" }); } catch (err) { console.error("Conv lookup:", err); }
             if (!conv) conv = { email: email.toLowerCase(), messages: [] };
 
             conv.messages.push({
@@ -349,7 +349,7 @@ export default async (req, context) => {
                 userStore.list(), msgStore.list(), convStore.list(), contentStore.list()
             ]);
 
-            const tiers = { free: 0, peek: 0, vip: 0, elite: 0 };
+            const tiers = { free: 0, vip: 0, elite: 0 };
             const signupDates = [];
             const loginDates = [];
             for (const blob of userBlobs.blobs) {
