@@ -22,8 +22,13 @@ const TIERS = {
     }
 };
 
+const DEFAULT_POST_PRICE = 499; // $4.99 in cents
+
 export default async (req, context) => {
-    if (req.method === "OPTIONS") return new Response("", { headers: CORS });
+    if (req.method === "OPTIONS") {
+        return new Response("", { headers: CORS });
+    }
+
     if (req.method !== "POST") {
         return new Response(JSON.stringify({ error: "Method not allowed" }), { status: 405, headers: CORS });
     }
@@ -45,7 +50,7 @@ export default async (req, context) => {
             return new Response(JSON.stringify({ error: "Invalid token" }), { status: 401, headers: CORS });
         }
 
-        const { tier, type, postId } = await req.json();
+        const { tier, type, postId, promoCode } = await req.json();
         const stripeKey = Netlify.env.get("STRIPE_SECRET_KEY");
 
         if (!stripeKey) {
@@ -57,9 +62,30 @@ export default async (req, context) => {
         const stripe = new Stripe(stripeKey);
         const siteUrl = Netlify.env.get("URL") || "https://inkedmayhem.netlify.app";
 
+        // Check and apply promo code if provided
+        let discounts = [];
+        if (promoCode) {
+            try {
+                const promoStore = getStore("promo-codes");
+                const promo = await promoStore.get(promoCode.toUpperCase(), { type: "json" });
+                if (promo && promo.active && (!promo.expiresAt || promo.expiresAt > new Date().toISOString())) {
+                    if (promo.maxUses && promo.usedCount >= promo.maxUses) {
+                        return new Response(JSON.stringify({ error: "Promo code has been fully redeemed" }), { status: 400, headers: CORS });
+                    }
+                    if (promo.stripeCouponId) {
+                        discounts = [{ coupon: promo.stripeCouponId }];
+                    }
+                } else {
+                    return new Response(JSON.stringify({ error: "Invalid or expired promo code" }), { status: 400, headers: CORS });
+                }
+            } catch {
+                // Promo code store doesn't exist or code not found — ignore
+            }
+        }
+
         if (type === "subscription" && TIERS[tier]) {
             // Create subscription checkout
-            const session = await stripe.checkout.sessions.create({
+            const sessionParams: any = {
                 mode: "subscription",
                 customer_email: decoded.email,
                 line_items: [{
@@ -75,24 +101,53 @@ export default async (req, context) => {
                 cancel_url: `${siteUrl}/#exclusive`,
                 metadata: {
                     user_email: decoded.email,
-                    tier: tier
+                    tier: tier,
+                    promo_code: promoCode || ""
                 }
-            });
+            };
+            if (discounts.length) sessionParams.discounts = discounts;
+
+            const session = await stripe.checkout.sessions.create(sessionParams);
+
+            // Track promo code usage
+            if (promoCode && discounts.length) {
+                try {
+                    const promoStore = getStore("promo-codes");
+                    const promo = await promoStore.get(promoCode.toUpperCase(), { type: "json" }) as any;
+                    if (promo) {
+                        promo.usedCount = (promo.usedCount || 0) + 1;
+                        promo.usedBy = promo.usedBy || [];
+                        promo.usedBy.push({ email: decoded.email, at: new Date().toISOString() });
+                        await promoStore.setJSON(promoCode.toUpperCase(), promo);
+                    }
+                } catch {}
+            }
 
             return new Response(JSON.stringify({ url: session.url }), { headers: CORS });
 
         } else if (type === "single" && postId) {
             // Pay-per-post checkout — look up price from content store
-            let postPrice = 499; // default $4.99
-            let postTitle = postId;
+            let postTitle = `Unlock: ${postId}`;
+            let postPrice = DEFAULT_POST_PRICE;
+
             try {
                 const contentStore = getStore("content");
-                const post = await contentStore.get(postId, { type: "json" });
+                const post = await contentStore.get(postId, { type: "json" }) as any;
                 if (post) {
-                    if (post.price) postPrice = Math.round(post.price * 100);
-                    if (post.title) postTitle = post.title;
+                    postTitle = `Unlock: ${post.title || postId}`;
+                    if (post.price) postPrice = Math.round(post.price * 100); // price stored as dollars
                 }
-            } catch (err) { console.error("Content price lookup:", err); }
+            } catch {}
+
+            // Check if user already purchased this post
+            try {
+                const userStore = getStore("users");
+                const userKey = decoded.email.toLowerCase().replace(/[^a-z0-9@._-]/g, '');
+                const user = await userStore.get(userKey, { type: "json" }) as any;
+                if (user?.purchases?.some((p: any) => p.postId === postId)) {
+                    return new Response(JSON.stringify({ error: "Already purchased", alreadyOwned: true }), { status: 400, headers: CORS });
+                }
+            } catch {}
 
             const session = await stripe.checkout.sessions.create({
                 mode: "payment",
@@ -100,13 +155,13 @@ export default async (req, context) => {
                 line_items: [{
                     price_data: {
                         currency: "usd",
-                        product_data: { name: `Unlock: ${postTitle}` },
+                        product_data: { name: postTitle },
                         unit_amount: postPrice
                     },
                     quantity: 1
                 }],
                 success_url: `${siteUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
-                cancel_url: `${siteUrl}/#exclusive`,
+                cancel_url: `${siteUrl}/members`,
                 metadata: {
                     user_email: decoded.email,
                     post_id: postId

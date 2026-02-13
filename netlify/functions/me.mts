@@ -45,7 +45,10 @@ export default async (req, context) => {
                 tier: user.tier || "free",
                 purchases: user.purchases || [],
                 createdAt: user.createdAt,
-                lastLogin: user.lastLogin
+                lastLogin: user.lastLogin,
+                subscribedAt: user.subscribedAt || null,
+                cancelPending: user.cancelPending || false,
+                cancelAt: user.cancelAt || null
             }
         }), { headers: CORS });
     }
@@ -104,7 +107,7 @@ export default async (req, context) => {
         if (!auth) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: CORS });
         try {
             const d = jwt.verify(auth.replace("Bearer ", ""), getSecret());
-            if (!d.admin && !d.isAdmin) throw new Error();
+            if (!d.isAdmin && !d.admin) throw new Error();
         } catch {
             return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: CORS });
         }

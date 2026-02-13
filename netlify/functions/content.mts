@@ -38,8 +38,12 @@ export default async (req, context) => {
 
     // ─── PUBLIC: GET CONTENT LIST ─────────────────
     if (path === "" && req.method === "GET") {
-        const jwtUser = verifyUser(req);
+        const search = (url.searchParams.get("search") || "").toLowerCase().trim();
+        const category = (url.searchParams.get("category") || "").toLowerCase().trim();
+        const sort = url.searchParams.get("sort") || "newest"; // newest, oldest, title
+
         // Look up fresh tier from user store (JWT tier may be stale after upgrade)
+        const jwtUser = verifyUser(req);
         let userTier = "free";
         let userPurchases = [];
         if (jwtUser?.email) {
@@ -53,6 +57,7 @@ export default async (req, context) => {
                 }
             } catch (err) { console.error("User lookup for content access:", err); }
         }
+
         try {
             const { blobs } = await store.list();
             const items = [];
@@ -63,22 +68,55 @@ export default async (req, context) => {
                 } catch (err) { console.error("Content item read error:", err); }
             }
 
-            // Sort by date descending
-            items.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
             // Enforce access: show metadata for all, but redact body/image for locked tiers
             const tierOrder = { free: 0, vip: 1, elite: 2 };
             const userLevel = tierOrder[userTier] || 0;
 
-            const filtered = items.map(i => {
+            let filtered = items.map(i => {
                 const itemLevel = tierOrder[i.tier] || 0;
                 // Grant access if user tier is high enough OR they purchased this post
                 if (userLevel >= itemLevel || userPurchases.includes(i.key)) return i;
                 // User doesn't have access — return metadata only, no body or image
-                return { key: i.key, title: i.title, tier: i.tier, type: i.type, createdAt: i.createdAt, locked: true };
+                return { key: i.key, title: i.title, tier: i.tier, type: i.type, createdAt: i.createdAt, price: i.price, category: i.category, locked: true };
             });
 
-            return new Response(JSON.stringify({ success: true, content: filtered }), { headers: CORS });
+            // Server-side search
+            if (search) {
+                filtered = filtered.filter(i =>
+                    (i.title || "").toLowerCase().includes(search) ||
+                    (i.body || "").toLowerCase().includes(search) ||
+                    (i.category || "").toLowerCase().includes(search)
+                );
+            }
+
+            // Category filter
+            if (category) {
+                filtered = filtered.filter(i => (i.category || "").toLowerCase() === category);
+            }
+
+            // Sort
+            if (sort === "oldest") {
+                filtered.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+            } else if (sort === "title") {
+                filtered.sort((a, b) => (a.title || "").localeCompare(b.title || ""));
+            } else {
+                filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            }
+
+            // Pagination
+            const page = Math.max(1, parseInt(url.searchParams.get("page") || "1"));
+            const limit = Math.min(100, Math.max(1, parseInt(url.searchParams.get("limit") || "50")));
+            const total = filtered.length;
+            const paginated = filtered.slice((page - 1) * limit, page * limit);
+
+            return new Response(JSON.stringify({
+                success: true,
+                content: paginated,
+                total,
+                page,
+                limit,
+                pages: Math.ceil(total / limit)
+            }), { headers: CORS });
         } catch (err) {
             return new Response(JSON.stringify({ error: "Failed to load content" }), { status: 500, headers: CORS });
         }

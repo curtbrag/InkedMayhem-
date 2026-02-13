@@ -451,6 +451,11 @@
         .toast-ok { background: var(--surface); color: var(--off-white); border: 1px solid var(--mid); }
         .toast-err { background: #2a0808; color: var(--red-bright); border: 1px solid var(--red); }
 
+        /* ─── PIPELINE SPECIFIC ────────────────── */
+        .pipe-filter.active { border-color: var(--red); color: var(--red); }
+        #pipeDetail .compose-form select { width: 100%; margin-bottom: 0; }
+        #pipeDetail .compose-form textarea { min-height: 80px; }
+
         /* ─── RESPONSIVE ────────────────────────── */
         @media (max-width: 768px) {
             .dash-header { padding: 1rem; }
@@ -526,11 +531,15 @@
     <!-- TABS -->
     <div class="tabs">
         <button class="tab active" data-tab="overview">Overview</button>
+        <button class="tab" data-tab="pipeline">Pipeline <span class="badge" id="pipelineBadge" style="display:none">0</span></button>
+        <button class="tab" data-tab="calendar">Calendar</button>
         <button class="tab" data-tab="users">Users</button>
         <button class="tab" data-tab="messages">Messages <span class="badge" id="unreadBadge" style="display:none">0</span></button>
         <button class="tab" data-tab="conversations">Conversations</button>
         <button class="tab" data-tab="content">Content</button>
         <button class="tab" data-tab="analytics">Analytics</button>
+        <button class="tab" data-tab="promos">Promos</button>
+        <button class="tab" data-tab="settings">Settings</button>
     </div>
 
     <!-- ─── OVERVIEW TAB ──────────────────── -->
@@ -553,6 +562,14 @@
                 <div class="label">Total Messages</div>
                 <div class="value" id="statMsgs">—</div>
             </div>
+        </div>
+
+        <!-- Pipeline Overview -->
+        <div class="section-title" style="font-size:1.3rem; margin-top: 2rem;"><span class="icon">◆</span> Content Pipeline</div>
+        <div class="stats-grid" id="overviewPipeGrid">
+            <div class="stat-card"><div class="label">Pipeline Inbox</div><div class="value" id="overviewPipeInbox">—</div></div>
+            <div class="stat-card gold"><div class="label">Queued</div><div class="value" id="overviewPipeQueued">—</div></div>
+            <div class="stat-card"><div class="label">Published</div><div class="value" id="overviewPipePublished" style="color:var(--green)">—</div></div>
         </div>
 
         <div class="section-title" style="font-size:1.3rem; margin-top: 2rem;"><span class="icon">◆</span> Tier Breakdown</div>
@@ -591,6 +608,81 @@
         </div>
     </div>
 
+    <!-- ─── PIPELINE TAB ───────────────────── -->
+    <div class="tab-content" id="tab-pipeline">
+        <div class="section-title"><span class="icon">◆</span> Content Pipeline</div>
+        <div class="stats-grid">
+            <div class="stat-card"><div class="label">Inbox</div><div class="value" id="pipeInbox">—</div><div class="sub">Awaiting review</div></div>
+            <div class="stat-card"><div class="label">Processed</div><div class="value" id="pipeProcessed">—</div><div class="sub">Checks complete</div></div>
+            <div class="stat-card gold"><div class="label">Queued</div><div class="value" id="pipeQueued">—</div><div class="sub">Ready to publish</div></div>
+            <div class="stat-card" style="border-left:2px solid var(--green)"><div class="label">Published</div><div class="value" id="pipePublished" style="color:var(--green)">—</div></div>
+            <div class="stat-card red"><div class="label">Rejected</div><div class="value" id="pipeRejected">—</div></div>
+        </div>
+        <div style="display:flex;gap:0.5rem;margin-bottom:1.5rem;flex-wrap:wrap">
+            <button class="btn-sm primary" onclick="pipeUploadModal()">+ Upload Content</button>
+            <button class="btn-sm" onclick="pipeProcessAll()">Process All Inbox</button>
+            <button class="btn-sm" onclick="pipePublishAll()">Publish All Queued</button>
+            <button class="btn-sm" onclick="pipeCheckSchedule()">Run Schedule Check</button>
+        </div>
+        <div style="display:flex;gap:0.5rem;margin-bottom:1rem;flex-wrap:wrap">
+            <button class="btn-sm pipe-filter active" data-filter="all" onclick="filterPipeline('all',this)">All</button>
+            <button class="btn-sm pipe-filter" data-filter="inbox" onclick="filterPipeline('inbox',this)">Inbox</button>
+            <button class="btn-sm pipe-filter" data-filter="processed" onclick="filterPipeline('processed',this)">Processed</button>
+            <button class="btn-sm pipe-filter" data-filter="queued" onclick="filterPipeline('queued',this)">Queued</button>
+            <button class="btn-sm pipe-filter" data-filter="published" onclick="filterPipeline('published',this)">Published</button>
+            <button class="btn-sm pipe-filter" data-filter="rejected" onclick="filterPipeline('rejected',this)">Rejected</button>
+        </div>
+        <div id="pipeLoading" class="loading-text"><span class="spinner"></span> Loading pipeline...</div>
+        <div class="table-wrap" id="pipeTable" style="display:none">
+            <table><thead><tr><th>Status</th><th>File</th><th>Caption</th><th>Category</th><th>Tier</th><th>Source</th><th>Date</th><th>Actions</th></tr></thead><tbody id="pipeBody"></tbody></table>
+        </div>
+        <div class="empty" id="pipeEmpty" style="display:none"><div class="icon">📂</div><p>No items in the pipeline. Upload content to get started.</p></div>
+        <div class="msg-detail" id="pipeDetail">
+            <span class="back-link" onclick="closePipeDetail()">← Back to pipeline</span>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-top:1rem">
+                <div>
+                    <div class="msg-meta" id="pipeDetailMeta"></div>
+                    <div id="pipeDetailPreview" style="margin:1rem 0;max-width:100%;background:var(--surface);border:1px solid var(--border);padding:1rem;text-align:center"><span style="color:var(--gray)">Preview</span></div>
+                    <div id="pipeDetailChecks" style="margin-top:1rem"></div>
+                </div>
+                <div>
+                    <div class="compose-form" style="margin-top:0;border:none;padding:0;background:none">
+                        <label>Caption</label>
+                        <textarea id="pipeEditCaption" placeholder="Add a caption..."></textarea>
+                        <label>Category</label>
+                        <select id="pipeEditCategory"><option value="photos">Photos</option><option value="selfies">Selfies</option><option value="lifestyle">Lifestyle</option><option value="behind-the-scenes">Behind the Scenes</option></select>
+                        <label style="margin-top:1rem">Access Tier</label>
+                        <select id="pipeEditTier"><option value="free">Free</option><option value="vip">VIP</option><option value="elite">Elite</option></select>
+                        <label style="margin-top:1rem">Schedule (optional)</label>
+                        <input type="datetime-local" id="pipeEditSchedule" style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--off-white);padding:0.75rem 1rem;font-family:var(--font-mono);font-size:12px">
+                        <div style="display:flex;gap:0.5rem;margin-top:1.5rem;flex-wrap:wrap">
+                            <button class="btn-sm primary" onclick="pipeApproveItem()">Approve + Queue</button>
+                            <button class="btn-sm" onclick="pipeSaveItem()">Save Changes</button>
+                            <button class="btn-sm" onclick="pipePublishItem()">Publish Now</button>
+                            <button class="btn-sm danger" onclick="pipeRejectItem()">Reject</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="pipeUploadPanel" style="display:none">
+            <div class="compose-form" style="margin-top:1rem">
+                <div class="section-title" style="font-size:1.2rem"><span class="icon">◆</span> Upload Content</div>
+                <label>File</label>
+                <input type="file" id="pipeFileInput" accept="image/*,video/*" style="background:var(--surface);border:1px solid var(--border);color:var(--off-white);padding:0.75rem;width:100%;font-family:var(--font-mono);font-size:12px;margin-bottom:1rem">
+                <label>Caption</label>
+                <input type="text" id="pipeUpCaption" placeholder="Optional caption" style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--off-white);padding:0.75rem 1rem;font-family:var(--font-mono);font-size:12px;margin-bottom:1rem">
+                <div style="display:flex;gap:1rem;margin-bottom:1rem"><div style="flex:1"><label>Category</label><select id="pipeUpCategory" style="width:100%"><option value="photos">Photos</option><option value="selfies">Selfies</option><option value="lifestyle">Lifestyle</option><option value="behind-the-scenes">Behind the Scenes</option></select></div><div style="flex:1"><label>Tier</label><select id="pipeUpTier" style="width:100%"><option value="free">Free</option><option value="vip">VIP</option><option value="elite">Elite</option></select></div></div>
+                <div style="display:flex;gap:0.5rem"><button class="login-btn" style="max-width:200px" id="pipeUploadBtn" onclick="pipeDoUpload()">Upload</button><button class="btn-sm" onclick="pipeCloseUpload()">Cancel</button></div>
+                <div id="pipeUploadProgress" style="display:none;margin-top:1rem;color:var(--muted);font-size:11px"><span class="spinner"></span> Uploading...</div>
+            </div>
+        </div>
+        <div style="margin-top:2rem">
+            <div class="section-title" style="font-size:1.2rem"><span class="icon">◆</span> Recent Activity</div>
+            <div id="pipeActivityLog" style="background:var(--darker);border:1px solid var(--border);padding:1rem;max-height:300px;overflow-y:auto"><div class="loading-text"><span class="spinner"></span> Loading activity...</div></div>
+        </div>
+    </div>
+
     <!-- ─── USERS TAB ─────────────────────── -->
     <div class="tab-content" id="tab-users">
         <div class="section-title"><span class="icon">◆</span> Registered Users</div>
@@ -602,6 +694,7 @@
                         <th>Email</th>
                         <th>Name</th>
                         <th>Tier</th>
+                        <th>Status</th>
                         <th>Joined</th>
                         <th>Actions</th>
                     </tr>
@@ -774,6 +867,33 @@
     </div>
 
     <!-- ─── ANALYTICS TAB ────────────────────── -->
+    <!-- ─── CALENDAR TAB ─────────────────────── -->
+    <div class="tab-content" id="tab-calendar">
+        <div class="section-title"><span class="icon">◆</span> Content Calendar</div>
+        <div style="display:flex; gap:1rem; margin-bottom:1.5rem; align-items:center">
+            <button class="btn-sm" onclick="calPrevMonth()">&lt; Prev</button>
+            <span id="calMonthLabel" style="font-family:var(--font-display); font-size:1.3rem; letter-spacing:2px; min-width:180px; text-align:center"></span>
+            <button class="btn-sm" onclick="calNextMonth()">Next &gt;</button>
+            <button class="btn-sm primary" onclick="calToday()" style="margin-left:1rem">Today</button>
+        </div>
+        <div style="display:grid; grid-template-columns:repeat(7,1fr); gap:1px; background:var(--border)">
+            <div style="background:var(--surface); padding:0.5rem; text-align:center; color:var(--muted); font-size:10px; text-transform:uppercase; letter-spacing:1px">Sun</div>
+            <div style="background:var(--surface); padding:0.5rem; text-align:center; color:var(--muted); font-size:10px; text-transform:uppercase; letter-spacing:1px">Mon</div>
+            <div style="background:var(--surface); padding:0.5rem; text-align:center; color:var(--muted); font-size:10px; text-transform:uppercase; letter-spacing:1px">Tue</div>
+            <div style="background:var(--surface); padding:0.5rem; text-align:center; color:var(--muted); font-size:10px; text-transform:uppercase; letter-spacing:1px">Wed</div>
+            <div style="background:var(--surface); padding:0.5rem; text-align:center; color:var(--muted); font-size:10px; text-transform:uppercase; letter-spacing:1px">Thu</div>
+            <div style="background:var(--surface); padding:0.5rem; text-align:center; color:var(--muted); font-size:10px; text-transform:uppercase; letter-spacing:1px">Fri</div>
+            <div style="background:var(--surface); padding:0.5rem; text-align:center; color:var(--muted); font-size:10px; text-transform:uppercase; letter-spacing:1px">Sat</div>
+        </div>
+        <div id="calGrid" style="display:grid; grid-template-columns:repeat(7,1fr); gap:1px; background:var(--border)"></div>
+        <div style="margin-top:2rem">
+            <div class="section-title" style="font-size:1.2rem"><span class="icon">◆</span> Upcoming Scheduled Posts</div>
+            <div id="calUpcoming" style="background:var(--darker); border:1px solid var(--border); padding:1rem">
+                <div class="loading-text"><span class="spinner"></span> Loading schedule...</div>
+            </div>
+        </div>
+    </div>
+
     <div class="tab-content" id="tab-analytics">
         <div class="section-title"><span class="icon">◆</span> Analytics</div>
 
@@ -803,10 +923,93 @@
         <div class="section-title" style="font-size:1.2rem;margin-top:2rem"><span class="icon">◆</span> Signup Timeline</div>
         <div id="signupChart" style="display:flex;align-items:flex-end;gap:3px;height:120px;margin:1rem 0;max-width:800px;padding-bottom:20px;position:relative"></div>
 
-        <div class="section-title" style="font-size:1.2rem;margin-top:2rem"><span class="icon">◆</span> Revenue Estimate</div>
-        <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);padding:1.5rem;max-width:400px">
-            <div style="font-size:2rem;font-weight:700;color:var(--gold)" id="analRevenue">$0</div>
-            <div style="color:var(--muted);font-size:12px;margin-top:4px">Estimated monthly recurring (VIP × $9.99 + Elite × $24.99)</div>
+        <div class="section-title" style="font-size:1.2rem;margin-top:2rem"><span class="icon">◆</span> Revenue & MRR</div>
+        <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-top:1rem">
+            <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);padding:1.5rem;flex:1;min-width:200px">
+                <div style="font-size:2rem;font-weight:700;color:var(--gold)" id="analRevenue">$0</div>
+                <div style="color:var(--muted);font-size:12px;margin-top:4px">Estimated MRR</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);padding:1.5rem;flex:1;min-width:200px">
+                <div style="font-size:2rem;font-weight:700;color:var(--green)" id="analRevenue30d">—</div>
+                <div style="color:var(--muted);font-size:12px;margin-top:4px">Revenue (30d)</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);padding:1.5rem;flex:1;min-width:200px">
+                <div style="font-size:2rem;font-weight:700;color:var(--off-white)" id="analNetRevenue">—</div>
+                <div style="color:var(--muted);font-size:12px;margin-top:4px">Net Revenue (30d)</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);padding:1.5rem;flex:1;min-width:200px">
+                <div style="font-size:2rem;font-weight:700;color:var(--off-white)" id="analChurnRate">—</div>
+                <div style="color:var(--muted);font-size:12px;margin-top:4px">Churn Rate (90d)</div>
+            </div>
+        </div>
+        <div style="margin-top:1rem;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);padding:1.5rem;max-width:800px">
+            <div style="color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:1px;margin-bottom:1rem">Daily Revenue (Last 30 Days)</div>
+            <div id="analRevenueChart" style="display:flex;align-items:flex-end;gap:2px;height:80px"></div>
+        </div>
+
+        <div class="section-title" style="font-size:1.2rem;margin-top:2rem"><span class="icon">◆</span> Subscriber Growth</div>
+        <div class="stats-grid">
+            <div class="stat-card"><div class="label">Active VIP</div><div class="value" id="analActiveVip">—</div></div>
+            <div class="stat-card"><div class="label">Active Elite</div><div class="value" id="analActiveElite">—</div></div>
+            <div class="stat-card gold"><div class="label">Total Paid</div><div class="value" id="analTotalPaid">—</div></div>
+            <div class="stat-card"><div class="label">New Subs (90d)</div><div class="value" id="analNewSubs" style="color:var(--green)">—</div></div>
+            <div class="stat-card"><div class="label">Cancelled (90d)</div><div class="value" id="analCancelled" style="font-size:1.5rem">—</div></div>
+            <div class="stat-card"><div class="label">Churn Rate</div><div class="value" id="analChurnRateFull" style="font-size:1.5rem">—</div></div>
+        </div>
+
+        <div class="section-title" style="font-size:1.2rem;margin-top:2rem"><span class="icon">◆</span> FAQ Bot Insights</div>
+        <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-top:1rem">
+            <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);padding:1.5rem;flex:1;min-width:280px">
+                <div style="display:flex;gap:2rem;margin-bottom:1rem">
+                    <div>
+                        <div style="font-size:2rem;font-weight:700;color:var(--red-bright)" id="faqTotalHits">—</div>
+                        <div style="color:var(--muted);font-size:11px">Total FAQ hits</div>
+                    </div>
+                    <div>
+                        <div style="font-size:2rem;font-weight:700;color:var(--gold)" id="faqUnansweredCount">—</div>
+                        <div style="color:var(--muted);font-size:11px">Unanswered</div>
+                    </div>
+                    <div>
+                        <div style="font-size:2rem;font-weight:700;color:var(--red)" id="faqEscalationCount">—</div>
+                        <div style="color:var(--muted);font-size:11px">Escalations</div>
+                    </div>
+                </div>
+                <div style="font-size:12px;font-weight:700;color:var(--off-white);margin-bottom:0.5rem">Top Categories</div>
+                <div id="faqTopCategories" style="font-size:11px;color:var(--muted)">Loading...</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);padding:1.5rem;flex:1;min-width:280px">
+                <div style="font-size:12px;font-weight:700;color:var(--off-white);margin-bottom:0.5rem">Unanswered Questions</div>
+                <div id="faqUnansweredList" style="font-size:11px;color:var(--muted);max-height:200px;overflow-y:auto">Loading...</div>
+            </div>
+        </div>
+
+        <div class="section-title" style="font-size:1.2rem;margin-top:2rem"><span class="icon">◆</span> Data Export & Backup</div>
+        <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-top:1rem">
+            <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);padding:1.5rem;flex:1;min-width:280px">
+                <div style="font-size:14px;font-weight:700;color:var(--off-white);margin-bottom:0.5rem">Full Backup</div>
+                <div style="color:var(--muted);font-size:11px;margin-bottom:1rem">Download all data as JSON (users, content, pipeline, conversations, configs)</div>
+                <div id="exportStoreStats" style="font-size:11px;color:var(--muted);margin-bottom:1rem">Loading store stats...</div>
+                <button class="btn-sm primary" onclick="downloadFullBackup()" style="font-size:13px;padding:0.4rem 1rem">Download Full Backup</button>
+            </div>
+            <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);padding:1.5rem;flex:1;min-width:280px">
+                <div style="font-size:14px;font-weight:700;color:var(--off-white);margin-bottom:0.5rem">Export Single Store</div>
+                <select id="exportStoreName" style="width:100%;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.1);color:var(--off-white);padding:0.5rem;margin-bottom:0.5rem;font-family:var(--font-mono);font-size:12px">
+                    <option value="users">users</option>
+                    <option value="content">content</option>
+                    <option value="pipeline">pipeline</option>
+                    <option value="pipeline-logs">pipeline-logs</option>
+                    <option value="conversations">conversations</option>
+                    <option value="creator-configs">creator-configs</option>
+                    <option value="telegram-logs">telegram-logs</option>
+                    <option value="telegram-escalations">telegram-escalations</option>
+                    <option value="telegram-faq-stats">telegram-faq-stats</option>
+                    <option value="promo-codes">promo-codes</option>
+                    <option value="revenue-events">revenue-events</option>
+                    <option value="auth-ratelimits">auth-ratelimits</option>
+                    <option value="contacts">contacts</option>
+                </select>
+                <button class="btn-sm" onclick="downloadStoreExport()" style="font-size:13px;padding:0.4rem 1rem">Export Store</button>
+            </div>
         </div>
 
         <div class="section-title" style="font-size:1.2rem;margin-top:2rem"><span class="icon">◆</span> Admin Tools</div>
@@ -816,6 +1019,147 @@
                 <input type="email" id="resetEmail" placeholder="user@example.com" style="width:100%;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.1);color:var(--off-white);padding:0.5rem;margin-bottom:0.5rem">
                 <input type="text" id="resetPass" placeholder="New password (min 6 chars)" style="width:100%;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.1);color:var(--off-white);padding:0.5rem;margin-bottom:0.5rem">
                 <button class="btn-sm primary" onclick="resetUserPassword()" style="font-size:13px;padding:0.4rem 1rem">Reset Password</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ─── PROMOS TAB ──────────────────────── -->
+    <div class="tab-content" id="tab-promos">
+        <div class="section-title"><span class="icon">◆</span> Promo Codes</div>
+
+        <!-- Create Promo Code -->
+        <div style="background:var(--darker);border:1px solid var(--border);padding:1.5rem;margin-bottom:2rem;max-width:600px">
+            <div style="font-size:12px;font-weight:700;color:var(--off-white);margin-bottom:1rem">Create Promo Code</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem">
+                <div>
+                    <label style="display:block;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:1px;margin-bottom:0.2rem">Code</label>
+                    <input type="text" id="promoCode" placeholder="LAUNCH20" style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--off-white);padding:0.5rem;font-family:var(--font-mono);font-size:12px;text-transform:uppercase">
+                </div>
+                <div>
+                    <label style="display:block;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:1px;margin-bottom:0.2rem">Description</label>
+                    <input type="text" id="promoDesc" placeholder="Launch discount" style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--off-white);padding:0.5rem;font-family:var(--font-mono);font-size:12px">
+                </div>
+                <div>
+                    <label style="display:block;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:1px;margin-bottom:0.2rem">Discount Type</label>
+                    <select id="promoType" style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--off-white);padding:0.5rem;font-family:var(--font-mono);font-size:12px">
+                        <option value="percent">Percentage (%)</option>
+                        <option value="fixed">Fixed Amount ($)</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="display:block;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:1px;margin-bottom:0.2rem">Value</label>
+                    <input type="number" id="promoValue" placeholder="20" style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--off-white);padding:0.5rem;font-family:var(--font-mono);font-size:12px">
+                </div>
+                <div>
+                    <label style="display:block;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:1px;margin-bottom:0.2rem">Max Uses (0=unlimited)</label>
+                    <input type="number" id="promoMaxUses" placeholder="0" value="0" style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--off-white);padding:0.5rem;font-family:var(--font-mono);font-size:12px">
+                </div>
+                <div>
+                    <label style="display:block;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:1px;margin-bottom:0.2rem">Stripe Coupon ID (optional)</label>
+                    <input type="text" id="promoStripeCoupon" placeholder="" style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--off-white);padding:0.5rem;font-family:var(--font-mono);font-size:12px">
+                </div>
+            </div>
+            <button class="btn-sm primary" onclick="createPromo()" style="margin-top:1rem;font-size:13px;padding:0.4rem 1rem">Create Code</button>
+        </div>
+
+        <!-- Promo Codes List -->
+        <div id="promosLoading" class="loading-text"><span class="spinner"></span> Loading promo codes...</div>
+        <div id="promosEmpty" style="display:none;color:var(--gray);text-align:center;padding:2rem">No promo codes yet</div>
+        <div id="promosTable" style="display:none" class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Discount</th>
+                        <th>Uses</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="promosBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ─── SETTINGS TAB ─────────────────────── -->
+    <div class="tab-content" id="tab-settings">
+        <div class="section-title"><span class="icon">◆</span> Settings & Configuration</div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:2rem">
+            <div>
+                <div class="section-title" style="font-size:1.2rem"><span class="icon">◆</span> Creator Profile</div>
+                <div style="background:var(--darker); border:1px solid var(--border); padding:1.5rem">
+                    <label style="display:block; color:var(--muted); font-size:10px; text-transform:uppercase; letter-spacing:1px; margin-bottom:0.3rem">Creator Name</label>
+                    <input type="text" id="setCreatorName" placeholder="InkedMayhem" style="width:100%; background:var(--surface); border:1px solid var(--border); color:var(--off-white); padding:0.5rem; font-family:var(--font-mono); font-size:12px; margin-bottom:0.75rem">
+                    <label style="display:block; color:var(--muted); font-size:10px; text-transform:uppercase; letter-spacing:1px; margin-bottom:0.3rem">Handle</label>
+                    <input type="text" id="setCreatorHandle" placeholder="@inkedmayhem" style="width:100%; background:var(--surface); border:1px solid var(--border); color:var(--off-white); padding:0.5rem; font-family:var(--font-mono); font-size:12px; margin-bottom:0.75rem">
+                    <label style="display:block; color:var(--muted); font-size:10px; text-transform:uppercase; letter-spacing:1px; margin-bottom:0.3rem">Creator Tier</label>
+                    <select id="setCreatorTier" style="width:100%; background:var(--surface); border:1px solid var(--border); color:var(--off-white); padding:0.5rem; font-family:var(--font-mono); font-size:12px; margin-bottom:0.75rem">
+                        <option value="A">A — Manual approval</option>
+                        <option value="B">B — Trusted auto-publish</option>
+                        <option value="C">C — Scheduled</option>
+                        <option value="D">D — Full automation</option>
+                    </select>
+                    <label style="display:block; color:var(--muted); font-size:10px; text-transform:uppercase; letter-spacing:1px; margin-bottom:0.3rem">Moderation Level</label>
+                    <select id="setModLevel" style="width:100%; background:var(--surface); border:1px solid var(--border); color:var(--off-white); padding:0.5rem; font-family:var(--font-mono); font-size:12px; margin-bottom:1rem">
+                        <option value="manual">Manual — Review everything</option>
+                        <option value="trusted">Trusted — Auto-approve</option>
+                        <option value="scheduled">Scheduled — Auto-queue</option>
+                    </select>
+                    <button class="btn-sm primary" onclick="saveCreatorConfig()" style="font-size:13px; padding:0.4rem 1rem">Save Profile</button>
+                </div>
+            </div>
+            <div>
+                <div class="section-title" style="font-size:1.2rem"><span class="icon">◆</span> Telegram Bots</div>
+                <div style="background:var(--darker); border:1px solid var(--border); padding:1.5rem; margin-bottom:1rem">
+                    <div style="display:flex; gap:1rem; margin-bottom:1rem">
+                        <span id="tgCreatorStatus" style="font-size:11px"></span>
+                        <span id="tgFanStatus" style="font-size:11px"></span>
+                    </div>
+                    <button class="btn-sm primary" onclick="setupTelegramBot('creator')">Setup Creator Bot</button>
+                    <button class="btn-sm" onclick="setupTelegramBot('fan')">Setup Fan Bot</button>
+                    <div id="tgSetupResult" style="margin-top:0.75rem; font-size:11px; color:var(--muted)"></div>
+                </div>
+                <div class="section-title" style="font-size:1.2rem"><span class="icon">◆</span> Content Rules</div>
+                <div style="background:var(--darker); border:1px solid var(--border); padding:1.5rem">
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem; font-size:11px; margin-bottom:1rem">
+                        <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer"><input type="checkbox" id="setStripExif" checked style="accent-color:var(--red)"> Strip EXIF data</label>
+                        <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer"><input type="checkbox" id="setCompress" checked style="accent-color:var(--red)"> Compress images</label>
+                        <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer"><input type="checkbox" id="setThumbnails" checked style="accent-color:var(--red)"> Generate thumbnails</label>
+                        <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer"><input type="checkbox" id="setAutoApprove" style="accent-color:var(--red)"> Auto-approve</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Creators List -->
+        <div style="margin-top:2rem">
+            <div class="section-title" style="font-size:1.2rem"><span class="icon">◆</span> Managed Creators</div>
+            <div id="creatorsListLoading" class="loading-text"><span class="spinner"></span> Loading creators...</div>
+            <div id="creatorsList" style="display:none"></div>
+            <div style="background:var(--darker); border:1px solid var(--border); padding:1.5rem; margin-top:1rem">
+                <div class="section-title" style="font-size:1rem"><span class="icon">◆</span> Onboard New Creator</div>
+                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:1rem">
+                    <div>
+                        <label style="display:block; color:var(--muted); font-size:10px; text-transform:uppercase; margin-bottom:0.3rem">Name</label>
+                        <input type="text" id="onboardName" placeholder="Creator Name" style="width:100%; background:var(--surface); border:1px solid var(--border); color:var(--off-white); padding:0.5rem; font-family:var(--font-mono); font-size:12px">
+                    </div>
+                    <div>
+                        <label style="display:block; color:var(--muted); font-size:10px; text-transform:uppercase; margin-bottom:0.3rem">Handle</label>
+                        <input type="text" id="onboardHandle" placeholder="@handle" style="width:100%; background:var(--surface); border:1px solid var(--border); color:var(--off-white); padding:0.5rem; font-family:var(--font-mono); font-size:12px">
+                    </div>
+                    <div>
+                        <label style="display:block; color:var(--muted); font-size:10px; text-transform:uppercase; margin-bottom:0.3rem">Tagline</label>
+                        <input type="text" id="onboardTagline" placeholder="Brand tagline" style="width:100%; background:var(--surface); border:1px solid var(--border); color:var(--off-white); padding:0.5rem; font-family:var(--font-mono); font-size:12px">
+                    </div>
+                </div>
+                <div style="display:flex; gap:1rem; margin-top:0.75rem; align-items:center">
+                    <label style="display:flex; align-items:center; gap:0.3rem; font-size:11px; cursor:pointer"><input type="checkbox" id="onboardMembership" style="accent-color:var(--red)"> Membership</label>
+                    <label style="display:flex; align-items:center; gap:0.3rem; font-size:11px; cursor:pointer"><input type="checkbox" id="onboardBlog" style="accent-color:var(--red)"> Blog</label>
+                    <label style="display:flex; align-items:center; gap:0.3rem; font-size:11px; cursor:pointer"><input type="checkbox" id="onboardFaq" style="accent-color:var(--red)"> FAQ Bot</label>
+                    <button class="btn-sm primary" onclick="onboardCreator()" style="margin-left:auto">Onboard Creator</button>
+                </div>
+                <div id="onboardResult" style="margin-top:0.75rem; display:none"></div>
             </div>
         </div>
     </div>
@@ -881,6 +1225,7 @@ async function showDashboard() {
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('dashboard').style.display = 'block';
     loadStats();
+    loadPipelineStats();
 }
 
 // Check existing session
@@ -906,7 +1251,11 @@ document.querySelectorAll('.tab').forEach(tab => {
         if (tab.dataset.tab === 'conversations') loadConversations();
         if (tab.dataset.tab === 'content') loadContent();
         if (tab.dataset.tab === 'analytics') loadAnalytics();
-        if (tab.dataset.tab === 'overview') loadStats();
+        if (tab.dataset.tab === 'promos') loadPromos();
+        if (tab.dataset.tab === 'overview') { loadStats(); loadPipelineStats(); }
+        if (tab.dataset.tab === 'pipeline') { loadPipeline(); loadPipelineStats(); }
+        if (tab.dataset.tab === 'calendar') loadCalendar();
+        if (tab.dataset.tab === 'settings') loadSettingsTab();
     });
 });
 
@@ -950,8 +1299,14 @@ async function loadUsers() {
         }
 
         const tbody = document.getElementById('usersBody');
-        tbody.innerHTML = data.users.map(u => `
-            <tr>
+        tbody.innerHTML = data.users.map(u => {
+            const statusColor = u.status === 'banned' ? 'var(--red)' : u.status === 'suspended' ? 'var(--gold)' : 'var(--green)';
+            const statusLabel = (u.status || 'active').toUpperCase();
+            const banBtn = u.status === 'banned' || u.status === 'suspended'
+                ? `<button class="btn-sm" style="background:var(--green);color:#fff" onclick="userAction('${esc(u.key)}','activate')">Activate</button>`
+                : `<button class="btn-sm" style="background:var(--gold);color:#000" onclick="userAction('${esc(u.key)}','suspend')">Suspend</button>
+                   <button class="btn-sm danger" onclick="userAction('${esc(u.key)}','ban')">Ban</button>`;
+            return `<tr>
                 <td>${esc(u.email)}</td>
                 <td>${esc(u.name)}</td>
                 <td>
@@ -961,13 +1316,15 @@ async function loadUsers() {
                         ).join('')}
                     </select>
                 </td>
+                <td><span style="color:${statusColor};font-size:10px;letter-spacing:1px">${statusLabel}</span></td>
                 <td>${formatDate(u.createdAt)}</td>
-                <td>
-                    <button class="btn-sm" onclick="messageUser('${esc(u.email)}')">Message</button>
-                    <button class="btn-sm danger" onclick="deleteUser('${esc(u.key)}', '${esc(u.email)}')">Delete</button>
+                <td style="white-space:nowrap">
+                    <button class="btn-sm" onclick="messageUser('${esc(u.email)}')">Msg</button>
+                    ${banBtn}
+                    <button class="btn-sm danger" onclick="deleteUser('${esc(u.key)}', '${esc(u.email)}')">Del</button>
                 </td>
-            </tr>
-        `).join('');
+            </tr>`;
+        }).join('');
         document.getElementById('usersTable').style.display = 'block';
     } catch (e) {
         document.getElementById('usersLoading').style.display = 'none';
@@ -986,6 +1343,18 @@ async function deleteUser(key, email) {
     const data = await api('/users/delete', 'POST', { userKey: key });
     if (data.success) { toast('User deleted'); loadUsers(); loadStats(); }
     else toast('Delete failed', true);
+}
+
+async function userAction(key, action) {
+    const labels = { ban: 'Ban', suspend: 'Suspend', activate: 'Activate' };
+    if (action !== 'activate' && !confirm(`${labels[action]} this user?`)) return;
+    let reason = '';
+    if (action === 'ban' || action === 'suspend') {
+        reason = prompt(`${labels[action]} reason (optional):`) || '';
+    }
+    const data = await api('/users/ban', 'POST', { userKey: key, action, reason });
+    if (data.success) { toast(`User ${action === 'activate' ? 'activated' : action + 'ned'}`); loadUsers(); }
+    else toast('Action failed', true);
 }
 
 function messageUser(email) {
@@ -1412,6 +1781,379 @@ async function loadAnalytics() {
             }).join('');
         }
     } catch (e) { console.error('Analytics error:', e); }
+
+    // Load FAQ insights
+    loadFaqInsights();
+    // Load export stats
+    loadExportStats();
+    // Load revenue & subscriber analytics
+    loadRevenueMetrics();
+    loadSubscriberMetrics();
+}
+
+async function loadRevenueMetrics() {
+    try {
+        const r = await fetch('/api/analytics/revenue?days=30', { headers: headers() });
+        const data = await r.json();
+        if (!data.success) return;
+
+        document.getElementById('analRevenue30d').textContent = `$${(data.totalRevenue || 0).toFixed(2)}`;
+        document.getElementById('analNetRevenue').textContent = `$${(data.netRevenue || 0).toFixed(2)}`;
+
+        // Daily revenue chart (revenueByDay is array of {date, amount})
+        if (data.revenueByDay && data.revenueByDay.length) {
+            const maxVal = Math.max(1, ...data.revenueByDay.map(d => d.amount));
+            const chartEl = document.getElementById('analRevenueChart');
+            chartEl.innerHTML = data.revenueByDay.map(d => {
+                const h = Math.max(2, (d.amount / maxVal) * 80);
+                const label = d.date.split('-').slice(1).join('/');
+                return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end">
+                    <div style="width:100%;height:${h}px;background:var(--green, #4ade80);border-radius:2px 2px 0 0;min-height:2px" title="${label}: $${d.amount.toFixed(2)}"></div>
+                </div>`;
+            }).join('');
+        }
+    } catch (e) { console.error('Revenue metrics error:', e); }
+}
+
+async function loadSubscriberMetrics() {
+    try {
+        const r = await fetch('/api/analytics/subscribers?days=90', { headers: headers() });
+        const data = await r.json();
+        if (!data.success) return;
+
+        const churn = data.churnRate || '—';
+        document.getElementById('analChurnRate').textContent = churn;
+
+        // Subscriber Growth cards
+        document.getElementById('analActiveVip').textContent = data.activeVip || 0;
+        document.getElementById('analActiveElite').textContent = data.activeElite || 0;
+        document.getElementById('analTotalPaid').textContent = data.totalPaid || 0;
+        document.getElementById('analNewSubs').textContent = data.newSubscribers || 0;
+        document.getElementById('analCancelled').textContent = data.cancelled || 0;
+        document.getElementById('analChurnRateFull').textContent = churn;
+
+        // Update MRR from real data if available
+        if (data.mrr !== undefined) {
+            document.getElementById('analRevenue').textContent = `$${(data.mrr).toFixed(2)}`;
+        }
+    } catch (e) { console.error('Subscriber metrics error:', e); }
+}
+
+async function loadFaqInsights() {
+    try {
+        const r = await fetch('/api/analytics/faq', { headers: headers() });
+        const data = await r.json();
+        if (!data.success) return;
+
+        document.getElementById('faqTotalHits').textContent = data.totalHits || 0;
+        document.getElementById('faqUnansweredCount').textContent = data.unansweredCount || 0;
+        document.getElementById('faqEscalationCount').textContent = data.escalationCount || 0;
+
+        // Top categories
+        const catEl = document.getElementById('faqTopCategories');
+        if (data.topCategories && data.topCategories.length) {
+            catEl.innerHTML = data.topCategories.map(c =>
+                `<div style="display:flex;justify-content:space-between;padding:0.2rem 0;border-bottom:1px solid rgba(255,255,255,0.05)">
+                    <span style="text-transform:capitalize">${esc(c.category)}</span>
+                    <span style="color:var(--red-bright);font-weight:700">${c.hits}</span>
+                </div>`
+            ).join('');
+        } else {
+            catEl.innerHTML = '<span style="color:var(--gray)">No FAQ data yet</span>';
+        }
+
+        // Unanswered questions
+        const unEl = document.getElementById('faqUnansweredList');
+        if (data.unansweredQuestions && data.unansweredQuestions.length) {
+            unEl.innerHTML = data.unansweredQuestions.map(q =>
+                `<div style="padding:0.3rem 0;border-bottom:1px solid rgba(255,255,255,0.05)">
+                    <div style="color:var(--off-white)">"${esc((q.question || '').substring(0, 120))}"</div>
+                    <div style="color:var(--gray);font-size:10px">${q.timestamp ? formatDate(q.timestamp) : ''}</div>
+                </div>`
+            ).join('');
+        } else {
+            unEl.innerHTML = '<span style="color:var(--gray)">No unanswered questions</span>';
+        }
+    } catch (e) { console.error('FAQ insights error:', e); }
+}
+
+async function loadExportStats() {
+    try {
+        const r = await fetch('/api/admin-export/stats', { headers: headers() });
+        const data = await r.json();
+        if (!data.success) return;
+
+        const el = document.getElementById('exportStoreStats');
+        const entries = Object.entries(data.stores).filter(([,v]) => v > 0);
+        el.innerHTML = entries.map(([name, count]) =>
+            `<span style="display:inline-block;background:rgba(255,255,255,0.06);padding:2px 8px;border-radius:3px;margin:2px">${name}: <strong>${count}</strong></span>`
+        ).join(' ') + `<div style="margin-top:0.5rem;color:var(--gold)">Total items: ${data.totalItems}</div>`;
+    } catch (e) {
+        document.getElementById('exportStoreStats').textContent = 'Could not load stats';
+    }
+}
+
+async function downloadFullBackup() {
+    try {
+        toast('Generating backup...');
+        const r = await fetch('/api/admin-export', { headers: headers() });
+        const blob = await r.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `inkedmayhem-backup-${new Date().toISOString().split('T')[0]}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        toast('Backup downloaded!');
+    } catch (e) { toast('Backup failed', true); }
+}
+
+async function downloadStoreExport() {
+    const storeName = document.getElementById('exportStoreName').value;
+    try {
+        toast(`Exporting ${storeName}...`);
+        const r = await fetch(`/api/admin-export/store?name=${storeName}`, { headers: headers() });
+        const blob = await r.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${storeName}-export-${new Date().toISOString().split('T')[0]}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        toast(`${storeName} exported!`);
+    } catch (e) { toast('Export failed', true); }
+}
+
+// ─── PROMO CODES ──────────────────────────────
+const PROMO_API = '/api/promo-codes';
+
+async function promoApi(path, method = 'GET', body = null) {
+    const opts = { method, headers: headers() };
+    if (body) opts.body = JSON.stringify(body);
+    const r = await fetch(`${PROMO_API}${path}`, opts);
+    return r.json();
+}
+
+async function loadPromos() {
+    try {
+        document.getElementById('promosLoading').style.display = 'block';
+        document.getElementById('promosTable').style.display = 'none';
+        document.getElementById('promosEmpty').style.display = 'none';
+
+        const data = await promoApi('');
+        document.getElementById('promosLoading').style.display = 'none';
+
+        if (!data.success || !data.codes.length) {
+            document.getElementById('promosEmpty').style.display = 'block';
+            return;
+        }
+
+        const tbody = document.getElementById('promosBody');
+        tbody.innerHTML = data.codes.map(p => {
+            const discountLabel = p.discountType === 'percent' ? `${p.discountValue}%` : `$${(p.discountValue / 100).toFixed(2)}`;
+            const usesLabel = p.maxUses ? `${p.usedCount || 0}/${p.maxUses}` : `${p.usedCount || 0}/∞`;
+            const statusColor = p.active ? 'var(--green)' : 'var(--red)';
+            return `<tr>
+                <td style="font-weight:700;letter-spacing:1px">${esc(p.code)}</td>
+                <td>${discountLabel} <span style="color:var(--gray)">${esc(p.description || '')}</span></td>
+                <td>${usesLabel}</td>
+                <td><span style="color:${statusColor}">${p.active ? 'ACTIVE' : 'INACTIVE'}</span></td>
+                <td>${formatDate(p.createdAt)}</td>
+                <td>
+                    <button class="btn-sm" onclick="togglePromo('${esc(p.code)}')">${p.active ? 'Disable' : 'Enable'}</button>
+                    <button class="btn-sm danger" onclick="deletePromo('${esc(p.code)}')">Delete</button>
+                </td>
+            </tr>`;
+        }).join('');
+        document.getElementById('promosTable').style.display = 'block';
+    } catch (e) {
+        document.getElementById('promosLoading').style.display = 'none';
+        toast('Failed to load promos', true);
+    }
+}
+
+async function createPromo() {
+    const code = document.getElementById('promoCode').value.trim();
+    const description = document.getElementById('promoDesc').value.trim();
+    const discountType = document.getElementById('promoType').value;
+    const discountValue = Number(document.getElementById('promoValue').value);
+    const maxUses = Number(document.getElementById('promoMaxUses').value) || null;
+    const stripeCouponId = document.getElementById('promoStripeCoupon').value.trim() || null;
+
+    if (!code || !discountValue) { toast('Code and value required', true); return; }
+
+    const data = await promoApi('/create', 'POST', { code, description, discountType, discountValue, maxUses, stripeCouponId });
+    if (data.success) {
+        toast('Promo code created!');
+        document.getElementById('promoCode').value = '';
+        document.getElementById('promoDesc').value = '';
+        document.getElementById('promoValue').value = '';
+        loadPromos();
+    } else {
+        toast(data.error || 'Create failed', true);
+    }
+}
+
+async function togglePromo(code) {
+    const data = await promoApi('/toggle', 'POST', { code });
+    if (data.success) { toast(`Code ${data.active ? 'enabled' : 'disabled'}`); loadPromos(); }
+    else toast('Toggle failed', true);
+}
+
+async function deletePromo(code) {
+    if (!confirm(`Delete promo code ${code}?`)) return;
+    const data = await promoApi('/delete', 'POST', { code });
+    if (data.success) { toast('Code deleted'); loadPromos(); }
+    else toast('Delete failed', true);
+}
+
+// ─── PIPELINE ─────────────────────────────────
+const PIPE_API = '/api/pipeline';
+let currentPipeFilter = 'all';
+let currentPipeId = null;
+let currentPipeItem = null;
+
+async function pipeApi(path, method = 'GET', body = null) {
+    const opts = { method, headers: headers() };
+    if (body) opts.body = JSON.stringify(body);
+    const r = await fetch(`${PIPE_API}${path}`, opts);
+    return r.json();
+}
+
+async function loadPipelineStats() {
+    try {
+        const data = await pipeApi('/stats');
+        if (!data.success) return;
+        const p = data.pipeline;
+        document.getElementById('pipeInbox').textContent = p.inbox;
+        document.getElementById('pipeProcessed').textContent = p.processed;
+        document.getElementById('pipeQueued').textContent = p.queued;
+        document.getElementById('pipePublished').textContent = p.published;
+        document.getElementById('pipeRejected').textContent = p.rejected;
+        document.getElementById('overviewPipeInbox').textContent = p.inbox;
+        document.getElementById('overviewPipeQueued').textContent = p.queued;
+        document.getElementById('overviewPipePublished').textContent = p.published;
+        const badge = document.getElementById('pipelineBadge');
+        const pending = p.inbox + p.processed;
+        if (pending > 0) { badge.textContent = pending; badge.style.display = 'inline'; }
+        else { badge.style.display = 'none'; }
+        if (data.recentActivity) renderActivityLog(data.recentActivity);
+    } catch (e) { console.error('Pipeline stats error:', e); }
+}
+
+function renderActivityLog(logs) {
+    const container = document.getElementById('pipeActivityLog');
+    if (!logs.length) { container.innerHTML = '<div style="color:var(--gray);font-size:11px;text-align:center;padding:1rem">No recent activity</div>'; return; }
+    const actionColors = { 'ingest':'var(--gold)','process':'var(--muted)','approve':'var(--green)','reject':'var(--red)','publish':'var(--green)','delete':'var(--red)','telegram-upload':'var(--gold)','update':'var(--muted)','schedule-check':'var(--muted)','process-all':'var(--muted)','publish-all':'var(--green)','auto-queue':'var(--gold)','scheduled-publish':'var(--green)' };
+    container.innerHTML = logs.map(log => {
+        const color = actionColors[log.action] || 'var(--muted)';
+        return `<div style="display:flex;justify-content:space-between;align-items:center;padding:0.4rem 0;border-bottom:1px solid var(--border);font-size:11px"><span><span style="color:${color};text-transform:uppercase;letter-spacing:1px;font-size:10px">${esc(log.action)}</span> — ${esc(log.itemId||'')}</span><span style="color:var(--gray)">${formatDate(log.timestamp)}</span></div>`;
+    }).join('');
+}
+
+async function loadPipeline() {
+    document.getElementById('pipeLoading').style.display = 'block';
+    document.getElementById('pipeTable').style.display = 'none';
+    document.getElementById('pipeEmpty').style.display = 'none';
+    document.getElementById('pipeDetail').classList.remove('active');
+    try {
+        const data = await pipeApi(`/list?status=${currentPipeFilter}`);
+        document.getElementById('pipeLoading').style.display = 'none';
+        if (!data.success || !data.items.length) { document.getElementById('pipeEmpty').style.display = 'block'; return; }
+        const statusBadge = (s) => { const colors = {inbox:'var(--gold)',processed:'var(--muted)',queued:'var(--gold)',published:'var(--green)',rejected:'var(--red)'}; const c = colors[s]||'var(--muted)'; return `<span style="color:${c};border:1px solid ${c};padding:2px 8px;font-size:10px;text-transform:uppercase;letter-spacing:1px">${s}</span>`; };
+        document.getElementById('pipeBody').innerHTML = data.items.map(item => {
+            const proc = item.processing||{};
+            const thumbUrl = item.mediaType==='image'&&item.storedAs ? `/api/pipeline/thumb/${esc(item.storedAs)}` : '';
+            const thumbHtml = thumbUrl ? `<img src="${thumbUrl}" style="width:32px;height:40px;object-fit:cover;vertical-align:middle;margin-right:6px;border:1px solid var(--border)" onerror="this.style.display='none'">` : '';
+            const savingsHtml = proc.savings ? `<span style="color:var(--green);font-size:9px;margin-left:4px" title="Compressed">${proc.savings}</span>` : '';
+            return `<tr><td>${statusBadge(item.status)}</td><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${thumbHtml}${esc(item.filename)}${savingsHtml}</td><td style="color:var(--muted);max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(item.caption||'—')}</td><td>${esc(item.category||'—')}</td><td><span class="tier-badge tier-${item.tier||'free'}">${(item.tier||'free').toUpperCase()}</span></td><td style="font-size:10px;color:var(--muted)">${esc(item.source||'upload')}</td><td style="white-space:nowrap">${formatDate(item.createdAt)}</td><td><button class="btn-sm primary" onclick="openPipeItem('${esc(item.id)}')">Open</button>${item.status==='inbox'?`<button class="btn-sm" onclick="quickProcess('${esc(item.id)}')">Process</button>`:''}${item.status==='queued'?`<button class="btn-sm" onclick="quickPublish('${esc(item.id)}')">Publish</button>`:''}<button class="btn-sm danger" onclick="pipeDeleteItem('${esc(item.id)}')">Del</button></td></tr>`;
+        }).join('');
+        document.getElementById('pipeTable').style.display = 'block';
+    } catch (e) { document.getElementById('pipeLoading').style.display = 'none'; toast('Failed to load pipeline', true); }
+}
+
+function filterPipeline(status, btn) { currentPipeFilter = status; document.querySelectorAll('.pipe-filter').forEach(b => b.classList.remove('active')); if (btn) btn.classList.add('active'); loadPipeline(); }
+
+async function openPipeItem(id) {
+    try {
+        const data = await pipeApi(`/item?id=${id}`);
+        if (!data.success) { toast('Item not found', true); return; }
+        currentPipeId = id; currentPipeItem = data.item; const item = data.item;
+        document.getElementById('pipeTable').style.display = 'none';
+        document.getElementById('pipeDetailMeta').innerHTML = `<strong>${esc(item.filename)}</strong><br>Status: <span style="color:var(--gold)">${item.status.toUpperCase()}</span> | Source: ${esc(item.source)} | Type: ${esc(item.mediaType)} | Size: ${item.fileSizeMB}MB<br>Created: ${formatDate(item.createdAt)}${item.processedAt?` | Processed: ${formatDate(item.processedAt)}`:''}${item.publishedAt?` | Published: ${formatDate(item.publishedAt)}`:''}${item.scheduledAt?`<br>Scheduled: ${item.scheduledAt}`:''}${item.rejectReason?`<br><span style="color:var(--red)">Rejected: ${esc(item.rejectReason)}</span>`:''}`;
+        const preview = document.getElementById('pipeDetailPreview');
+        if (item.mediaType==='image'&&item.storedAs) { preview.innerHTML = `<img src="/api/pipeline/asset/${esc(item.storedAs)}" style="max-width:100%;max-height:400px;object-fit:contain" onerror="this.parentNode.innerHTML='<span style=color:var(--gray)>Preview unavailable</span>'">`; }
+        else if (item.mediaType==='video') { preview.innerHTML = `<div style="color:var(--muted);padding:2rem">Video file — ${esc(item.filename)}</div>`; }
+        else { preview.innerHTML = '<span style="color:var(--gray)">Preview unavailable</span>'; }
+        const checks = item.checks||{};
+        const proc = item.processing||{};
+        let checksHtml = `<div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:0.5rem">Content Checks</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:0.3rem;font-size:11px"><span>${checks.fileTypeValid?'✅':'❌'} File type valid</span><span>${checks.fileSizeValid?'✅':'❌'} File size valid</span><span>${checks.exifStripped?'✅':'⏳'} EXIF stripped</span><span>${checks.compressed?'✅':'⏳'} Compressed</span><span>${checks.thumbnailGenerated?'✅':'⏳'} Thumbnail</span>${proc.watermarked?'<span>✅ Watermarked</span>':''}</div>`;
+        if (proc.originalSizeBytes) {
+            const origKB = (proc.originalSizeBytes/1024).toFixed(0);
+            const procKB = (proc.processedSizeBytes/1024).toFixed(0);
+            checksHtml += `<div style="margin-top:0.7rem;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:0.3rem">Processing Results</div><div style="font-size:11px;display:grid;grid-template-columns:1fr 1fr;gap:0.3rem"><span>Original: ${origKB} KB</span><span>Processed: ${procKB} KB</span><span>Savings: <span style="color:var(--green)">${proc.savings||'—'}</span></span>${proc.width?`<span>Dimensions: ${proc.width}×${proc.height}</span>`:''}${proc.format?`<span>Format: ${proc.format}</span>`:''}</div>`;
+        }
+        if (proc.errors&&proc.errors.length) { checksHtml += `<div style="margin-top:0.5rem;color:var(--red);font-size:11px">${proc.errors.map(e=>'⚠ '+esc(e)).join('<br>')}</div>`; }
+        if (proc.note) { checksHtml += `<div style="margin-top:0.5rem;color:var(--muted);font-size:11px;font-style:italic">${esc(proc.note)}</div>`; }
+        document.getElementById('pipeDetailChecks').innerHTML = checksHtml;
+        document.getElementById('pipeEditCaption').value = item.caption||'';
+        document.getElementById('pipeEditCategory').value = item.category||'photos';
+        document.getElementById('pipeEditTier').value = item.tier||'free';
+        document.getElementById('pipeEditSchedule').value = item.scheduledAt?item.scheduledAt.slice(0,16):'';
+        document.getElementById('pipeDetail').classList.add('active');
+    } catch (e) { toast('Failed to load item', true); }
+}
+
+function closePipeDetail() { document.getElementById('pipeDetail').classList.remove('active'); document.getElementById('pipeTable').style.display = 'block'; loadPipeline(); loadPipelineStats(); }
+
+async function pipeSaveItem() {
+    if (!currentPipeId) return;
+    const data = await pipeApi('/update','POST',{pipelineId:currentPipeId,caption:document.getElementById('pipeEditCaption').value,category:document.getElementById('pipeEditCategory').value,tier:document.getElementById('pipeEditTier').value,scheduledAt:document.getElementById('pipeEditSchedule').value||null});
+    if (data.success) toast('Saved'); else toast('Save failed',true);
+}
+
+async function pipeApproveItem() {
+    if (!currentPipeId) return;
+    const data = await pipeApi('/approve','POST',{pipelineId:currentPipeId,caption:document.getElementById('pipeEditCaption').value,category:document.getElementById('pipeEditCategory').value,tier:document.getElementById('pipeEditTier').value,scheduledAt:document.getElementById('pipeEditSchedule').value||null});
+    if (data.success) { toast('Approved + queued'); closePipeDetail(); } else toast(data.error||'Approve failed',true);
+}
+
+async function pipePublishItem() {
+    if (!currentPipeId) return;
+    if (currentPipeItem&&currentPipeItem.status!=='queued') {
+        const approve = await pipeApi('/approve','POST',{pipelineId:currentPipeId,caption:document.getElementById('pipeEditCaption').value,category:document.getElementById('pipeEditCategory').value,tier:document.getElementById('pipeEditTier').value});
+        if (!approve.success) { toast('Failed to queue item first',true); return; }
+    }
+    const data = await pipeApi('/publish','POST',{pipelineId:currentPipeId});
+    if (data.success) { toast('Published!'); closePipeDetail(); } else toast(data.error||'Publish failed',true);
+}
+
+async function pipeRejectItem() { if (!currentPipeId) return; const reason = prompt('Reject reason (optional):')||''; const data = await pipeApi('/reject','POST',{pipelineId:currentPipeId,reason}); if (data.success) { toast('Rejected'); closePipeDetail(); } else toast('Reject failed',true); }
+
+async function pipeDeleteItem(id) { if (!confirm('Delete this pipeline item?')) return; const data = await pipeApi('/delete','POST',{pipelineId:id}); if (data.success) { toast('Deleted'); loadPipeline(); loadPipelineStats(); } else toast('Delete failed',true); }
+async function quickProcess(id) { const data = await pipeApi('/process','POST',{pipelineId:id}); if (data.success) { toast('Processed'); loadPipeline(); loadPipelineStats(); } else toast('Process failed',true); }
+async function quickPublish(id) { const data = await pipeApi('/publish','POST',{pipelineId:id}); if (data.success) { toast('Published!'); loadPipeline(); loadPipelineStats(); } else toast('Publish failed',true); }
+async function pipeProcessAll() { if (!confirm('Process all inbox items?')) return; const data = await pipeApi('/process-all','POST'); if (data.success) { toast(`Processed ${data.processed} items`); loadPipeline(); loadPipelineStats(); } else toast('Batch process failed',true); }
+async function pipePublishAll() { if (!confirm('Publish all queued items?')) return; const data = await pipeApi('/publish-all','POST'); if (data.success) { toast(`Published ${data.published} items`); loadPipeline(); loadPipelineStats(); } else toast('Batch publish failed',true); }
+async function pipeCheckSchedule() { const data = await pipeApi('/check-schedule','POST'); if (data.success) { toast(`Schedule check: ${data.published} items published`); loadPipeline(); loadPipelineStats(); } else toast('Schedule check failed',true); }
+
+function pipeUploadModal() { document.getElementById('pipeUploadPanel').style.display = 'block'; document.getElementById('pipeFileInput').value = ''; document.getElementById('pipeUpCaption').value = ''; }
+function pipeCloseUpload() { document.getElementById('pipeUploadPanel').style.display = 'none'; }
+
+async function pipeDoUpload() {
+    const fileInput = document.getElementById('pipeFileInput');
+    const file = fileInput.files[0];
+    if (!file) { toast('Select a file first',true); return; }
+    const btn = document.getElementById('pipeUploadBtn');
+    const progress = document.getElementById('pipeUploadProgress');
+    btn.disabled = true; btn.textContent = 'Uploading...'; progress.style.display = 'block';
+    try {
+        const reader = new FileReader();
+        const fileData = await new Promise((resolve,reject) => { reader.onload = () => resolve(reader.result.split(',')[1]); reader.onerror = reject; reader.readAsDataURL(file); });
+        const data = await pipeApi('/ingest','POST',{filename:file.name,fileSize:file.size,fileData,caption:document.getElementById('pipeUpCaption').value,category:document.getElementById('pipeUpCategory').value,tier:document.getElementById('pipeUpTier').value,source:'upload'});
+        if (data.success) { toast('Uploaded to pipeline!'); pipeCloseUpload(); loadPipeline(); loadPipelineStats(); } else { toast(data.error||'Upload failed',true); }
+    } catch (e) { toast('Upload error',true); console.error('Upload error:',e); }
+    btn.disabled = false; btn.textContent = 'Upload'; progress.style.display = 'none';
 }
 
 // ─── ADMIN PASSWORD RESET ────────────────────
@@ -1434,6 +2176,160 @@ async function resetUserPassword() {
             document.getElementById('resetPass').value = '';
         } else toast(data.error || 'Reset failed', true);
     } catch { toast('Reset failed', true); }
+}
+
+// ─── CALENDAR ─────────────────────────────────
+let calYear = new Date().getFullYear();
+let calMonth = new Date().getMonth();
+let calItems = [];
+
+function calPrevMonth() { calMonth--; if (calMonth < 0) { calMonth = 11; calYear--; } renderCalendar(); }
+function calNextMonth() { calMonth++; if (calMonth > 11) { calMonth = 0; calYear++; } renderCalendar(); }
+function calToday() { calYear = new Date().getFullYear(); calMonth = new Date().getMonth(); renderCalendar(); }
+
+async function loadCalendar() {
+    try {
+        const data = await pipeApi('/list?status=all');
+        if (data.success) calItems = data.items.filter(i => i.scheduledAt || i.publishedAt);
+    } catch {}
+    renderCalendar();
+    renderUpcoming();
+}
+
+function renderCalendar() {
+    const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    document.getElementById('calMonthLabel').textContent = `${months[calMonth]} ${calYear}`;
+    const grid = document.getElementById('calGrid');
+    const firstDay = new Date(calYear, calMonth, 1).getDay();
+    const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+    const todayStr = new Date().toISOString().split('T')[0];
+    let html = '';
+    const prevDays = new Date(calYear, calMonth, 0).getDate();
+    for (let i = firstDay - 1; i >= 0; i--) html += `<div style="background:var(--dark);opacity:0.4;min-height:80px;padding:0.4rem"><div style="font-size:10px;color:var(--gray)">${prevDays-i}</div></div>`;
+    for (let d = 1; d <= daysInMonth; d++) {
+        const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        const isToday = dateStr === todayStr;
+        const events = calItems.filter(item => (item.scheduledAt?.split('T')[0] === dateStr) || (item.publishedAt?.split('T')[0] === dateStr));
+        let ev = events.slice(0,3).map(item => {
+            const cls = item.status === 'published' ? 'color:var(--green);background:rgba(46,125,50,0.15)' : 'color:var(--gold);background:rgba(201,168,76,0.15)';
+            return `<div style="${cls};font-size:9px;padding:1px 3px;margin-bottom:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;border-radius:2px" onclick="openPipeItem('${esc(item.id)}')">${esc((item.caption||item.filename||'').substring(0,14))}</div>`;
+        }).join('');
+        if (events.length > 3) ev += `<div style="font-size:8px;color:var(--gray)">+${events.length-3}</div>`;
+        html += `<div style="background:var(--darker);min-height:80px;padding:0.4rem;${isToday?'border:1px solid var(--red)':''}"><div style="font-size:10px;color:${isToday?'var(--red)':'var(--muted)'};margin-bottom:2px;${isToday?'font-weight:bold':''}">${d}</div>${ev}</div>`;
+    }
+    const rem = (7 - ((firstDay + daysInMonth) % 7)) % 7;
+    for (let i = 1; i <= rem; i++) html += `<div style="background:var(--dark);opacity:0.4;min-height:80px;padding:0.4rem"><div style="font-size:10px;color:var(--gray)">${i}</div></div>`;
+    grid.innerHTML = html;
+}
+
+function renderUpcoming() {
+    const now = new Date().toISOString();
+    const upcoming = calItems.filter(i => i.status === 'queued' && i.scheduledAt && i.scheduledAt > now).sort((a,b) => (a.scheduledAt||'').localeCompare(b.scheduledAt||''));
+    const c = document.getElementById('calUpcoming');
+    if (!upcoming.length) { c.innerHTML = '<div style="color:var(--gray);font-size:11px;text-align:center;padding:1rem">No upcoming scheduled posts</div>'; return; }
+    c.innerHTML = upcoming.slice(0,10).map(item => {
+        const d = new Date(item.scheduledAt);
+        return `<div style="display:flex;justify-content:space-between;align-items:center;padding:0.4rem 0;border-bottom:1px solid var(--border)">
+            <span><span style="color:var(--gold);font-size:10px;text-transform:uppercase;letter-spacing:1px">SCHED</span> ${esc(item.caption||item.filename)} <span class="tier-badge tier-${item.tier||'free'}" style="font-size:9px">${(item.tier||'free').toUpperCase()}</span></span>
+            <span style="font-size:11px;color:var(--muted)">${d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})} ${d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})}</span>
+        </div>`;
+    }).join('');
+}
+
+// ─── SETTINGS ─────────────────────────────────
+const CONFIG_API = '/api/creator-config';
+async function configApi(path, method = 'GET', body = null) {
+    const opts = { method, headers: headers() };
+    if (body) opts.body = JSON.stringify(body);
+    const r = await fetch(`${CONFIG_API}${path}`, opts);
+    return r.json();
+}
+
+async function loadSettingsTab() {
+    try {
+        const data = await configApi('/get?id=inkedmayhem');
+        if (data.success && data.config) {
+            const c = data.config;
+            document.getElementById('setCreatorName').value = c.name || '';
+            document.getElementById('setCreatorHandle').value = c.handle || '';
+            document.getElementById('setCreatorTier').value = c.creatorTier || 'A';
+            document.getElementById('setModLevel').value = c.moderation?.level || 'manual';
+            document.getElementById('setStripExif').checked = c.contentRules?.stripExif !== false;
+            document.getElementById('setCompress').checked = c.contentRules?.compressImages !== false;
+            document.getElementById('setThumbnails').checked = c.contentRules?.generateThumbnails !== false;
+            document.getElementById('setAutoApprove').checked = c.moderation?.autoApproveAfterChecks === true;
+        }
+    } catch {}
+    loadBotStatus();
+    loadCreatorsList();
+}
+
+async function saveCreatorConfig() {
+    try {
+        const data = await configApi('/save', 'POST', {
+            config: {
+                id: 'inkedmayhem',
+                name: document.getElementById('setCreatorName').value,
+                handle: document.getElementById('setCreatorHandle').value,
+                creatorTier: document.getElementById('setCreatorTier').value,
+                moderation: { level: document.getElementById('setModLevel').value, autoApproveAfterChecks: document.getElementById('setAutoApprove').checked, notifyOnUpload: true, notifyOnPublish: true },
+                contentRules: { stripExif: document.getElementById('setStripExif').checked, compressImages: document.getElementById('setCompress').checked, generateThumbnails: document.getElementById('setThumbnails').checked }
+            }
+        });
+        if (data.success) toast('Config saved'); else toast('Save failed', true);
+    } catch { toast('Save failed', true); }
+}
+
+async function loadBotStatus() {
+    try {
+        const r = await fetch('/api/analytics/health');
+        const data = await r.json();
+        document.getElementById('tgCreatorStatus').innerHTML = `<span style="color:${data.env?.telegramCreator ? 'var(--green)' : 'var(--red)'}">● Creator: ${data.env?.telegramCreator ? 'OK' : 'Not Set'}</span>`;
+        document.getElementById('tgFanStatus').innerHTML = `<span style="color:${data.env?.telegramFan ? 'var(--green)' : 'var(--red)'}">● Fan: ${data.env?.telegramFan ? 'OK' : 'Not Set'}</span>`;
+    } catch {
+        document.getElementById('tgCreatorStatus').innerHTML = '<span style="color:var(--gray)">● Unknown</span>';
+        document.getElementById('tgFanStatus').innerHTML = '<span style="color:var(--gray)">● Unknown</span>';
+    }
+}
+
+async function setupTelegramBot(botType) {
+    const el = document.getElementById('tgSetupResult');
+    el.textContent = 'Setting up...';
+    try {
+        const r = await fetch('/api/telegram/setup', { method: 'POST', headers: headers(), body: JSON.stringify({ botType }) });
+        const data = await r.json();
+        if (data.success) { el.innerHTML = `<span style="color:var(--green)">Webhook set: ${esc(data.webhookUrl)}</span>`; toast(`${botType} bot configured`); loadBotStatus(); }
+        else el.innerHTML = `<span style="color:var(--red)">${esc(data.error || 'Failed')}</span>`;
+    } catch { el.innerHTML = '<span style="color:var(--red)">Setup failed</span>'; }
+}
+
+async function loadCreatorsList() {
+    try {
+        const data = await configApi('/list');
+        document.getElementById('creatorsListLoading').style.display = 'none';
+        const c = document.getElementById('creatorsList');
+        if (!data.success || !data.creators?.length) { c.style.display = 'block'; c.innerHTML = '<div style="background:var(--darker);border:1px solid var(--border);padding:1rem;color:var(--gray);font-size:11px">No creators configured.</div>'; return; }
+        c.style.display = 'block';
+        c.innerHTML = `<div class="table-wrap"><table><thead><tr><th>Name</th><th>Handle</th><th>Tier</th><th>Domain</th></tr></thead><tbody>${data.creators.map(cr => `<tr><td>${esc(cr.name)}</td><td style="color:var(--muted)">${esc(cr.handle)}</td><td><span style="color:var(--gold)">${cr.creatorTier||'A'}</span></td><td style="color:var(--muted);font-size:11px">${esc(cr.domain||'—')}</td></tr>`).join('')}</tbody></table></div>`;
+    } catch { document.getElementById('creatorsListLoading').style.display = 'none'; }
+}
+
+async function onboardCreator() {
+    const name = document.getElementById('onboardName').value.trim();
+    if (!name) { toast('Name required', true); return; }
+    try {
+        const data = await configApi('/onboard', 'POST', {
+            name, handle: document.getElementById('onboardHandle').value.trim(), tagline: document.getElementById('onboardTagline').value.trim(),
+            membership: document.getElementById('onboardMembership').checked, blog: document.getElementById('onboardBlog').checked, faq: document.getElementById('onboardFaq').checked
+        });
+        const el = document.getElementById('onboardResult');
+        if (data.success) {
+            el.style.display = 'block';
+            el.innerHTML = `<div style="background:rgba(46,125,50,0.1);border:1px solid var(--green);padding:1rem;color:var(--green);font-size:11px"><strong>Onboarded!</strong> ID: ${esc(data.creatorId)}<br>${(data.nextSteps||[]).map(s => '• ' + esc(s)).join('<br>')}</div>`;
+            toast('Creator onboarded!'); loadCreatorsList();
+            document.getElementById('onboardName').value = ''; document.getElementById('onboardHandle').value = ''; document.getElementById('onboardTagline').value = '';
+        } else { el.style.display = 'block'; el.innerHTML = `<span style="color:var(--red)">${esc(data.error||'Failed')}</span>`; }
+    } catch { toast('Onboard failed', true); }
 }
 </script>
 </body>

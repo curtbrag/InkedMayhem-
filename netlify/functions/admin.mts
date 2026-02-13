@@ -69,6 +69,7 @@ export default async (req, context) => {
                         email: user.email,
                         name: user.name || "—",
                         tier: user.tier || "free",
+                        status: user.status || "active",
                         purchases: user.purchases || [],
                         createdAt: user.createdAt || "—",
                         lastLogin: user.lastLogin || null
@@ -76,7 +77,14 @@ export default async (req, context) => {
                 }
             }
             users.sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""));
-            return new Response(JSON.stringify({ success: true, users, total: users.length }), { headers: CORS });
+
+            // Pagination
+            const page = Math.max(1, parseInt(url.searchParams.get("page") || "1"));
+            const limit = Math.min(100, Math.max(1, parseInt(url.searchParams.get("limit") || "50")));
+            const total = users.length;
+            const paginated = users.slice((page - 1) * limit, page * limit);
+
+            return new Response(JSON.stringify({ success: true, users: paginated, total, page, limit, pages: Math.ceil(total / limit) }), { headers: CORS });
         } catch (err) {
             console.error("List users error:", err);
             return new Response(JSON.stringify({ error: "Failed to list users" }), { status: 500, headers: CORS });
@@ -86,7 +94,7 @@ export default async (req, context) => {
     // ─── UPDATE USER ─────────────────────────────
     if (path === "/users/update" && req.method === "POST") {
         try {
-            const { userKey, tier, name } = await req.json();
+            const { userKey, tier, name, status } = await req.json();
             if (!userKey) return new Response(JSON.stringify({ error: "userKey required" }), { status: 400, headers: CORS });
 
             const store = getStore("users");
@@ -95,12 +103,50 @@ export default async (req, context) => {
 
             if (tier) user.tier = tier;
             if (name) user.name = name;
+            if (status !== undefined) user.status = status; // "active", "suspended", "banned"
             user.updatedAt = new Date().toISOString();
 
             await store.setJSON(userKey, user);
-            return new Response(JSON.stringify({ success: true, user: { email: user.email, name: user.name, tier: user.tier } }), { headers: CORS });
+            return new Response(JSON.stringify({ success: true, user: { email: user.email, name: user.name, tier: user.tier, status: user.status } }), { headers: CORS });
         } catch (err) {
             return new Response(JSON.stringify({ error: "Update failed" }), { status: 500, headers: CORS });
+        }
+    }
+
+    // ─── BAN/SUSPEND USER ─────────────────────────
+    if (path === "/users/ban" && req.method === "POST") {
+        try {
+            const { userKey, action, reason } = await req.json();
+            if (!userKey || !action) return new Response(JSON.stringify({ error: "userKey and action required" }), { status: 400, headers: CORS });
+
+            const store = getStore("users");
+            const user = await store.get(userKey, { type: "json" });
+            if (!user) return new Response(JSON.stringify({ error: "User not found" }), { status: 404, headers: CORS });
+
+            if (action === "ban") {
+                user.status = "banned";
+                user.bannedAt = new Date().toISOString();
+                user.banReason = reason || "Banned by admin";
+            } else if (action === "suspend") {
+                user.status = "suspended";
+                user.suspendedAt = new Date().toISOString();
+                user.suspendReason = reason || "Suspended by admin";
+            } else if (action === "unban" || action === "unsuspend" || action === "activate") {
+                user.status = "active";
+                user.bannedAt = null;
+                user.banReason = null;
+                user.suspendedAt = null;
+                user.suspendReason = null;
+            } else {
+                return new Response(JSON.stringify({ error: "Invalid action. Use: ban, suspend, activate" }), { status: 400, headers: CORS });
+            }
+
+            user.updatedAt = new Date().toISOString();
+            await store.setJSON(userKey, user);
+
+            return new Response(JSON.stringify({ success: true, status: user.status }), { headers: CORS });
+        } catch (err) {
+            return new Response(JSON.stringify({ error: "Action failed" }), { status: 500, headers: CORS });
         }
     }
 
@@ -132,7 +178,14 @@ export default async (req, context) => {
             }
             messages.sort((a, b) => (b.receivedAt || "").localeCompare(a.receivedAt || ""));
             const unread = messages.filter(m => !m.read).length;
-            return new Response(JSON.stringify({ success: true, messages, total: messages.length, unread }), { headers: CORS });
+
+            // Pagination
+            const page = Math.max(1, parseInt(url.searchParams.get("page") || "1"));
+            const limit = Math.min(100, Math.max(1, parseInt(url.searchParams.get("limit") || "50")));
+            const total = messages.length;
+            const paginated = messages.slice((page - 1) * limit, page * limit);
+
+            return new Response(JSON.stringify({ success: true, messages: paginated, total, unread, page, limit, pages: Math.ceil(total / limit) }), { headers: CORS });
         } catch (err) {
             console.error("List messages error:", err);
             return new Response(JSON.stringify({ error: "Failed to list messages" }), { status: 500, headers: CORS });

@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initLightbox();
     initAuthModal();
     initContactForm();
+    loadLatestDrops();
 });
 
 // ==================== NAVIGATION ====================
@@ -255,6 +256,44 @@ function updateAuthUI(user) {
 }
 
 // ==================== SUBSCRIPTION / PAYMENT ====================
+let activePromoCode = null;
+
+async function applyPromoCode() {
+    const input = document.getElementById('promoCodeInput');
+    const result = document.getElementById('promoResult');
+    const code = (input?.value || '').trim().toUpperCase();
+
+    if (!code) { result.textContent = ''; result.style.color = '#888'; return; }
+
+    result.textContent = 'Checking...';
+    result.style.color = '#888';
+
+    try {
+        const res = await fetch('/api/promo-codes/validate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code })
+        });
+        const data = await res.json();
+        if (data.valid) {
+            activePromoCode = code;
+            const desc = data.discountType === 'percent'
+                ? `${data.discountValue}% off`
+                : `$${(data.discountValue / 100).toFixed(2)} off`;
+            result.textContent = `${desc} applied!`;
+            result.style.color = '#4ade80';
+            showToast(`Promo code ${code} applied — ${desc}`);
+        } else {
+            activePromoCode = null;
+            result.textContent = data.error || 'Invalid code';
+            result.style.color = '#c22020';
+        }
+    } catch {
+        result.textContent = 'Error checking code';
+        result.style.color = '#c22020';
+    }
+}
+
 async function handleSubscribe(tier) {
     const token = localStorage.getItem('im_token');
 
@@ -266,13 +305,16 @@ async function handleSubscribe(tier) {
     }
 
     try {
+        const body = { tier, type: 'subscription' };
+        if (activePromoCode) body.promoCode = activePromoCode;
+
         const res = await fetch('/api/create-checkout', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify({ tier, type: 'subscription' })
+            body: JSON.stringify(body)
         });
 
         const data = await res.json();
@@ -396,4 +438,50 @@ function showToast(message, type = 'success') {
         toast.style.transform = 'translateY(10px)';
         setTimeout(() => toast.remove(), 300);
     }, 3000);
+}
+
+// ==================== LATEST DROPS ====================
+// Load recently published free content from the pipeline
+function loadLatestDrops() {
+    const section = document.getElementById('latest-content');
+    const grid = document.getElementById('latestDropsGrid');
+    if (!section || !grid) return;
+
+    fetch('/api/content?tier=free')
+        .then(r => r.json())
+        .then(data => {
+            if (!data.success) return;
+            const items = (data.content || []).filter(c => c.tier === 'free').slice(0, 6);
+            if (!items.length) return;
+
+            section.style.display = '';
+            grid.innerHTML = items.map(c => {
+                const hasImage = c.imageUrl && (c.imageUrl.startsWith('http') || c.imageUrl.startsWith('/api/'));
+                const typeIcons = { post: '\u270E', gallery: '\u2726', video: '\u25B6', announcement: '\u2605' };
+                const icon = typeIcons[c.type] || '\u2726';
+                const dateStr = c.createdAt ? new Date(c.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
+
+                return `<div style="background:#0d0d0d;border:1px solid #222;overflow:hidden;transition:all 0.3s;cursor:pointer" onmouseover="this.style.borderColor='#333';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='#222';this.style.transform=''">
+                    <div style="aspect-ratio:4/5;background:#1a1a1a;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative">
+                        ${hasImage
+                            ? `<img src="${escapeHtml(c.imageUrl)}" alt="${escapeHtml(c.title)}" style="width:100%;height:100%;object-fit:cover" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div style="display:none;width:100%;height:100%;align-items:center;justify-content:center;font-size:2rem;color:#555">${icon}</div>`
+                            : `<div style="font-size:2rem;color:#555">${icon}</div>`
+                        }
+                        ${c.category ? `<span style="position:absolute;top:0.8rem;right:0.8rem;background:#c22020;color:#fff;font-size:0.5rem;letter-spacing:2px;text-transform:uppercase;padding:0.25rem 0.7rem;font-family:'Space Mono',monospace">${escapeHtml(c.category)}</span>` : ''}
+                    </div>
+                    <div style="padding:1.2rem">
+                        <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.1rem;margin-bottom:0.3rem;color:#e8e4df">${escapeHtml(c.title)}</h3>
+                        <span style="font-size:0.6rem;color:#555;letter-spacing:2px;font-family:'Space Mono',monospace">${dateStr}</span>
+                    </div>
+                </div>`;
+            }).join('');
+        })
+        .catch(() => {});
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    const d = document.createElement('div');
+    d.textContent = str;
+    return d.innerHTML;
 }

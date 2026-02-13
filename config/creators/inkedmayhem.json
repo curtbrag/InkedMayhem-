@@ -1,0 +1,120 @@
+{
+  "id": "inkedmayhem",
+  "name": "InkedMayhem",
+  "handle": "@inkedmayhem",
+  "domain": "inkedmayhem.netlify.app",
+  "creatorTier": "A",
+  "brand": {
+    "colors": {
+      "primary": "#060606",
+      "accent": "#c22020",
+      "text": "#e8e4df",
+      "gold": "#c9a84c"
+    },
+    "fonts": {
+      "display": "Bebas Neue",
+      "serif": "Cormorant Garamond",
+      "mono": "Space Mono"
+    },
+    "ctaText": "Join the Mayhem",
+    "tagline": "Ink. Attitude. No apologies."
+  },
+  "features": {
+    "blog": true,
+    "membership": true,
+    "unlockPosts": true,
+    "contact": true,
+    "ageGate": false,
+    "faq": true,
+    "bookings": false,
+    "galleryFilters": true
+  },
+  "membership": {
+    "tiers": {
+      "free": { "name": "Lurker", "price": 0, "description": "Public gallery access" },
+      "vip": { "name": "Ink Insider", "price": 9.99, "description": "Exclusive photo sets, behind-scenes content, early drops" },
+      "elite": { "name": "Mayhem Circle", "price": 24.99, "description": "Everything + premium drops, custom requests, DMs" }
+    }
+  },
+  "socials": {
+    "instagram": "",
+    "twitter": "",
+    "tiktok": "",
+    "telegram": ""
+  },
+  "contentRules": {
+    "allowedFileTypes": ["jpg", "jpeg", "png", "webp", "mp4", "mov"],
+    "maxImageSizeMB": 25,
+    "maxVideoSizeMB": 500,
+    "autoWatermark": false,
+    "stripExif": true,
+    "compressImages": true,
+    "generateThumbnails": true,
+    "explicitAllowed": false,
+    "categories": ["photos", "selfies", "lifestyle", "behind-the-scenes"]
+  },
+  "postingSchedule": {
+    "enabled": false,
+    "slots": [
+      { "day": "tuesday", "time": "20:00", "timezone": "America/New_York" },
+      { "day": "thursday", "time": "20:00", "timezone": "America/New_York" }
+    ],
+    "autoFillSlots": true
+  },
+  "telegram": {
+    "creatorBot": {
+      "enabled": false,
+      "token": "",
+      "chatId": ""
+    },
+    "fanBot": {
+      "enabled": false,
+      "token": "",
+      "username": ""
+    }
+  },
+  "faq": {
+    "botTone": "edgy",
+    "bannedPhrases": [],
+    "escalationKeywords": ["refund", "chargeback", "address", "meet", "where do you live", "phone number", "minor"],
+    "templates": [
+      {
+        "category": "subscribe",
+        "patterns": ["how do i subscribe", "where do i subscribe", "membership", "join", "sign up"],
+        "response": "Head to the main site and check out the membership tiers — pick the level that vibes with you and you're in."
+      },
+      {
+        "category": "content",
+        "patterns": ["what do you post", "what kind of content", "what content", "type of content"],
+        "response": "Tattoo lifestyle, ink culture, behind-the-scenes shoots, and exclusive photo sets. Members get the good stuff."
+      },
+      {
+        "category": "schedule",
+        "patterns": ["when do you post", "posting schedule", "how often", "next post"],
+        "response": "New drops hit Tuesdays and Thursdays at 8pm ET. Members always get first access."
+      },
+      {
+        "category": "customs",
+        "patterns": ["custom", "request", "commission", "personal"],
+        "response": "Custom requests are available for Elite tier members. Check out the Mayhem Circle membership for details."
+      },
+      {
+        "category": "refund",
+        "patterns": ["refund", "money back", "cancel", "chargeback"],
+        "response": "I'm connecting you with support for this. Someone will get back to you shortly.",
+        "escalate": true
+      },
+      {
+        "category": "contact",
+        "patterns": ["contact", "email", "reach you", "message you", "talk to you"],
+        "response": "Best way to reach out is through the contact form on the site, or DM through the members area if you're subscribed."
+      }
+    ]
+  },
+  "moderation": {
+    "level": "manual",
+    "autoApproveAfterChecks": false,
+    "notifyOnUpload": true,
+    "notifyOnPublish": true
+  }
+}

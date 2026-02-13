@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InkedMayhem — Links</title>
+    <meta name="description" content="InkedMayhem — All links in one place. Exclusive content, socials, and more.">
+    <meta property="og:title" content="InkedMayhem — Links">
+    <meta property="og:description" content="Ink. Attitude. No apologies.">
+    <meta property="og:type" content="website">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔥</text></svg>">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0a0a0a">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #060606;
+            color: #e8e4df;
+            font-family: 'Space Mono', monospace;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .links-page {
+            max-width: 420px;
+            width: 100%;
+            padding: 3rem 1.5rem;
+            text-align: center;
+        }
+        .avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 2px solid #c22020;
+            margin: 0 auto 1.5rem;
+            overflow: hidden;
+            background: #1a1a1a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+        }
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        h1 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 2.5rem;
+            letter-spacing: 4px;
+            margin-bottom: 0.3rem;
+        }
+        h1 span { color: #c22020; }
+        .tagline {
+            color: #888;
+            font-size: 0.7rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 2rem;
+        }
+        .link-btn {
+            display: block;
+            width: 100%;
+            padding: 1rem 1.5rem;
+            margin-bottom: 0.75rem;
+            border: 1px solid #222;
+            background: #0d0d0d;
+            color: #e8e4df;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-decoration: none;
+            transition: all 0.3s;
+            cursor: pointer;
+            position: relative;
+        }
+        .link-btn:hover {
+            border-color: #c22020;
+            background: rgba(194, 32, 32, 0.08);
+            transform: translateY(-1px);
+        }
+        .link-btn.primary {
+            border-color: #c22020;
+            background: #c22020;
+            color: #fff;
+        }
+        .link-btn.primary:hover {
+            background: #e63030;
+            border-color: #e63030;
+        }
+        .link-btn .link-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.1rem;
+        }
+        .social-row {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+        .social-icon {
+            width: 40px;
+            height: 40px;
+            border: 1px solid #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #aaa;
+            font-size: 1rem;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        .social-icon:hover {
+            border-color: #c22020;
+            color: #c22020;
+        }
+        .footer-text {
+            margin-top: 2.5rem;
+            font-size: 0.55rem;
+            color: #555;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        .footer-text a { color: #c22020; text-decoration: none; }
+
+        #dynamicLinks { min-height: 50px; }
+    </style>
+</head>
+<body>
+    <div class="links-page">
+        <div class="avatar" id="avatarEl">IM</div>
+
+        <h1>INKED<span>MAYHEM</span></h1>
+        <div class="tagline" id="taglineEl">Ink. Attitude. No apologies.</div>
+
+        <div id="dynamicLinks">
+            <!-- Primary CTA -->
+            <a href="/members" class="link-btn primary">
+                <span class="link-icon">&#x2726;</span>
+                Exclusive Content
+            </a>
+
+            <!-- Static links -->
+            <a href="/" class="link-btn">
+                <span class="link-icon">&#x1F3E0;</span>
+                Website
+            </a>
+
+            <a href="/#gallery" class="link-btn">
+                <span class="link-icon">&#x1F5BC;</span>
+                Gallery
+            </a>
+
+            <a href="/#exclusive" class="link-btn">
+                <span class="link-icon">&#x1F451;</span>
+                Membership Tiers
+            </a>
+
+            <a href="/blog/how-it-all-started.html" class="link-btn">
+                <span class="link-icon">&#x270E;</span>
+                Blog
+            </a>
+
+            <a href="/#contact" class="link-btn">
+                <span class="link-icon">&#x2709;</span>
+                Contact
+            </a>
+        </div>
+
+        <!-- Social icons (populated dynamically) -->
+        <div class="social-row" id="socialRow"></div>
+
+        <div class="footer-text">
+            <a href="/">inkedmayhem.netlify.app</a>
+        </div>
+    </div>
+
+    <script>
+    // Load creator config for socials and branding
+    fetch('/api/creator-config/features?id=inkedmayhem')
+        .then(r => r.json())
+        .then(data => {
+            if (!data.success) return;
+
+            // Update tagline
+            if (data.brand?.tagline) {
+                document.getElementById('taglineEl').textContent = data.brand.tagline;
+            }
+
+            // Update CTA text
+            if (data.brand?.ctaText) {
+                const primary = document.querySelector('.link-btn.primary');
+                if (primary) {
+                    primary.childNodes[primary.childNodes.length - 1].textContent = data.brand.ctaText;
+                }
+            }
+        })
+        .catch(() => {});
+
+    // Load socials from creator config (public endpoint returns membership which may have socials)
+    // For now, use known social URLs
+    const socials = [
+        { name: 'IG', url: 'https://instagram.com/x_tina_d', icon: 'IG' },
+        { name: 'TG', url: '#', icon: 'TG' }
+    ];
+
+    const row = document.getElementById('socialRow');
+    socials.forEach(s => {
+        if (!s.url || s.url === '#') return;
+        const a = document.createElement('a');
+        a.href = s.url;
+        a.target = '_blank';
+        a.rel = 'noopener';
+        a.className = 'social-icon';
+        a.textContent = s.icon;
+        a.title = s.name;
+        row.appendChild(a);
+    });
+    </script>
+</body>
+</html>
