@@ -308,6 +308,26 @@
             </div>
         </div>
 
+        <!-- Trust indicators -->
+        <div style="display:flex;justify-content:center;gap:2.5rem;flex-wrap:wrap;margin:2rem auto 0;max-width:700px">
+            <div style="text-align:center">
+                <div style="font-size:1.2rem;margin-bottom:0.3rem">🔒</div>
+                <div style="font-size:0.55rem;letter-spacing:2px;text-transform:uppercase;color:var(--gray)">Secure Checkout</div>
+            </div>
+            <div style="text-align:center">
+                <div style="font-size:1.2rem;margin-bottom:0.3rem">⚡</div>
+                <div style="font-size:0.55rem;letter-spacing:2px;text-transform:uppercase;color:var(--gray)">Instant Access</div>
+            </div>
+            <div style="text-align:center">
+                <div style="font-size:1.2rem;margin-bottom:0.3rem">📅</div>
+                <div style="font-size:0.55rem;letter-spacing:2px;text-transform:uppercase;color:var(--gray)">Cancel Anytime</div>
+            </div>
+            <div style="text-align:center">
+                <div style="font-size:1.2rem;margin-bottom:0.3rem">🛡️</div>
+                <div style="font-size:0.55rem;letter-spacing:2px;text-transform:uppercase;color:var(--gray)">Privacy Protected</div>
+            </div>
+        </div>
+
         <!-- PAY PER POST PREVIEW -->
         <div class="ppv-section">
             <h3 class="ppv-title">Or Unlock Individual Posts</h3>
@@ -516,6 +536,13 @@
                 <span style="font-size:0.55rem;letter-spacing:2px;text-transform:uppercase;color:var(--gray);margin-top:0.5rem;display:block;text-align:center;">Scan • Share • Subscribe</span>
             </div>
         </div>
+        <!-- Trust signals -->
+        <div style="display:flex;justify-content:center;gap:2rem;flex-wrap:wrap;padding:1.5rem 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin:0 2rem">
+            <span style="font-size:0.55rem;letter-spacing:2px;text-transform:uppercase;color:var(--gray)">Secure payments via Stripe</span>
+            <span style="font-size:0.55rem;letter-spacing:2px;text-transform:uppercase;color:var(--gray)">Privacy-first media processing</span>
+            <span style="font-size:0.55rem;letter-spacing:2px;text-transform:uppercase;color:var(--gray)">Creator-controlled publishing</span>
+            <span style="font-size:0.55rem;letter-spacing:2px;text-transform:uppercase;color:var(--gray)">DMCA protected</span>
+        </div>
         <div class="footer-bottom">
             <p>&copy; 2026 InkedMayhem. All rights reserved. Independent creator platform.</p>
             <div class="footer-legal">
@@ -562,6 +589,55 @@
         <img id="lightboxImg" style="max-width:92vw;max-height:92vh;object-fit:contain;border-radius:4px" alt="">
         <span style="position:absolute;top:20px;right:28px;color:#fff;font-size:2rem;font-family:var(--font-mono);opacity:.7">✕</span>
     </div>
+
+    <!-- STRUCTURED DATA — Product/Pricing -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "InkedMayhem",
+        "url": "https://inkedmayhem.netlify.app",
+        "description": "Independent creator platform — exclusive content, premium drops, and raw creativity.",
+        "creator": {
+            "@type": "Person",
+            "name": "InkedMayhem"
+        },
+        "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://inkedmayhem.netlify.app/members?search={search_term_string}",
+            "query-input": "required name=search_term_string"
+        }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        "name": "InkedMayhem Membership",
+        "description": "Exclusive content membership — choose from Ink Insider (VIP) or Mayhem Circle (Elite) tiers.",
+        "brand": { "@type": "Brand", "name": "InkedMayhem" },
+        "offers": [
+            {
+                "@type": "Offer",
+                "name": "Ink Insider (VIP)",
+                "price": "9.99",
+                "priceCurrency": "USD",
+                "priceValidUntil": "2027-12-31",
+                "availability": "https://schema.org/InStock",
+                "url": "https://inkedmayhem.netlify.app/#exclusive"
+            },
+            {
+                "@type": "Offer",
+                "name": "Mayhem Circle (Elite)",
+                "price": "24.99",
+                "priceCurrency": "USD",
+                "priceValidUntil": "2027-12-31",
+                "availability": "https://schema.org/InStock",
+                "url": "https://inkedmayhem.netlify.app/#exclusive"
+            }
+        ]
+    }
+    </script>
 
     <script src="/js/app.js"></script>
     <script>
