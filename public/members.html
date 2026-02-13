@@ -264,12 +264,72 @@
         </div>
     </nav>
 
-    <!-- LOCKED STATE (shown if not authenticated) -->
+    <!-- LOCKED STATE (shown if not authenticated) — full landing page -->
     <div class="locked-overlay" id="lockedOverlay" style="display:none">
-        <span class="lock-big">🔒</span>
-        <h2>MEMBERS ONLY</h2>
-        <p>Sign in to access exclusive content. Already a member? Hit the button below.</p>
-        <a href="/" class="btn-primary">Sign In →</a>
+        <div style="max-width:900px;width:100%;padding:0 1.5rem;overflow-y:auto;max-height:100vh">
+            <div style="text-align:center;margin-bottom:3rem">
+                <div style="font-size:3rem;opacity:0.3;margin-bottom:1rem">✦</div>
+                <h2 style="font-family:var(--font-display);font-size:clamp(2rem,6vw,3.5rem);letter-spacing:4px;margin-bottom:0.5rem">MEMBERS <span style="color:var(--red)">ONLY</span></h2>
+                <p style="color:var(--gray);max-width:500px;margin:0 auto 2rem;font-size:0.85rem;line-height:1.7">Exclusive drops, behind-the-scenes content, direct messaging, and more. Pick your tier and get access instantly.</p>
+                <a href="/" class="btn-primary" style="margin-right:1rem">Sign In →</a>
+                <a href="/#exclusive" class="btn-outline" style="border-color:#c22020;color:#e8e4df">View Plans</a>
+            </div>
+
+            <!-- Preview of what's inside -->
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem;margin-bottom:3rem">
+                <div style="background:#111;border:1px solid #222;overflow:hidden">
+                    <div style="aspect-ratio:4/5;background:#1a1a1a;display:flex;align-items:center;justify-content:center;position:relative">
+                        <img src="/images/gallery/neon-wave-beach.jpg" alt="" style="width:100%;height:100%;object-fit:cover;filter:blur(8px) brightness(0.4)">
+                        <span style="position:absolute;font-size:2rem;opacity:0.6">🔒</span>
+                        <span style="position:absolute;top:0.6rem;right:0.6rem;background:#c22020;color:#fff;font-size:0.45rem;letter-spacing:2px;text-transform:uppercase;padding:0.2rem 0.6rem;font-family:'Space Mono',monospace">VIP</span>
+                    </div>
+                    <div style="padding:1rem">
+                        <div style="font-family:'Cormorant Garamond',serif;font-size:0.95rem;color:#e8e4df">Exclusive Photo Sets</div>
+                        <div style="font-size:0.55rem;color:#555;letter-spacing:2px;margin-top:0.3rem">INK INSIDER+</div>
+                    </div>
+                </div>
+                <div style="background:#111;border:1px solid #222;overflow:hidden">
+                    <div style="aspect-ratio:4/5;background:#1a1a1a;display:flex;align-items:center;justify-content:center;position:relative">
+                        <img src="/images/gallery/pool-leopard-palms.jpg" alt="" style="width:100%;height:100%;object-fit:cover;filter:blur(8px) brightness(0.4)">
+                        <span style="position:absolute;font-size:2rem;opacity:0.6">🔒</span>
+                        <span style="position:absolute;top:0.6rem;right:0.6rem;background:#d4a853;color:#000;font-size:0.45rem;letter-spacing:2px;text-transform:uppercase;padding:0.2rem 0.6rem;font-family:'Space Mono',monospace">ELITE</span>
+                    </div>
+                    <div style="padding:1rem">
+                        <div style="font-family:'Cormorant Garamond',serif;font-size:0.95rem;color:#e8e4df">Premium Content Drops</div>
+                        <div style="font-size:0.55rem;color:#555;letter-spacing:2px;margin-top:0.3rem">MAYHEM CIRCLE</div>
+                    </div>
+                </div>
+                <div style="background:#111;border:1px solid #222;overflow:hidden">
+                    <div style="aspect-ratio:4/5;background:#1a1a1a;display:flex;align-items:center;justify-content:center;position:relative">
+                        <img src="/images/gallery/mirror-black-art.jpg" alt="" style="width:100%;height:100%;object-fit:cover;filter:blur(8px) brightness(0.4)">
+                        <span style="position:absolute;font-size:2rem;opacity:0.6">🔒</span>
+                        <span style="position:absolute;top:0.6rem;right:0.6rem;background:#c22020;color:#fff;font-size:0.45rem;letter-spacing:2px;text-transform:uppercase;padding:0.2rem 0.6rem;font-family:'Space Mono',monospace">VIP</span>
+                    </div>
+                    <div style="padding:1rem">
+                        <div style="font-family:'Cormorant Garamond',serif;font-size:0.95rem;color:#e8e4df">Behind-the-Scenes</div>
+                        <div style="font-size:0.55rem;color:#555;letter-spacing:2px;margin-top:0.3rem">INK INSIDER+</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tier summary -->
+            <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-bottom:2rem">
+                <div style="background:rgba(194,32,32,0.1);border:1px solid rgba(194,32,32,0.3);padding:1.2rem 1.5rem;text-align:center;min-width:200px;flex:1;max-width:280px">
+                    <div style="font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:2px;margin-bottom:0.3rem">INK INSIDER</div>
+                    <div style="font-size:1.5rem;font-weight:700;color:#c22020;margin-bottom:0.5rem">$9.99<span style="font-size:0.7rem;color:#666">/mo</span></div>
+                    <div style="font-size:0.65rem;color:#888;line-height:1.6">Exclusive photos, BTS content, early access, members-only posts</div>
+                </div>
+                <div style="background:rgba(212,168,83,0.1);border:1px solid rgba(212,168,83,0.3);padding:1.2rem 1.5rem;text-align:center;min-width:200px;flex:1;max-width:280px">
+                    <div style="font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:2px;margin-bottom:0.3rem">MAYHEM CIRCLE</div>
+                    <div style="font-size:1.5rem;font-weight:700;color:#d4a853;margin-bottom:0.5rem">$24.99<span style="font-size:0.7rem;color:#666">/mo</span></div>
+                    <div style="font-size:0.65rem;color:#888;line-height:1.6">Everything in VIP + premium drops, DMs, custom requests, priority access</div>
+                </div>
+            </div>
+
+            <div style="text-align:center;padding-bottom:2rem">
+                <a href="/#exclusive" style="font-size:0.6rem;letter-spacing:3px;text-transform:uppercase;color:#c22020;text-decoration:none">See Full Plan Details →</a>
+            </div>
+        </div>
     </div>
 
     <!-- MEMBERS CONTENT (hidden until auth) -->
