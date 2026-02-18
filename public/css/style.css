@@ -729,6 +729,140 @@ nav.scrolled {
     color: var(--white);
 }
 
+/* ==================== TIP JAR ==================== */
+.tip-section {
+    background: var(--black);
+    overflow: hidden;
+    position: relative;
+}
+
+.tip-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 30%, rgba(0, 140, 255, 0.06) 0%, transparent 60%);
+    pointer-events: none;
+}
+
+.tip-card {
+    max-width: 520px;
+    margin: 0 auto;
+    background: var(--darker);
+    border: 1px solid var(--border);
+    padding: 3rem 2.5rem;
+    text-align: center;
+    position: relative;
+    transition: all 0.4s;
+}
+
+.tip-card:hover {
+    border-color: #008CFF;
+    box-shadow: 0 0 40px rgba(0, 140, 255, 0.1);
+}
+
+.tip-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1.2rem;
+}
+
+.tip-heading {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    letter-spacing: 3px;
+    color: var(--off-white);
+    margin-bottom: 1rem;
+}
+
+.tip-desc {
+    color: var(--muted);
+    font-size: 0.8rem;
+    line-height: 1.8;
+    margin-bottom: 2rem;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.btn-venmo {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.95rem 2.5rem;
+    background: #008CFF;
+    color: #fff;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    border: 1px solid #008CFF;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-decoration: none;
+}
+
+.btn-venmo:hover {
+    background: #0077d4;
+    border-color: #0077d4;
+    box-shadow: 0 0 30px rgba(0, 140, 255, 0.25);
+    transform: translateY(-1px);
+}
+
+.venmo-logo {
+    flex-shrink: 0;
+}
+
+.tip-handle {
+    display: block;
+    font-size: 0.65rem;
+    letter-spacing: 2px;
+    color: var(--gray);
+    margin-top: 1rem;
+}
+
+.tip-amounts {
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-top: 1.8rem;
+    flex-wrap: wrap;
+}
+
+.tip-amount-btn {
+    padding: 0.6rem 1.4rem;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--off-white);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-decoration: none;
+}
+
+.tip-amount-btn:hover {
+    border-color: #008CFF;
+    color: #008CFF;
+    background: rgba(0, 140, 255, 0.05);
+}
+
+.tip-amount-btn.featured {
+    border-color: #008CFF;
+    color: #008CFF;
+    background: rgba(0, 140, 255, 0.08);
+}
+
+.tip-note {
+    margin-top: 1.5rem;
+    font-size: 0.6rem;
+    letter-spacing: 1px;
+    color: var(--gray);
+}
+
+.nav-tip {
+    color: #008CFF !important;
+}
+
 /* ==================== BLOG ==================== */
 .blog-section {
     background: var(--dark);
