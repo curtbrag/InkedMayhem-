@@ -67,6 +67,42 @@
   to = "/success.html"
   status = 200
 
+[[redirects]]
+  from = "/terms"
+  to = "/terms.html"
+  status = 200
+
+[[redirects]]
+  from = "/privacy"
+  to = "/privacy.html"
+  status = 200
+
+# Blog pretty URLs
+[[redirects]]
+  from = "/blog/how-it-all-started"
+  to = "/blog/how-it-all-started.html"
+  status = 200
+
+[[redirects]]
+  from = "/blog/content-creation-truths"
+  to = "/blog/content-creation-truths.html"
+  status = 200
+
+[[redirects]]
+  from = "/blog/dog-mom-energy"
+  to = "/blog/dog-mom-energy.html"
+  status = 200
+
+[[redirects]]
+  from = "/blog/setting-boundaries-online"
+  to = "/blog/setting-boundaries-online.html"
+  status = 200
+
+[[redirects]]
+  from = "/blog/tattoos-judgment-not-caring"
+  to = "/blog/tattoos-judgment-not-caring.html"
+  status = 200
+
 # Custom 404
 [[redirects]]
   from = "/*"

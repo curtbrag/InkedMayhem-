@@ -104,19 +104,20 @@ function initGalleryFilters() {
 
             const filter = btn.dataset.filter;
 
-            galleryItems.forEach(item => {
+            galleryItems.forEach((item, i) => {
                 if (filter === 'all' || item.dataset.category === filter) {
                     item.style.display = '';
+                    // Stagger the fade-in for a cleaner look
                     setTimeout(() => {
                         item.style.opacity = '1';
                         item.style.transform = 'scale(1)';
-                    }, 50);
+                    }, 30 + i * 30);
                 } else {
                     item.style.opacity = '0';
                     item.style.transform = 'scale(0.95)';
                     setTimeout(() => {
                         item.style.display = 'none';
-                    }, 300);
+                    }, 250);
                 }
             });
         });
@@ -635,13 +636,21 @@ function initTestimonialsCarousel() {
         }
     }, { passive: true });
 
-    // Auto-advance
-    let autoPlay = setInterval(() => goToSlide(currentSlide + 1 >= getSlideCount() ? 0 : currentSlide + 1), 5000);
+    // Auto-advance with pause on hover/touch
+    function nextSlide() {
+        goToSlide(currentSlide + 1 >= getSlideCount() ? 0 : currentSlide + 1);
+    }
+    let autoPlay = setInterval(nextSlide, 5000);
 
-    track.closest('.testimonials-section').addEventListener('mouseenter', () => clearInterval(autoPlay));
-    track.closest('.testimonials-section').addEventListener('mouseleave', () => {
-        autoPlay = setInterval(() => goToSlide(currentSlide + 1 >= getSlideCount() ? 0 : currentSlide + 1), 5000);
-    });
+    function pauseAutoPlay() { clearInterval(autoPlay); }
+    function resumeAutoPlay() { clearInterval(autoPlay); autoPlay = setInterval(nextSlide, 5000); }
+
+    const section = track.closest('.testimonials-section');
+    section.addEventListener('mouseenter', pauseAutoPlay);
+    section.addEventListener('mouseleave', resumeAutoPlay);
+    // Pause on touch too (mobile)
+    section.addEventListener('touchstart', pauseAutoPlay, { passive: true });
+    section.addEventListener('touchend', () => { setTimeout(resumeAutoPlay, 3000); }, { passive: true });
 
     buildDots();
     window.addEventListener('resize', () => goToSlide(currentSlide));
@@ -655,42 +664,58 @@ function initCountdown() {
     const secsEl = document.getElementById('cdSecs');
     if (!daysEl) return;
 
-    // Calculate next Tuesday or Thursday at 8pm ET
-    function getNextDrop() {
-        const now = new Date();
-        const et = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));
-        const target = new Date(et);
+    // Calculate next Tuesday or Thursday at 8pm ET using UTC offsets
+    function getNextDropMs() {
+        // Get current UTC time
+        const now = Date.now();
+        // ET is UTC-5 (EST) or UTC-4 (EDT)
+        // Use Intl to detect current ET offset
+        const etStr = new Intl.DateTimeFormat('en-US', {
+            timeZone: 'America/New_York',
+            year: 'numeric', month: '2-digit', day: '2-digit',
+            hour: '2-digit', minute: '2-digit', second: '2-digit',
+            hour12: false
+        }).format(now);
+        // Parse ET parts: "MM/DD/YYYY, HH:MM:SS"
+        const parts = etStr.match(/(\d+)/g);
+        const etMonth = parseInt(parts[0], 10) - 1;
+        const etDay = parseInt(parts[1], 10);
+        const etYear = parseInt(parts[2], 10);
+        const etHour = parseInt(parts[3], 10);
+        const etMin = parseInt(parts[4], 10);
+        const etSec = parseInt(parts[5], 10);
 
-        // Find next Tue (2) or Thu (4) at 8pm
-        const day = et.getDay();
-        const hour = et.getHours();
-        let daysUntil;
+        // Create a Date representing ET time
+        const etDate = new Date(etYear, etMonth, etDay, etHour, etMin, etSec);
+        const dayOfWeek = etDate.getDay(); // 0=Sun, 2=Tue, 4=Thu
 
-        if (day === 2 && hour < 20) {
-            daysUntil = 0; // Today is Tuesday, before 8pm
-        } else if (day < 4 || (day === 2 && hour >= 20)) {
-            daysUntil = (4 - day + 7) % 7 || 7;
-            if (day === 2 && hour >= 20) daysUntil = 2; // Next Thursday
-            if (day === 3) daysUntil = 1; // Wednesday -> Thursday
-        } else if (day === 4 && hour < 20) {
-            daysUntil = 0; // Today is Thursday, before 8pm
-        } else {
-            // After Thursday 8pm, next Tuesday
-            daysUntil = (2 - day + 7) % 7 || 7;
+        // Find days until next Tue(2) or Thu(4) at 8pm ET
+        const dropDays = [2, 4]; // Tuesday, Thursday
+        let bestDaysUntil = 8;
+
+        for (const targetDay of dropDays) {
+            let daysUntil = (targetDay - dayOfWeek + 7) % 7;
+            // If it's the same day, check if we're past 8pm
+            if (daysUntil === 0 && etHour >= 20) {
+                daysUntil = 7; // Next week same day
+            }
+            // Also try next week for the other day
+            if (daysUntil === 0 && etHour < 20) {
+                daysUntil = 0; // Today, still before 8pm
+            }
+            if (daysUntil < bestDaysUntil) {
+                bestDaysUntil = daysUntil;
+            }
         }
 
-        target.setDate(et.getDate() + daysUntil);
-        target.setHours(20, 0, 0, 0);
-
-        // Convert back to local time
-        const targetStr = target.toLocaleString('en-US', { timeZone: 'America/New_York' });
-        return new Date(targetStr);
+        // Build target: today + bestDaysUntil at 8pm ET
+        const targetET = new Date(etYear, etMonth, etDay + bestDaysUntil, 20, 0, 0, 0);
+        // Calculate diff in ms using the ET clock
+        return targetET.getTime() - etDate.getTime();
     }
 
     function updateTimer() {
-        const now = new Date();
-        const target = getNextDrop();
-        const diff = Math.max(0, target - now);
+        const diff = Math.max(0, getNextDropMs());
 
         const days = Math.floor(diff / (1000 * 60 * 60 * 24));
         const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
