@@ -9,6 +9,13 @@ document.addEventListener('DOMContentLoaded', () => {
     initLightbox();
     initAuthModal();
     initContactForm();
+    initFAQ();
+    initTestimonialsCarousel();
+    initCountdown();
+    initBackToTop();
+    initNewsletterForm();
+    initImageShimmer();
+    initAnimatedStats();
     loadLatestDrops();
 });
 
@@ -62,7 +69,7 @@ function initScrollEffects() {
     }, observerOptions);
 
     // Observe sections
-    document.querySelectorAll('.section-header, .gallery-item, .tier-card, .blog-card, .ppv-card').forEach(el => {
+    document.querySelectorAll('.section-header, .gallery-item, .tier-card, .blog-card, .ppv-card, .testimonial-card, .faq-item, .countdown-card, .newsletter-card').forEach(el => {
         el.style.opacity = '0';
         el.style.transform = 'translateY(20px)';
         el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
@@ -116,24 +123,88 @@ function initGalleryFilters() {
     });
 }
 
-// ==================== AUTH MODAL ====================
+// ==================== LIGHTBOX (Upgraded) ====================
 function initLightbox() {
     const lightbox = document.getElementById('lightbox');
     const lightboxImg = document.getElementById('lightboxImg');
+    const lightboxClose = document.getElementById('lightboxClose');
+    const lightboxPrev = document.getElementById('lightboxPrev');
+    const lightboxNext = document.getElementById('lightboxNext');
+    const lightboxCounter = document.getElementById('lightboxCounter');
     if (!lightbox) return;
 
-    document.querySelectorAll('.gallery-item img').forEach(img => {
+    const galleryImages = Array.from(document.querySelectorAll('.gallery-item img'));
+    let currentIndex = 0;
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    function openLightbox(index) {
+        currentIndex = index;
+        updateLightbox();
+        lightbox.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeLightbox() {
+        lightbox.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    function updateLightbox() {
+        const visibleImages = galleryImages.filter(img => img.closest('.gallery-item').style.display !== 'none');
+        const idx = visibleImages.indexOf(galleryImages[currentIndex]);
+        lightboxImg.src = galleryImages[currentIndex].src;
+        lightboxCounter.textContent = `${idx + 1} / ${visibleImages.length}`;
+    }
+
+    function navigate(dir) {
+        const visibleImages = galleryImages.filter(img => img.closest('.gallery-item').style.display !== 'none');
+        const currentVisible = visibleImages.indexOf(galleryImages[currentIndex]);
+        let nextVisible = currentVisible + dir;
+        if (nextVisible < 0) nextVisible = visibleImages.length - 1;
+        if (nextVisible >= visibleImages.length) nextVisible = 0;
+        currentIndex = galleryImages.indexOf(visibleImages[nextVisible]);
+        updateLightbox();
+    }
+
+    galleryImages.forEach((img, i) => {
         img.addEventListener('click', (e) => {
             e.stopPropagation();
-            lightboxImg.src = img.src;
-            lightbox.style.display = 'flex';
+            openLightbox(i);
         });
     });
 
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') lightbox.style.display = 'none';
+    lightboxClose.addEventListener('click', closeLightbox);
+    lightboxPrev.addEventListener('click', (e) => { e.stopPropagation(); navigate(-1); });
+    lightboxNext.addEventListener('click', (e) => { e.stopPropagation(); navigate(1); });
+
+    lightbox.addEventListener('click', (e) => {
+        if (e.target === lightbox) closeLightbox();
     });
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+        if (!lightbox.classList.contains('active')) return;
+        if (e.key === 'Escape') closeLightbox();
+        if (e.key === 'ArrowLeft') navigate(-1);
+        if (e.key === 'ArrowRight') navigate(1);
+    });
+
+    // Touch/swipe support
+    lightbox.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+
+    lightbox.addEventListener('touchend', (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        const diff = touchStartX - touchEndX;
+        if (Math.abs(diff) > 50) {
+            navigate(diff > 0 ? 1 : -1);
+        }
+    }, { passive: true });
 }
+
+// ==================== AUTH MODAL ====================
 
 function initAuthModal() {
     const modal = document.getElementById('authModal');
@@ -480,6 +551,271 @@ function loadLatestDrops() {
             }).join('');
         })
         .catch(() => {});
+}
+
+// ==================== FAQ ACCORDION ====================
+function initFAQ() {
+    const faqItems = document.querySelectorAll('.faq-item');
+
+    faqItems.forEach(item => {
+        const question = item.querySelector('.faq-question');
+        question.addEventListener('click', () => {
+            const isActive = item.classList.contains('active');
+
+            // Close all others
+            faqItems.forEach(other => other.classList.remove('active'));
+
+            // Toggle current
+            if (!isActive) {
+                item.classList.add('active');
+                question.setAttribute('aria-expanded', 'true');
+            } else {
+                question.setAttribute('aria-expanded', 'false');
+            }
+        });
+    });
+}
+
+// ==================== TESTIMONIALS CAROUSEL ====================
+function initTestimonialsCarousel() {
+    const track = document.getElementById('testimonialsTrack');
+    const dotsContainer = document.getElementById('testimonialDots');
+    const prevBtn = document.getElementById('testimonialPrev');
+    const nextBtn = document.getElementById('testimonialNext');
+    if (!track) return;
+
+    const cards = track.querySelectorAll('.testimonial-card');
+    let currentSlide = 0;
+    let touchStartX = 0;
+
+    function getVisibleCount() {
+        const w = window.innerWidth;
+        if (w > 900) return 3;
+        if (w > 600) return 2;
+        return 1;
+    }
+
+    function getSlideCount() {
+        return Math.max(1, cards.length - getVisibleCount() + 1);
+    }
+
+    function buildDots() {
+        dotsContainer.innerHTML = '';
+        const count = getSlideCount();
+        for (let i = 0; i < count; i++) {
+            const dot = document.createElement('div');
+            dot.className = 'testimonial-dot' + (i === currentSlide ? ' active' : '');
+            dot.addEventListener('click', () => goToSlide(i));
+            dotsContainer.appendChild(dot);
+        }
+    }
+
+    function goToSlide(index) {
+        const maxSlide = getSlideCount() - 1;
+        currentSlide = Math.max(0, Math.min(index, maxSlide));
+        const card = cards[0];
+        const gap = 24; // 1.5rem
+        const cardWidth = card.offsetWidth + gap;
+        track.style.transform = `translateX(-${currentSlide * cardWidth}px)`;
+        buildDots();
+    }
+
+    prevBtn.addEventListener('click', () => goToSlide(currentSlide - 1));
+    nextBtn.addEventListener('click', () => goToSlide(currentSlide + 1));
+
+    // Touch support
+    track.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+
+    track.addEventListener('touchend', (e) => {
+        const diff = touchStartX - e.changedTouches[0].screenX;
+        if (Math.abs(diff) > 50) {
+            goToSlide(currentSlide + (diff > 0 ? 1 : -1));
+        }
+    }, { passive: true });
+
+    // Auto-advance
+    let autoPlay = setInterval(() => goToSlide(currentSlide + 1 >= getSlideCount() ? 0 : currentSlide + 1), 5000);
+
+    track.closest('.testimonials-section').addEventListener('mouseenter', () => clearInterval(autoPlay));
+    track.closest('.testimonials-section').addEventListener('mouseleave', () => {
+        autoPlay = setInterval(() => goToSlide(currentSlide + 1 >= getSlideCount() ? 0 : currentSlide + 1), 5000);
+    });
+
+    buildDots();
+    window.addEventListener('resize', () => goToSlide(currentSlide));
+}
+
+// ==================== COUNTDOWN TIMER ====================
+function initCountdown() {
+    const daysEl = document.getElementById('cdDays');
+    const hoursEl = document.getElementById('cdHours');
+    const minsEl = document.getElementById('cdMins');
+    const secsEl = document.getElementById('cdSecs');
+    if (!daysEl) return;
+
+    // Calculate next Tuesday or Thursday at 8pm ET
+    function getNextDrop() {
+        const now = new Date();
+        const et = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));
+        const target = new Date(et);
+
+        // Find next Tue (2) or Thu (4) at 8pm
+        const day = et.getDay();
+        const hour = et.getHours();
+        let daysUntil;
+
+        if (day === 2 && hour < 20) {
+            daysUntil = 0; // Today is Tuesday, before 8pm
+        } else if (day < 4 || (day === 2 && hour >= 20)) {
+            daysUntil = (4 - day + 7) % 7 || 7;
+            if (day === 2 && hour >= 20) daysUntil = 2; // Next Thursday
+            if (day === 3) daysUntil = 1; // Wednesday -> Thursday
+        } else if (day === 4 && hour < 20) {
+            daysUntil = 0; // Today is Thursday, before 8pm
+        } else {
+            // After Thursday 8pm, next Tuesday
+            daysUntil = (2 - day + 7) % 7 || 7;
+        }
+
+        target.setDate(et.getDate() + daysUntil);
+        target.setHours(20, 0, 0, 0);
+
+        // Convert back to local time
+        const targetStr = target.toLocaleString('en-US', { timeZone: 'America/New_York' });
+        return new Date(targetStr);
+    }
+
+    function updateTimer() {
+        const now = new Date();
+        const target = getNextDrop();
+        const diff = Math.max(0, target - now);
+
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+        const mins = Math.floor((diff / (1000 * 60)) % 60);
+        const secs = Math.floor((diff / 1000) % 60);
+
+        daysEl.textContent = String(days).padStart(2, '0');
+        hoursEl.textContent = String(hours).padStart(2, '0');
+        minsEl.textContent = String(mins).padStart(2, '0');
+        secsEl.textContent = String(secs).padStart(2, '0');
+    }
+
+    updateTimer();
+    setInterval(updateTimer, 1000);
+}
+
+// ==================== BACK TO TOP ====================
+function initBackToTop() {
+    const btn = document.getElementById('backToTop');
+    if (!btn) return;
+
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 600) {
+            btn.classList.add('visible');
+        } else {
+            btn.classList.remove('visible');
+        }
+    });
+
+    btn.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+}
+
+// ==================== NEWSLETTER FORM ====================
+function initNewsletterForm() {
+    const form = document.getElementById('newsletterForm');
+    if (!form) return;
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = form.querySelector('input[name="email"]').value;
+        const btn = form.querySelector('.newsletter-btn');
+        const origText = btn.textContent;
+
+        try {
+            btn.textContent = 'Subscribing...';
+            btn.disabled = true;
+
+            const res = await fetch('/api/contact', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: 'Newsletter Subscriber',
+                    email,
+                    subject: 'newsletter',
+                    message: 'Newsletter signup'
+                })
+            });
+
+            const data = await res.json();
+            if (data.success) {
+                showToast('You\'re in! Welcome to the Mayhem List.');
+                form.reset();
+            } else {
+                showToast('Something went wrong — try again', 'error');
+            }
+        } catch {
+            showToast('Connection error — try again', 'error');
+        } finally {
+            btn.textContent = origText;
+            btn.disabled = false;
+        }
+    });
+}
+
+// ==================== IMAGE SHIMMER LOADING ====================
+function initImageShimmer() {
+    document.querySelectorAll('.gallery-item img[loading="lazy"]').forEach(img => {
+        if (img.complete) {
+            img.classList.add('loaded');
+        } else {
+            img.addEventListener('load', () => img.classList.add('loaded'));
+        }
+    });
+}
+
+// ==================== ANIMATED STATS COUNTER ====================
+function initAnimatedStats() {
+    const stats = document.querySelectorAll('.stat-num');
+    if (!stats.length) return;
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                animateNumber(entry.target);
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.5 });
+
+    stats.forEach(stat => observer.observe(stat));
+
+    function animateNumber(el) {
+        const text = el.textContent.trim();
+        const hasPlus = text.includes('+');
+        const num = parseInt(text.replace(/[^0-9]/g, ''), 10);
+        if (isNaN(num)) return;
+
+        const duration = 1500;
+        const start = performance.now();
+
+        function update(now) {
+            const elapsed = now - start;
+            const progress = Math.min(elapsed / duration, 1);
+            // Ease out cubic
+            const eased = 1 - Math.pow(1 - progress, 3);
+            const current = Math.round(eased * num);
+            el.textContent = current + (hasPlus ? '+' : '');
+            if (progress < 1) requestAnimationFrame(update);
+        }
+
+        el.textContent = '0' + (hasPlus ? '+' : '');
+        requestAnimationFrame(update);
+    }
 }
 
 function escapeHtml(str) {
