@@ -21,7 +21,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/style.css?v=3">
+    <link rel="stylesheet" href="/css/style.css?v=4">
 </head>
 <body>
     <!-- AGE GATE (shown when ageGate is enabled in creator config) -->
@@ -585,6 +585,9 @@
                 </div>
             </article>
         </div>
+        <div class="blog-show-more">
+            <button class="btn-outline" onclick="document.querySelectorAll('.blog-card').forEach(c=>c.style.display='');this.parentElement.style.display='none'">See All Posts</button>
+        </div>
     </section>
 
     <!-- ABOUT SECTION -->
@@ -881,7 +884,7 @@
     }
     </script>
 
-    <script src="/js/app.js?v=3"></script>
+    <script src="/js/app.js?v=4"></script>
     <script>
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('/sw.js').catch(() => {});
