@@ -1,6 +1,7 @@
 [build]
+  command = "node build-functions.cjs"
   publish = "public"
-  functions = "netlify/functions"
+  functions = "dist/functions"
 
 [build.environment]
   NODE_VERSION = "18"
