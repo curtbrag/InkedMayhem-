@@ -7,8 +7,6 @@
     "build": "echo 'Static site - no build needed'"
   },
   "dependencies": {
-    "@netlify/blobs": "^8.0.0",
-    "@netlify/functions": "^2.0.0",
     "bcryptjs": "^2.4.3",
     "esbuild": "^0.24.0",
     "jsonwebtoken": "^9.0.0",
