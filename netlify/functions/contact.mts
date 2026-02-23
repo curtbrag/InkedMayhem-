@@ -1,4 +1,4 @@
-import { getStore } from "@netlify/blobs";
+import { getStore } from "./lib/blobs.mjs";
 
 const CORS = {
     "Content-Type": "application/json",

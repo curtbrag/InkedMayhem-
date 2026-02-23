@@ -1,4 +1,4 @@
-import { getStore } from "@netlify/blobs";
+import { getStore } from "./lib/blobs.mjs";
 
 // Lightweight email notification system using Resend API
 // Set RESEND_API_KEY and NOTIFY_EMAIL in Netlify env vars

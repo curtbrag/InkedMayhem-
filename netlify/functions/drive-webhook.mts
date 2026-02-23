@@ -1,4 +1,4 @@
-import { getStore } from "@netlify/blobs";
+import { getStore } from "./lib/blobs.mjs";
 
 // ═══════════════════════════════════════════════════════════════
 // DRIVE / DROPBOX WEBHOOK — Content intake from cloud storage
