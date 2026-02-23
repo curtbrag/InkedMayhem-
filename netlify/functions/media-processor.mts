@@ -235,8 +235,8 @@ export default async (req: Request, context: any) => {
 
     // Auth check — internal API key or admin JWT
     const apiKey = req.headers.get("x-api-key");
-    const expectedKey = Netlify.env.get("PIPELINE_API_KEY") ||
-        Netlify.env.get("JWT_SECRET") ||
+    const expectedKey = process.env.PIPELINE_API_KEY ||
+        process.env.JWT_SECRET ||
         "inkedmayhem-dev-secret-change-me";
 
     if (apiKey !== expectedKey) {

@@ -76,12 +76,12 @@ export default async (req: Request) => {
         // Send Telegram notification if anything was published
         if (published > 0) {
             try {
-                const siteUrl = Netlify.env.get("URL") || "";
-                const secret = Netlify.env.get("JWT_SECRET") || "inkedmayhem-dev-secret-change-me";
+                const siteUrl = process.env.URL || "";
+                const secret = process.env.JWT_SECRET || "inkedmayhem-dev-secret-change-me";
 
                 // Notify via Telegram
-                const botToken = Netlify.env.get("TELEGRAM_CREATOR_BOT_TOKEN");
-                const chatId = Netlify.env.get("TELEGRAM_ADMIN_CHAT_ID") || Netlify.env.get("TELEGRAM_CREATOR_CHAT_ID");
+                const botToken = process.env.TELEGRAM_CREATOR_BOT_TOKEN;
+                const chatId = process.env.TELEGRAM_ADMIN_CHAT_ID || process.env.TELEGRAM_CREATOR_CHAT_ID;
 
                 if (botToken && chatId) {
                     const fileList = results.map(r => `  • ${r.filename}`).join("\n");

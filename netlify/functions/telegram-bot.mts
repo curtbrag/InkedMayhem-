@@ -17,23 +17,23 @@ const CORS = {
 // ─── Config Helpers ─────────────────────────────────────────
 
 function getSecret() {
-    return Netlify.env.get("JWT_SECRET") || "inkedmayhem-dev-secret-change-me";
+    return process.env.JWT_SECRET || "inkedmayhem-dev-secret-change-me";
 }
 
 function getCreatorBotToken() {
-    return Netlify.env.get("TELEGRAM_CREATOR_BOT_TOKEN") || "";
+    return process.env.TELEGRAM_CREATOR_BOT_TOKEN || "";
 }
 
 function getFanBotToken() {
-    return Netlify.env.get("TELEGRAM_FAN_BOT_TOKEN") || "";
+    return process.env.TELEGRAM_FAN_BOT_TOKEN || "";
 }
 
 function getCreatorChatId() {
-    return Netlify.env.get("TELEGRAM_CREATOR_CHAT_ID") || "";
+    return process.env.TELEGRAM_CREATOR_CHAT_ID || "";
 }
 
 function getAdminChatId() {
-    return Netlify.env.get("TELEGRAM_ADMIN_CHAT_ID") || "";
+    return process.env.TELEGRAM_ADMIN_CHAT_ID || "";
 }
 
 // ─── Telegram API Helpers ───────────────────────────────────
@@ -956,7 +956,7 @@ export default async (req: Request, context: any) => {
     if (path === "/setup" && req.method === "POST") {
         // Verify admin
         const apiKey = req.headers.get("x-api-key");
-        const expectedApiKey = Netlify.env.get("PIPELINE_API_KEY") || getSecret();
+        const expectedApiKey = process.env.PIPELINE_API_KEY || getSecret();
         const auth = req.headers.get("authorization");
         let isAdmin = false;
 
@@ -974,7 +974,7 @@ export default async (req: Request, context: any) => {
 
         try {
             const { botType } = await req.json();
-            const siteUrl = Netlify.env.get("URL") || "";
+            const siteUrl = process.env.URL || "";
 
             if (!siteUrl) {
                 return new Response(JSON.stringify({ error: "URL env var not set" }), { status: 500, headers: CORS });

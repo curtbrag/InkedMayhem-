@@ -5,6 +5,9 @@
 [build.environment]
   NODE_VERSION = "18"
 
+[functions]
+  node_bundler = "nft"
+
 # Scheduled function: auto-publish content on schedule (every 15 min)
 [functions."scheduled-publish"]
   schedule = "*/15 * * * *"

@@ -4,7 +4,7 @@ import { getStore } from "@netlify/blobs";
 // Set RESEND_API_KEY and NOTIFY_EMAIL in Netlify env vars
 
 async function sendEmail(to, subject, html) {
-    const apiKey = Netlify.env.get("RESEND_API_KEY");
+    const apiKey = process.env.RESEND_API_KEY;
     if (!apiKey) {
         console.log(`[NOTIFY] No RESEND_API_KEY — would send: "${subject}" to ${to}`);
         return false;
@@ -31,7 +31,7 @@ async function sendEmail(to, subject, html) {
 }
 
 function getAdminEmail() {
-    return Netlify.env.get("NOTIFY_EMAIL") || null;
+    return process.env.NOTIFY_EMAIL || null;
 }
 
 function emailTemplate(title, body) {
@@ -57,7 +57,7 @@ export default async (req, context) => {
 
     // Only allow internal calls (check for internal secret)
     const internalKey = req.headers.get("x-internal-key");
-    const expectedKey = Netlify.env.get("JWT_SECRET") || "inkedmayhem-dev-secret-change-me";
+    const expectedKey = process.env.JWT_SECRET || "inkedmayhem-dev-secret-change-me";
     if (internalKey !== expectedKey) {
         return new Response("Forbidden", { status: 403 });
     }

@@ -48,8 +48,8 @@ function isSpammy(text) {
 }
 
 async function notifyAdmin(type, data) {
-    const secret = Netlify.env.get("JWT_SECRET") || "inkedmayhem-dev-secret-change-me";
-    const siteUrl = Netlify.env.get("URL") || "https://inkedmayhem.netlify.app";
+    const secret = process.env.JWT_SECRET || "inkedmayhem-dev-secret-change-me";
+    const siteUrl = process.env.URL || "https://inkedmayhem.netlify.app";
     try {
         await fetch(`${siteUrl}/api/notify`, {
             method: "POST",

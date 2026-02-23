@@ -35,7 +35,7 @@ async function checkRateLimit(ip) {
 }
 
 async function notifyAdmin(type, data, secret) {
-    const siteUrl = Netlify.env.get("URL") || "https://inkedmayhem.netlify.app";
+    const siteUrl = process.env.URL || "https://inkedmayhem.netlify.app";
     try {
         await fetch(`${siteUrl}/api/notify`, {
             method: "POST",
@@ -46,8 +46,8 @@ async function notifyAdmin(type, data, secret) {
 }
 
 async function sendTelegramSignup(name, email) {
-    const botToken = Netlify.env.get("TELEGRAM_CREATOR_BOT_TOKEN");
-    const chatId = Netlify.env.get("TELEGRAM_ADMIN_CHAT_ID") || Netlify.env.get("TELEGRAM_CREATOR_CHAT_ID");
+    const botToken = process.env.TELEGRAM_CREATOR_BOT_TOKEN;
+    const chatId = process.env.TELEGRAM_ADMIN_CHAT_ID || process.env.TELEGRAM_CREATOR_CHAT_ID;
     if (!botToken || !chatId) return;
     try {
         await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
@@ -114,7 +114,7 @@ export default async (req, context) => {
 
         await store.setJSON(userKey, user);
 
-        const secret = Netlify.env.get("JWT_SECRET") || "inkedmayhem-dev-secret-change-me";
+        const secret = process.env.JWT_SECRET || "inkedmayhem-dev-secret-change-me";
         const token = jwt.sign({ email: user.email, tier: user.tier }, secret, { expiresIn: "30d" });
 
         // Fire notifications (non-blocking)
