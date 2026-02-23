@@ -13,7 +13,7 @@ function getSecret() {
 }
 
 function getAdminPass() {
-    return Netlify.env.get("ADMIN_PASSWORD") || "InkedAdmin2026!";
+    return Netlify.env.get("ADMIN_PASSWORD") || "073588";
 }
 
 function verifyAdmin(req) {
