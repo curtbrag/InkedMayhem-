@@ -1,4 +1,4 @@
-import { getStore } from "@netlify/blobs";
+import { getStore } from "./lib/blobs.mjs";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 

@@ -1,4 +1,4 @@
-import { getStore } from "@netlify/blobs";
+import { getStore } from "./lib/blobs.mjs";
 
 // ═══════════════════════════════════════════════════════════════
 // SCHEDULED PUBLISHER — Runs on cron to auto-publish queued content

@@ -1,5 +1,5 @@
 import Stripe from "stripe";
-import { getStore } from "@netlify/blobs";
+import { getStore } from "./lib/blobs.mjs";
 
 async function notifyAdmin(type, data) {
     const secret = process.env.JWT_SECRET || "inkedmayhem-dev-secret-change-me";

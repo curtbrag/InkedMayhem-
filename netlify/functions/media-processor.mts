@@ -1,5 +1,5 @@
 import sharp from "sharp";
-import { getStore } from "@netlify/blobs";
+import { getStore } from "./lib/blobs.mjs";
 
 // ═══════════════════════════════════════════════════════════════
 // MEDIA PROCESSOR — EXIF strip, compress, thumbnail, watermark

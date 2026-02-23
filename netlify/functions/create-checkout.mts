@@ -1,5 +1,5 @@
 import Stripe from "stripe";
-import { getStore } from "@netlify/blobs";
+import { getStore } from "./lib/blobs.mjs";
 import jwt from "jsonwebtoken";
 
 const CORS = {
