@@ -18,7 +18,7 @@ const CORS = {
 // ─── Config & Auth Helpers ──────────────────────────────────
 
 function getSecret() {
-    return Netlify.env.get("JWT_SECRET") || "inkedmayhem-dev-secret-change-me";
+    return process.env.JWT_SECRET || "inkedmayhem-dev-secret-change-me";
 }
 
 function verifyAdmin(req: Request) {
@@ -116,7 +116,7 @@ function generatePipelineId(): string {
 
 async function notifyAdmin(type: string, data: Record<string, any>) {
     try {
-        const siteUrl = Netlify.env.get("URL") || "http://localhost:8888";
+        const siteUrl = process.env.URL || "http://localhost:8888";
         await fetch(`${siteUrl}/api/notify`, {
             method: "POST",
             headers: {
@@ -166,7 +166,7 @@ export default async (req: Request, context: any) => {
         const admin = verifyAdmin(req);
         // Allow admin uploads and webhook-based uploads (with API key)
         const apiKey = req.headers.get("x-api-key");
-        const expectedApiKey = Netlify.env.get("PIPELINE_API_KEY") || getSecret();
+        const expectedApiKey = process.env.PIPELINE_API_KEY || getSecret();
         const isAuthorized = admin || apiKey === expectedApiKey;
 
         if (!isAuthorized) {
@@ -1001,7 +1001,7 @@ export default async (req: Request, context: any) => {
     if (path === "/check-schedule" && req.method === "POST") {
         const admin = verifyAdmin(req);
         const apiKey = req.headers.get("x-api-key");
-        const expectedApiKey = Netlify.env.get("PIPELINE_API_KEY") || getSecret();
+        const expectedApiKey = process.env.PIPELINE_API_KEY || getSecret();
         if (!admin && apiKey !== expectedApiKey) {
             return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: CORS });
         }

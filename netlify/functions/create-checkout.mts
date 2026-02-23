@@ -40,7 +40,7 @@ export default async (req, context) => {
             return new Response(JSON.stringify({ error: "Not authenticated" }), { status: 401, headers: CORS });
         }
 
-        const secret = Netlify.env.get("JWT_SECRET") || "inkedmayhem-dev-secret-change-me";
+        const secret = process.env.JWT_SECRET || "inkedmayhem-dev-secret-change-me";
         const token = authHeader.replace("Bearer ", "");
 
         let decoded;
@@ -51,7 +51,7 @@ export default async (req, context) => {
         }
 
         const { tier, type, postId, promoCode } = await req.json();
-        const stripeKey = Netlify.env.get("STRIPE_SECRET_KEY");
+        const stripeKey = process.env.STRIPE_SECRET_KEY;
 
         if (!stripeKey) {
             return new Response(JSON.stringify({
@@ -60,7 +60,7 @@ export default async (req, context) => {
         }
 
         const stripe = new Stripe(stripeKey);
-        const siteUrl = Netlify.env.get("URL") || "https://inkedmayhem.netlify.app";
+        const siteUrl = process.env.URL || "https://inkedmayhem.netlify.app";
 
         // Check and apply promo code if provided
         let discounts = [];

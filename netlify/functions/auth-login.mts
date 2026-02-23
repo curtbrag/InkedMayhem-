@@ -87,7 +87,7 @@ export default async (req, context) => {
         user.lastLogin = new Date().toISOString();
         await store.setJSON(userKey, user);
 
-        const secret = Netlify.env.get("JWT_SECRET") || "inkedmayhem-dev-secret-change-me";
+        const secret = process.env.JWT_SECRET || "inkedmayhem-dev-secret-change-me";
         const token = jwt.sign({ email: user.email, tier: user.tier }, secret, { expiresIn: "30d" });
 
         return new Response(JSON.stringify({

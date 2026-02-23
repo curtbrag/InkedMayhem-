@@ -19,11 +19,11 @@ const CORS = {
 };
 
 function getSecret() {
-    return Netlify.env.get("JWT_SECRET") || "inkedmayhem-dev-secret-change-me";
+    return process.env.JWT_SECRET || "inkedmayhem-dev-secret-change-me";
 }
 
 function getPipelineApiKey() {
-    return Netlify.env.get("PIPELINE_API_KEY") || getSecret();
+    return process.env.PIPELINE_API_KEY || getSecret();
 }
 
 // ─── Supported file types ───────────────────────────────────
@@ -104,8 +104,8 @@ async function createPipelineItem(params: {
 
     // Notify admin via Telegram
     try {
-        const botToken = Netlify.env.get("TELEGRAM_CREATOR_BOT_TOKEN");
-        const chatId = Netlify.env.get("TELEGRAM_ADMIN_CHAT_ID") || Netlify.env.get("TELEGRAM_CREATOR_CHAT_ID");
+        const botToken = process.env.TELEGRAM_CREATOR_BOT_TOKEN;
+        const chatId = process.env.TELEGRAM_ADMIN_CHAT_ID || process.env.TELEGRAM_CREATOR_CHAT_ID;
         if (botToken && chatId) {
             await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
                 method: "POST",
@@ -176,8 +176,8 @@ export default async (req: Request, context: any) => {
                 });
 
                 // Notify admin that new files may be available
-                const botToken = Netlify.env.get("TELEGRAM_CREATOR_BOT_TOKEN");
-                const chatId = Netlify.env.get("TELEGRAM_ADMIN_CHAT_ID") || Netlify.env.get("TELEGRAM_CREATOR_CHAT_ID");
+                const botToken = process.env.TELEGRAM_CREATOR_BOT_TOKEN;
+                const chatId = process.env.TELEGRAM_ADMIN_CHAT_ID || process.env.TELEGRAM_CREATOR_CHAT_ID;
                 if (botToken && chatId) {
                     await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
                         method: "POST",
@@ -215,8 +215,8 @@ export default async (req: Request, context: any) => {
             });
 
             // Notify admin
-            const botToken = Netlify.env.get("TELEGRAM_CREATOR_BOT_TOKEN");
-            const chatId = Netlify.env.get("TELEGRAM_ADMIN_CHAT_ID") || Netlify.env.get("TELEGRAM_CREATOR_CHAT_ID");
+            const botToken = process.env.TELEGRAM_CREATOR_BOT_TOKEN;
+            const chatId = process.env.TELEGRAM_ADMIN_CHAT_ID || process.env.TELEGRAM_CREATOR_CHAT_ID;
             if (botToken && chatId) {
                 await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
                     method: "POST",

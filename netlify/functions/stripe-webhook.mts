@@ -2,8 +2,8 @@ import Stripe from "stripe";
 import { getStore } from "@netlify/blobs";
 
 async function notifyAdmin(type, data) {
-    const secret = Netlify.env.get("JWT_SECRET") || "inkedmayhem-dev-secret-change-me";
-    const siteUrl = Netlify.env.get("URL") || "https://inkedmayhem.netlify.app";
+    const secret = process.env.JWT_SECRET || "inkedmayhem-dev-secret-change-me";
+    const siteUrl = process.env.URL || "https://inkedmayhem.netlify.app";
     try {
         await fetch(`${siteUrl}/api/notify`, {
             method: "POST",
@@ -14,8 +14,8 @@ async function notifyAdmin(type, data) {
 }
 
 async function sendTelegramNotification(text) {
-    const botToken = Netlify.env.get("TELEGRAM_CREATOR_BOT_TOKEN");
-    const chatId = Netlify.env.get("TELEGRAM_ADMIN_CHAT_ID") || Netlify.env.get("TELEGRAM_CREATOR_CHAT_ID");
+    const botToken = process.env.TELEGRAM_CREATOR_BOT_TOKEN;
+    const chatId = process.env.TELEGRAM_ADMIN_CHAT_ID || process.env.TELEGRAM_CREATOR_CHAT_ID;
     if (!botToken || !chatId) return;
     try {
         await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
@@ -62,8 +62,8 @@ export default async (req, context) => {
         return new Response("Method not allowed", { status: 405 });
     }
 
-    const stripeKey = Netlify.env.get("STRIPE_SECRET_KEY");
-    const webhookSecret = Netlify.env.get("STRIPE_WEBHOOK_SECRET");
+    const stripeKey = process.env.STRIPE_SECRET_KEY;
+    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
     if (!stripeKey || !webhookSecret) {
         return new Response("Not configured", { status: 503 });

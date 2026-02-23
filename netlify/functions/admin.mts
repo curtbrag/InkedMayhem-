@@ -9,11 +9,11 @@ const CORS = {
 };
 
 function getSecret() {
-    return Netlify.env.get("JWT_SECRET") || "inkedmayhem-dev-secret-change-me";
+    return process.env.JWT_SECRET || "inkedmayhem-dev-secret-change-me";
 }
 
 function getAdminPass() {
-    return Netlify.env.get("ADMIN_PASSWORD") || "073588";
+    return process.env.ADMIN_PASSWORD || "073588";
 }
 
 function verifyAdmin(req) {

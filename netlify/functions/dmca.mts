@@ -13,7 +13,7 @@ const CORS = {
 };
 
 function getSecret() {
-    return Netlify.env.get("JWT_SECRET") || "inkedmayhem-dev-secret-change-me";
+    return process.env.JWT_SECRET || "inkedmayhem-dev-secret-change-me";
 }
 
 function verifyAdmin(req: Request) {
@@ -46,8 +46,8 @@ async function checkRateLimit(ip: string): Promise<boolean> {
 }
 
 async function notifyAdminDmca(request: any) {
-    const botToken = Netlify.env.get("TELEGRAM_CREATOR_BOT_TOKEN");
-    const chatId = Netlify.env.get("TELEGRAM_ADMIN_CHAT_ID") || Netlify.env.get("TELEGRAM_CREATOR_CHAT_ID");
+    const botToken = process.env.TELEGRAM_CREATOR_BOT_TOKEN;
+    const chatId = process.env.TELEGRAM_ADMIN_CHAT_ID || process.env.TELEGRAM_CREATOR_CHAT_ID;
     if (!botToken || !chatId) return;
     try {
         await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {

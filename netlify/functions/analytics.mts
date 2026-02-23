@@ -15,7 +15,7 @@ const CORS = {
 };
 
 function getSecret() {
-    return Netlify.env.get("JWT_SECRET") || "inkedmayhem-dev-secret-change-me";
+    return process.env.JWT_SECRET || "inkedmayhem-dev-secret-change-me";
 }
 
 function verifyAdmin(req: Request) {
@@ -76,12 +76,12 @@ export default async (req: Request, context: any) => {
 
             // Check environment vars
             checks.env = {
-                jwtSecret: !!Netlify.env.get("JWT_SECRET"),
-                stripeKey: !!Netlify.env.get("STRIPE_SECRET_KEY"),
-                telegramCreator: !!Netlify.env.get("TELEGRAM_CREATOR_BOT_TOKEN"),
-                telegramFan: !!Netlify.env.get("TELEGRAM_FAN_BOT_TOKEN"),
-                resendApi: !!Netlify.env.get("RESEND_API_KEY"),
-                notifyEmail: !!Netlify.env.get("NOTIFY_EMAIL")
+                jwtSecret: !!process.env.JWT_SECRET,
+                stripeKey: !!process.env.STRIPE_SECRET_KEY,
+                telegramCreator: !!process.env.TELEGRAM_CREATOR_BOT_TOKEN,
+                telegramFan: !!process.env.TELEGRAM_FAN_BOT_TOKEN,
+                resendApi: !!process.env.RESEND_API_KEY,
+                notifyEmail: !!process.env.NOTIFY_EMAIL
             };
 
             const statusCode = checks.status === "ok" ? 200 : 503;
@@ -442,8 +442,8 @@ async function getTelegramMetrics() {
         recent24h,
         actionCounts,
         botsConfigured: {
-            creator: !!Netlify.env.get("TELEGRAM_CREATOR_BOT_TOKEN"),
-            fan: !!Netlify.env.get("TELEGRAM_FAN_BOT_TOKEN")
+            creator: !!process.env.TELEGRAM_CREATOR_BOT_TOKEN,
+            fan: !!process.env.TELEGRAM_FAN_BOT_TOKEN
         }
     };
 }
