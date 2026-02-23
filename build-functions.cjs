@@ -1,4 +1,4 @@
-const { execSync } = require("child_process");
+const esbuild = require("esbuild");
 const fs = require("fs");
 const path = require("path");
 
@@ -16,10 +16,20 @@ for (const file of files) {
   const outFile = file.replace(".mts", ".mjs");
   const output = path.join(outDir, outFile);
   console.log(`  ${file} -> ${outFile}`);
-  execSync(
-    `npx esbuild "${input}" --bundle --platform=node --format=esm --outfile="${output}" --target=node18 --external:sharp`,
-    { stdio: "inherit" }
-  );
+  try {
+    esbuild.buildSync({
+      entryPoints: [input],
+      bundle: true,
+      platform: "node",
+      format: "esm",
+      outfile: output,
+      target: "node18",
+      external: ["sharp"],
+    });
+  } catch (e) {
+    console.error(`FAILED to build ${file}:`, e.message);
+    process.exit(1);
+  }
 }
 
 console.log(`Done. ${files.length} functions built to dist/functions/`);
