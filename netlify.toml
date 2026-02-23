@@ -2,6 +2,9 @@
   publish = "public"
   functions = "netlify/functions"
 
+[build.environment]
+  NODE_VERSION = "18"
+
 # Scheduled function: auto-publish content on schedule (every 15 min)
 [functions."scheduled-publish"]
   schedule = "*/15 * * * *"
@@ -46,10 +49,7 @@
     Cache-Control = "no-cache"
 
 # ─── Redirects ─────────────────────────────────────────
-[[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/:splat"
-  status = 200
+# NOTE: No /api/* redirect needed — all functions use config.path (Functions v2)
 
 # SPA-style fallback for members area
 [[redirects]]
