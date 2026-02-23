@@ -6,7 +6,7 @@
   NODE_VERSION = "18"
 
 [functions]
-  node_bundler = "nft"
+  included_files = ["node_modules/@netlify/blobs/**"]
 
 # Scheduled function: auto-publish content on schedule (every 15 min)
 [functions."scheduled-publish"]
