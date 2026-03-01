@@ -206,6 +206,7 @@ function initLightbox() {
 }
 
 // ==================== AUTH MODAL ====================
+let isSignUp = false;
 
 function initAuthModal() {
     const modal = document.getElementById('authModal');
@@ -217,8 +218,6 @@ function initAuthModal() {
     const authSubmit = document.getElementById('authSubmit');
     const nameGroup = document.getElementById('nameGroup');
     const authForm = document.getElementById('authForm');
-
-    let isSignUp = false;
 
     function openModal() {
         modal.classList.add('active');
@@ -287,7 +286,15 @@ function initAuthModal() {
                 localStorage.setItem('im_user', JSON.stringify(data.user));
                 closeModal();
                 updateAuthUI(data.user);
-                showToast(isSignUp ? 'Welcome to InkedMayhem!' : 'Welcome back!');
+                // If user was trying to subscribe, continue that flow
+                if (pendingSubscribeTier) {
+                    const tier = pendingSubscribeTier;
+                    pendingSubscribeTier = null;
+                    showToast(isSignUp ? 'Account created! Starting checkout...' : 'Welcome back! Starting checkout...');
+                    handleSubscribe(tier);
+                } else {
+                    showToast(isSignUp ? 'Welcome to InkedMayhem!' : 'Welcome back!');
+                }
             } else {
                 showToast(data.error || 'Something went wrong', 'error');
             }
@@ -332,6 +339,7 @@ function updateAuthUI(user) {
 
 // ==================== SUBSCRIPTION / PAYMENT ====================
 let activePromoCode = null;
+let pendingSubscribeTier = null;
 
 async function applyPromoCode() {
     const input = document.getElementById('promoCodeInput');
@@ -373,9 +381,22 @@ async function handleSubscribe(tier) {
     const token = localStorage.getItem('im_token');
 
     if (!token) {
+        pendingSubscribeTier = tier;
+        // Switch modal to Sign Up mode for new subscribers
+        isSignUp = true;
+        const modalTitle = document.getElementById('modalTitle');
+        const authSubmit = document.getElementById('authSubmit');
+        const toggleText = document.getElementById('toggleText');
+        const toggleAuth = document.getElementById('toggleAuth');
+        const nameGroup = document.getElementById('nameGroup');
+        if (modalTitle) modalTitle.textContent = 'Create Account';
+        if (authSubmit) authSubmit.textContent = 'Sign Up';
+        if (toggleText) toggleText.textContent = 'Already have an account?';
+        if (toggleAuth) toggleAuth.textContent = 'Sign In';
+        if (nameGroup) nameGroup.style.display = 'block';
         document.getElementById('authModal').classList.add('active');
         document.body.style.overflow = 'hidden';
-        showToast('Sign in first to subscribe');
+        showToast('Create an account to subscribe');
         return;
     }
 
