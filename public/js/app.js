@@ -416,18 +416,30 @@ function payWithStripe() {
 }
 
 function payWithVenmo() {
+    const token = localStorage.getItem('im_token');
     const user = JSON.parse(localStorage.getItem('im_user') || '{}');
     const email = user.email || '';
-    let amount, note;
+    let amount, note, requestBody;
 
     if (pendingPaymentType === 'subscription' && pendingPaymentTier) {
         amount = TIER_PRICES[pendingPaymentTier];
         note = `InkedMayhem ${TIER_NAMES[pendingPaymentTier]} subscription - ${email}`;
+        requestBody = { type: 'subscription', tier: pendingPaymentTier, amount };
     } else if (pendingPaymentType === 'single' && pendingPaymentPostId) {
         amount = DEFAULT_POST_PRICE;
         note = `InkedMayhem unlock ${pendingPaymentPostId} - ${email}`;
+        requestBody = { type: 'single', postId: pendingPaymentPostId, amount };
     } else {
         return;
+    }
+
+    // Record the pending Venmo payment request
+    if (token) {
+        fetch('/api/venmo-request', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify(requestBody)
+        }).catch(() => {});
     }
 
     // Show the note about including email
