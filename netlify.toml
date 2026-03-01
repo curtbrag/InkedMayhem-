@@ -6,6 +6,9 @@
 [build.environment]
   NODE_VERSION = "18"
 
+[functions]
+  node_bundler = "none"
+
 # Scheduled function: auto-publish content on schedule (every 15 min)
 [functions."scheduled-publish"]
   schedule = "*/15 * * * *"
