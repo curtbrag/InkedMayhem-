@@ -216,6 +216,7 @@ export default async (req, context) => {
             const sub = event.data.object;
             const found = await findUserByCustomer(sub.customer);
             if (found) {
+                const previousTier = found.user.tier;
                 found.user.tier = "free";
                 found.user.subscriptionId = null;
                 found.user.cancelledAt = new Date().toISOString();
@@ -224,7 +225,7 @@ export default async (req, context) => {
 
                 await logRevenue("subscription_cancelled", {
                     email: found.user.email,
-                    previousTier: found.user.tier
+                    previousTier
                 });
 
                 await sendTelegramNotification(

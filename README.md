@@ -1,97 +1,57 @@
 # InkedMayhem
 
-Independent creator platform — no middlemen, no platform cuts. 100% yours.
+Your site: **https://inkedmayhem.netlify.app**
 
-## Features
+---
 
-- **Dark & Edgy Design** — Custom tattoo-culture aesthetic
-- **Image Gallery** — Filterable portfolio of work
-- **Subscription Tiers** — Free / VIP ($9.99/mo) / Elite ($24.99/mo)
-- **Pay-Per-Post** — Individual content unlocking
-- **User Authentication** — JWT-based sign up/sign in
-- **Stripe Payments** — Subscriptions + one-time purchases
-- **Contact Form** — Messages stored in Netlify Blobs
-- **Blog Section** — Stories and updates
-- **Fully Responsive** — Mobile-first design
-- **Legal Pages** — Terms of Service + Privacy Policy
+## Your Login
 
-## Tech Stack
+- Go to **https://inkedmayhem.netlify.app/admin**
+- Password: **073588** (ask Curt if you want to change it)
 
-- **Frontend**: Vanilla HTML/CSS/JS (no framework bloat)
-- **Backend**: Netlify Serverless Functions
-- **Storage**: Netlify Blobs (user data, contacts)
-- **Payments**: Stripe Checkout
-- **Auth**: JWT + bcrypt
-- **Hosting**: Netlify
+From here you can:
+- See and manage your subscribers
+- Create and schedule posts
+- Approve or reject Venmo payments
+- Read messages from your contact form
+- Export your data
 
-## Setup
+---
 
-### 1. Clone & Install
-```bash
-git clone https://github.com/curtbrag/InkedMayhem-.git
-cd InkedMayhem-
-npm install
-```
+## How Fans Subscribe
 
-### 2. Environment Variables (Netlify Dashboard)
-| Variable | Description |
-|----------|-------------|
-| `JWT_SECRET` | Random secret for auth tokens (already set) |
-| `STRIPE_SECRET_KEY` | From [Stripe Dashboard](https://dashboard.stripe.com/apikeys) |
-| `STRIPE_WEBHOOK_SECRET` | From Stripe webhook setup |
+Fans go to your site, sign up with their email, and pick a tier:
 
-### 3. Stripe Setup
-1. Create a Stripe account at [stripe.com](https://stripe.com)
-2. Get your Secret Key from Dashboard → Developers → API Keys
-3. Add webhook endpoint: `https://inkedmayhem.netlify.app/api/stripe-webhook`
-4. Select events: `checkout.session.completed`, `customer.subscription.deleted`
-5. Copy the webhook signing secret
+| Tier | Price |
+|------|-------|
+| Free | $0 |
+| Ink Insider (VIP) | $9.99/mo |
+| Mayhem Circle (Elite) | $24.99/mo |
+| Single Post Unlock | $4.99 each |
 
-### 4. Local Dev
-```bash
-npx netlify dev
-```
+They can pay with **credit card** (Stripe) or **Venmo**.
 
-### 5. Deploy
-Push to main branch — Netlify auto-deploys.
+- **Credit card** — automatic, nothing for you to do
+- **Venmo** — shows up in your admin dashboard as "pending." Check your Venmo (@Christina-Dipietro-6), confirm you got the money, then hit **Approve** in the dashboard
+
+---
 
 ## Adding Content
 
-### Gallery Images
-Replace placeholder divs in `public/index.html` with:
-```html
-<div class="gallery-item" data-category="blackwork">
-    <img src="/images/your-image.jpg" alt="Description">
-</div>
-```
+1. Go to your admin dashboard
+2. Go to **Content**
+3. Click **New Post**
+4. Add your image, title, and pick which tier can see it
+5. Save it or schedule it for later
 
-### Blog Posts
-Add new `<article class="blog-card">` blocks in the blog section.
+Posts auto-publish every 15 minutes if you schedule them.
 
-### Exclusive Content
-Paid content is gated by user tier. The `create-checkout.mts` function handles payment flow.
+---
 
-## File Structure
-```
-├── public/
-│   ├── index.html          # Main site
-│   ├── success.html        # Post-payment page
-│   ├── terms.html          # Terms of Service
-│   ├── privacy.html        # Privacy Policy
-│   ├── css/style.css       # All styles
-│   ├── js/app.js           # Frontend logic
-│   └── images/             # Gallery images
-├── netlify/
-│   └── functions/
-│       ├── auth-register.mts   # User registration
-│       ├── auth-login.mts      # User login
-│       ├── create-checkout.mts # Stripe checkout
-│       ├── stripe-webhook.mts  # Payment confirmation
-│       └── contact.mts         # Contact form
-├── netlify.toml            # Netlify config
-└── package.json
-```
+## If Something Isn't Working
 
-## License
+Text Curt.
+
+---
 
 All content © 2026 InkedMayhem. All rights reserved.
