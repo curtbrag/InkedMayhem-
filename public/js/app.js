@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initImageShimmer();
     initAnimatedStats();
     loadLatestDrops();
+    initPaymentPicker();
 });
 
 // ==================== NAVIGATION ====================
@@ -290,12 +291,12 @@ function initAuthModal() {
                 if (pendingSubscribeTier) {
                     const tier = pendingSubscribeTier;
                     pendingSubscribeTier = null;
-                    showToast(isSignUp ? 'Account created! Starting checkout...' : 'Welcome back! Starting checkout...');
+                    showToast(isSignUp ? 'Account created! Choose your payment method.' : 'Welcome back! Choose your payment method.');
                     handleSubscribe(tier);
                 } else if (pendingUnlockPostId) {
                     const postId = pendingUnlockPostId;
                     pendingUnlockPostId = null;
-                    showToast(isSignUp ? 'Account created! Starting checkout...' : 'Welcome back! Starting checkout...');
+                    showToast(isSignUp ? 'Account created! Choose your payment method.' : 'Welcome back! Choose your payment method.');
                     handleUnlock(postId);
                 } else {
                     showToast(isSignUp ? 'Welcome to InkedMayhem!' : 'Welcome back!');
@@ -346,6 +347,92 @@ function updateAuthUI(user) {
 let activePromoCode = null;
 let pendingSubscribeTier = null;
 let pendingUnlockPostId = null;
+
+// Payment picker state
+let pendingPaymentType = null; // 'subscription' or 'single'
+let pendingPaymentTier = null;
+let pendingPaymentPostId = null;
+
+const VENMO_HANDLE = 'Christina-Dipietro-6';
+const TIER_PRICES = { vip: 9.99, elite: 24.99 };
+const TIER_NAMES = { vip: 'Ink Insider (VIP)', elite: 'Mayhem Circle (Elite)' };
+const DEFAULT_POST_PRICE = 4.99;
+
+function initPaymentPicker() {
+    const modal = document.getElementById('paymentPickerModal');
+    if (!modal) return;
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closePaymentPicker();
+    });
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.classList.contains('active')) closePaymentPicker();
+    });
+}
+
+function showPaymentPicker(type, tierOrPostId) {
+    pendingPaymentType = type;
+    const modal = document.getElementById('paymentPickerModal');
+    const desc = document.getElementById('paymentPickerDesc');
+    const title = document.getElementById('paymentPickerTitle');
+    const venmoNote = document.getElementById('venmoNote');
+
+    if (type === 'subscription') {
+        pendingPaymentTier = tierOrPostId;
+        pendingPaymentPostId = null;
+        const price = TIER_PRICES[tierOrPostId];
+        title.textContent = 'Choose Payment';
+        desc.textContent = `${TIER_NAMES[tierOrPostId]} — $${price.toFixed(2)}/mo`;
+    } else {
+        pendingPaymentPostId = tierOrPostId;
+        pendingPaymentTier = null;
+        title.textContent = 'Choose Payment';
+        desc.textContent = `Unlock content — $${DEFAULT_POST_PRICE.toFixed(2)}`;
+    }
+
+    venmoNote.style.display = 'none';
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function closePaymentPicker() {
+    const modal = document.getElementById('paymentPickerModal');
+    modal.classList.remove('active');
+    document.body.style.overflow = '';
+    pendingPaymentType = null;
+    pendingPaymentTier = null;
+    pendingPaymentPostId = null;
+}
+
+function payWithStripe() {
+    closePaymentPicker();
+    if (pendingPaymentType === 'subscription' && pendingPaymentTier) {
+        proceedStripeSubscribe(pendingPaymentTier);
+    } else if (pendingPaymentType === 'single' && pendingPaymentPostId) {
+        proceedStripeUnlock(pendingPaymentPostId);
+    }
+}
+
+function payWithVenmo() {
+    const user = JSON.parse(localStorage.getItem('im_user') || '{}');
+    const email = user.email || '';
+    let amount, note;
+
+    if (pendingPaymentType === 'subscription' && pendingPaymentTier) {
+        amount = TIER_PRICES[pendingPaymentTier];
+        note = `InkedMayhem ${TIER_NAMES[pendingPaymentTier]} subscription - ${email}`;
+    } else if (pendingPaymentType === 'single' && pendingPaymentPostId) {
+        amount = DEFAULT_POST_PRICE;
+        note = `InkedMayhem unlock ${pendingPaymentPostId} - ${email}`;
+    } else {
+        return;
+    }
+
+    // Show the note about including email
+    document.getElementById('venmoNote').style.display = 'block';
+
+    const venmoUrl = `https://account.venmo.com/u/${VENMO_HANDLE}?txn=pay&amount=${amount}&note=${encodeURIComponent(note)}`;
+    window.open(venmoUrl, '_blank');
+}
 
 async function applyPromoCode() {
     const input = document.getElementById('promoCodeInput');
@@ -406,6 +493,12 @@ async function handleSubscribe(tier) {
         return;
     }
 
+    // Show payment method picker
+    showPaymentPicker('subscription', tier);
+}
+
+async function proceedStripeSubscribe(tier) {
+    const token = localStorage.getItem('im_token');
     try {
         const body = { tier, type: 'subscription' };
         if (activePromoCode) body.promoCode = activePromoCode;
@@ -454,6 +547,12 @@ async function handleUnlock(postId) {
         return;
     }
 
+    // Show payment method picker
+    showPaymentPicker('single', postId);
+}
+
+async function proceedStripeUnlock(postId) {
+    const token = localStorage.getItem('im_token');
     try {
         const res = await fetch('/api/create-checkout', {
             method: 'POST',
