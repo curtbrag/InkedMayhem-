@@ -337,6 +337,87 @@ export default async (req, context) => {
         }
     }
 
+    // ─── VENMO PENDING ──────────────────────────
+    if (path === "/venmo-pending" && req.method === "GET") {
+        try {
+            const store = getStore("venmo-pending");
+            const { blobs } = await store.list();
+            const requests = [];
+            for (const blob of blobs) {
+                const r = await store.get(blob.key, { type: "json" }) as any;
+                if (r) requests.push({ key: blob.key, ...r });
+            }
+            requests.sort((a, b) => (b.requestedAt || "").localeCompare(a.requestedAt || ""));
+            const pending = requests.filter(r => r.status === "pending");
+            return new Response(JSON.stringify({ success: true, requests, pendingCount: pending.length }), { headers: CORS });
+        } catch (err) {
+            return new Response(JSON.stringify({ error: "Failed to list Venmo requests" }), { status: 500, headers: CORS });
+        }
+    }
+
+    // ─── APPROVE VENMO PAYMENT ──────────────────
+    if (path === "/venmo-approve" && req.method === "POST") {
+        try {
+            const { requestKey } = await req.json();
+            if (!requestKey) return new Response(JSON.stringify({ error: "requestKey required" }), { status: 400, headers: CORS });
+
+            const venmoStore = getStore("venmo-pending");
+            const request = await venmoStore.get(requestKey, { type: "json" }) as any;
+            if (!request) return new Response(JSON.stringify({ error: "Request not found" }), { status: 404, headers: CORS });
+
+            // Update user tier
+            const userStore = getStore("users");
+            const userKey = request.email.toLowerCase().replace(/[^a-z0-9@._-]/g, '');
+            const user = await userStore.get(userKey, { type: "json" }) as any;
+            if (!user) return new Response(JSON.stringify({ error: "User not found" }), { status: 404, headers: CORS });
+
+            if (request.type === "subscription" && request.tier) {
+                user.tier = request.tier;
+                user.subscribedAt = new Date().toISOString();
+                user.paymentMethod = "venmo";
+            } else if (request.type === "single" && request.postId) {
+                if (!user.purchases) user.purchases = [];
+                user.purchases.push({
+                    postId: request.postId,
+                    purchasedAt: new Date().toISOString(),
+                    amount: request.amount,
+                    paymentMethod: "venmo"
+                });
+            }
+            user.updatedAt = new Date().toISOString();
+            await userStore.setJSON(userKey, user);
+
+            // Mark request as approved
+            request.status = "approved";
+            request.approvedAt = new Date().toISOString();
+            await venmoStore.setJSON(requestKey, request);
+
+            return new Response(JSON.stringify({ success: true, user: { email: user.email, tier: user.tier } }), { headers: CORS });
+        } catch (err) {
+            return new Response(JSON.stringify({ error: "Approve failed" }), { status: 500, headers: CORS });
+        }
+    }
+
+    // ─── REJECT VENMO PAYMENT ───────────────────
+    if (path === "/venmo-reject" && req.method === "POST") {
+        try {
+            const { requestKey } = await req.json();
+            if (!requestKey) return new Response(JSON.stringify({ error: "requestKey required" }), { status: 400, headers: CORS });
+
+            const venmoStore = getStore("venmo-pending");
+            const request = await venmoStore.get(requestKey, { type: "json" }) as any;
+            if (!request) return new Response(JSON.stringify({ error: "Request not found" }), { status: 404, headers: CORS });
+
+            request.status = "rejected";
+            request.rejectedAt = new Date().toISOString();
+            await venmoStore.setJSON(requestKey, request);
+
+            return new Response(JSON.stringify({ success: true }), { headers: CORS });
+        } catch (err) {
+            return new Response(JSON.stringify({ error: "Reject failed" }), { status: 500, headers: CORS });
+        }
+    }
+
     // ─── STATS ───────────────────────────────────
     if (path === "/stats" && req.method === "GET") {
         try {
@@ -345,8 +426,10 @@ export default async (req, context) => {
             const convStore = getStore("conversations");
             const contentStore = getStore("content");
 
-            const [userBlobs, msgBlobs, convBlobs, contentBlobs] = await Promise.all([
-                userStore.list(), msgStore.list(), convStore.list(), contentStore.list()
+            const venmoStore = getStore("venmo-pending");
+
+            const [userBlobs, msgBlobs, convBlobs, contentBlobs, venmoBlobs] = await Promise.all([
+                userStore.list(), msgStore.list(), convStore.list(), contentStore.list(), venmoStore.list()
             ]);
 
             const tiers = { free: 0, vip: 0, elite: 0 };
@@ -365,6 +448,12 @@ export default async (req, context) => {
                 if (m && !m.read) unread++;
             }
 
+            let venmoPending = 0;
+            for (const blob of venmoBlobs.blobs) {
+                const v = await venmoStore.get(blob.key, { type: "json" }) as any;
+                if (v && v.status === "pending") venmoPending++;
+            }
+
             // Recent activity (last 7 days)
             const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
             const recentSignups = signupDates.filter(d => d > weekAgo).length;
@@ -379,6 +468,7 @@ export default async (req, context) => {
                     unreadMessages: unread,
                     totalConversations: convBlobs.blobs.length,
                     totalContent: contentBlobs.blobs.length,
+                    venmoPending,
                     recentSignups,
                     recentLogins,
                     signupDates: signupDates.sort(),

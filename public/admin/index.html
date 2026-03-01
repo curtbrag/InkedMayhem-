@@ -533,6 +533,7 @@
         <button class="tab active" data-tab="overview">Overview</button>
         <button class="tab" data-tab="pipeline">Pipeline <span class="badge" id="pipelineBadge" style="display:none">0</span></button>
         <button class="tab" data-tab="calendar">Calendar</button>
+        <button class="tab" data-tab="venmo">Venmo <span class="badge" id="venmoBadge" style="display:none">0</span></button>
         <button class="tab" data-tab="users">Users</button>
         <button class="tab" data-tab="messages">Messages <span class="badge" id="unreadBadge" style="display:none">0</span></button>
         <button class="tab" data-tab="conversations">Conversations</button>
@@ -553,6 +554,10 @@
             <div class="stat-card red">
                 <div class="label">Unread Messages</div>
                 <div class="value" id="statUnread">—</div>
+            </div>
+            <div class="stat-card" style="border-left:2px solid #008CFF">
+                <div class="label">Venmo Pending</div>
+                <div class="value" id="statVenmo" style="color:#008CFF">—</div>
             </div>
             <div class="stat-card gold">
                 <div class="label">Conversations</div>
@@ -680,6 +685,37 @@
         <div style="margin-top:2rem">
             <div class="section-title" style="font-size:1.2rem"><span class="icon">◆</span> Recent Activity</div>
             <div id="pipeActivityLog" style="background:var(--darker);border:1px solid var(--border);padding:1rem;max-height:300px;overflow-y:auto"><div class="loading-text"><span class="spinner"></span> Loading activity...</div></div>
+        </div>
+    </div>
+
+    <!-- ─── VENMO TAB ─────────────────────── -->
+    <div class="tab-content" id="tab-venmo">
+        <div class="section-title"><span class="icon">◆</span> Venmo Payments</div>
+        <p style="color:#888;font-size:0.8rem;margin-bottom:1.5rem">Users who chose "Pay with Venmo" show up here. Check your Venmo, then approve or reject.</p>
+
+        <div style="display:flex;gap:0.5rem;margin-bottom:1rem;flex-wrap:wrap">
+            <button class="btn-sm venmo-filter active" data-filter="pending" onclick="filterVenmo('pending',this)" style="border-color:#008CFF;color:#008CFF">Pending</button>
+            <button class="btn-sm venmo-filter" data-filter="approved" onclick="filterVenmo('approved',this)">Approved</button>
+            <button class="btn-sm venmo-filter" data-filter="rejected" onclick="filterVenmo('rejected',this)">Rejected</button>
+            <button class="btn-sm venmo-filter" data-filter="all" onclick="filterVenmo('all',this)">All</button>
+        </div>
+
+        <div id="venmoLoading" style="color:#888;padding:2rem;text-align:center">Loading...</div>
+        <div id="venmoEmpty" style="color:#555;padding:2rem;text-align:center;display:none">No Venmo payment requests yet.</div>
+        <div id="venmoTable" style="display:none">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Status</th>
+                        <th>Email</th>
+                        <th>Type</th>
+                        <th>Amount</th>
+                        <th>Requested</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="venmoBody"></tbody>
+            </table>
         </div>
     </div>
 
@@ -1246,6 +1282,7 @@ document.querySelectorAll('.tab').forEach(tab => {
         document.getElementById(`tab-${tab.dataset.tab}`).classList.add('active');
 
         // Load data for tab
+        if (tab.dataset.tab === 'venmo') loadVenmo();
         if (tab.dataset.tab === 'users') loadUsers();
         if (tab.dataset.tab === 'messages') loadMessages();
         if (tab.dataset.tab === 'conversations') loadConversations();
@@ -1280,7 +1317,106 @@ async function loadStats() {
         } else {
             badge.style.display = 'none';
         }
+
+        document.getElementById('statVenmo').textContent = s.venmoPending || 0;
+        const vBadge = document.getElementById('venmoBadge');
+        if (s.venmoPending > 0) {
+            vBadge.textContent = s.venmoPending;
+            vBadge.style.display = 'inline';
+        } else {
+            vBadge.style.display = 'none';
+        }
     } catch (e) { console.error('Stats error:', e); }
+}
+
+// ─── VENMO ──────────────────────────────────
+let venmoFilter = 'pending';
+let venmoData = [];
+
+function filterVenmo(filter, btn) {
+    venmoFilter = filter;
+    document.querySelectorAll('.venmo-filter').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    renderVenmo();
+}
+
+function renderVenmo() {
+    const filtered = venmoFilter === 'all' ? venmoData : venmoData.filter(r => r.status === venmoFilter);
+    const tbody = document.getElementById('venmoBody');
+
+    if (!filtered.length) {
+        document.getElementById('venmoTable').style.display = 'none';
+        document.getElementById('venmoEmpty').style.display = 'block';
+        return;
+    }
+
+    document.getElementById('venmoEmpty').style.display = 'none';
+    document.getElementById('venmoTable').style.display = 'block';
+
+    tbody.innerHTML = filtered.map(r => {
+        const statusColor = r.status === 'pending' ? '#008CFF' : r.status === 'approved' ? 'var(--green)' : 'var(--red)';
+        const label = r.type === 'subscription'
+            ? `${(r.tier || '').toUpperCase()} sub`
+            : `Unlock: ${r.postId || '?'}`;
+        const actions = r.status === 'pending'
+            ? `<button class="btn-sm" style="background:var(--green);color:#fff" onclick="approveVenmo('${esc(r.key)}')">Approve</button>
+               <button class="btn-sm danger" onclick="rejectVenmo('${esc(r.key)}')">Reject</button>`
+            : `<span style="font-size:10px;color:${statusColor};letter-spacing:1px">${r.status.toUpperCase()}</span>`;
+        return `<tr>
+            <td><span style="color:${statusColor};font-size:10px;letter-spacing:1px">${r.status.toUpperCase()}</span></td>
+            <td>${esc(r.email)}</td>
+            <td>${label}</td>
+            <td>$${(r.amount || 0).toFixed(2)}</td>
+            <td>${formatDate(r.requestedAt)}</td>
+            <td style="white-space:nowrap">${actions}</td>
+        </tr>`;
+    }).join('');
+}
+
+async function loadVenmo() {
+    document.getElementById('venmoLoading').style.display = 'block';
+    document.getElementById('venmoTable').style.display = 'none';
+    document.getElementById('venmoEmpty').style.display = 'none';
+
+    try {
+        const data = await api('/venmo-pending');
+        document.getElementById('venmoLoading').style.display = 'none';
+
+        if (!data.success || !data.requests.length) {
+            document.getElementById('venmoEmpty').style.display = 'block';
+            return;
+        }
+
+        venmoData = data.requests;
+        renderVenmo();
+    } catch (e) {
+        document.getElementById('venmoLoading').style.display = 'none';
+        toast('Failed to load Venmo requests', true);
+    }
+}
+
+async function approveVenmo(key) {
+    if (!confirm('Approve this Venmo payment and activate the user?')) return;
+    const data = await api('/venmo-approve', 'POST', { requestKey: key });
+    if (data.success) {
+        toast(`Approved! ${data.user.email} → ${data.user.tier.toUpperCase()}`);
+        loadVenmo();
+        loadStats();
+    } else {
+        toast(data.error || 'Approve failed', true);
+    }
+}
+
+async function rejectVenmo(key) {
+    if (!confirm('Reject this Venmo payment request?')) return;
+    const data = await api('/venmo-reject', 'POST', { requestKey: key });
+    if (data.success) {
+        toast('Payment request rejected');
+        loadVenmo();
+        loadStats();
+    } else {
+        toast(data.error || 'Reject failed', true);
+    }
 }
 
 // ─── USERS ───────────────────────────────────
