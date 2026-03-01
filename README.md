@@ -1,51 +1,56 @@
 # InkedMayhem
 
----
-
-## Netlify Environment Variables
-
-Go to **Netlify > Site Configuration > Environment Variables** and make sure these are set:
-
-| Variable | What It Is |
-|----------|------------|
-| `JWT_SECRET` | Any random string you make up |
-| `ADMIN_PASSWORD` | Password for your admin dashboard (default: `073588`) |
-| `STRIPE_SECRET_KEY` | From Stripe > Developers > API Keys (starts with `sk_live_`) |
-| `STRIPE_WEBHOOK_SECRET` | From Stripe > Developers > Webhooks (starts with `whsec_`) |
-
-After changing any of these, redeploy the site.
+Your site: **https://inkedmayhem.netlify.app**
 
 ---
 
-## Stripe Webhook
+## Your Login
 
-In Stripe go to **Developers > Webhooks > Add endpoint**
+- Go to **https://inkedmayhem.netlify.app/admin**
+- Password: **073588** (ask Curt if you want to change it)
 
-- **URL:** `https://inkedmayhem.netlify.app/api/stripe-webhook`
-- **Events to select:**
-  - `checkout.session.completed`
-  - `invoice.payment_succeeded`
-  - `invoice.payment_failed`
-  - `customer.subscription.deleted`
-  - `customer.subscription.updated`
-  - `charge.refunded`
-  - `charge.dispute.created`
-
-Copy the signing secret and paste it as `STRIPE_WEBHOOK_SECRET` in Netlify.
+From here you can:
+- See and manage your subscribers
+- Create and schedule posts
+- Approve or reject Venmo payments
+- Read messages from your contact form
+- Export your data
 
 ---
 
-## Admin Dashboard
+## How Fans Subscribe
 
-**https://inkedmayhem.netlify.app/admin**
+Fans go to your site, sign up with their email, and pick a tier:
 
-Log in with your `ADMIN_PASSWORD`. From here you can manage users, content, and approve Venmo payments.
+| Tier | Price |
+|------|-------|
+| Free | $0 |
+| Ink Insider (VIP) | $9.99/mo |
+| Mayhem Circle (Elite) | $24.99/mo |
+| Single Post Unlock | $4.99 each |
+
+They can pay with **credit card** (Stripe) or **Venmo**.
+
+- **Credit card** — automatic, nothing for you to do
+- **Venmo** — shows up in your admin dashboard as "pending." Check your Venmo (@Christina-Dipietro-6), confirm you got the money, then hit **Approve** in the dashboard
 
 ---
 
-## Venmo
+## Adding Content
 
-When a fan pays with Venmo, it shows up in your admin dashboard as "pending." Check your Venmo, confirm you got paid, then hit **Approve** in the dashboard.
+1. Go to your admin dashboard
+2. Go to **Content**
+3. Click **New Post**
+4. Add your image, title, and pick which tier can see it
+5. Save it or schedule it for later
+
+Posts auto-publish every 15 minutes if you schedule them.
+
+---
+
+## If Something Isn't Working
+
+Text Curt.
 
 ---
 
