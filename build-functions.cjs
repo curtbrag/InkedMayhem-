@@ -3,7 +3,7 @@ const fs = require("fs");
 const path = require("path");
 
 const srcDir = path.join(__dirname, "src", "functions");
-const outDir = path.join(__dirname, "dist", "functions");
+const outDir = path.join(__dirname, "netlify", "functions");
 
 fs.mkdirSync(outDir, { recursive: true });
 
@@ -32,4 +32,4 @@ for (const file of files) {
   }
 }
 
-console.log(`Done. ${files.length} functions built to dist/functions/`);
+console.log(`Done. ${files.length} functions built to netlify/functions/`);
