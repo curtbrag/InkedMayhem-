@@ -1399,7 +1399,7 @@ async function approveVenmo(key) {
     if (!confirm('Approve this Venmo payment and activate the user?')) return;
     const data = await api('/venmo-approve', 'POST', { requestKey: key });
     if (data.success) {
-        toast(`Approved! ${data.user.email} → ${data.user.tier.toUpperCase()}`);
+        toast(`Approved! ${data.user.email}${data.user.tier ? ' → ' + data.user.tier.toUpperCase() : ' — post unlocked'}`);
         loadVenmo();
         loadStats();
     } else {
