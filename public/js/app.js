@@ -404,11 +404,14 @@ function closePaymentPicker() {
 }
 
 function payWithStripe() {
+    const type = pendingPaymentType;
+    const tier = pendingPaymentTier;
+    const postId = pendingPaymentPostId;
     closePaymentPicker();
-    if (pendingPaymentType === 'subscription' && pendingPaymentTier) {
-        proceedStripeSubscribe(pendingPaymentTier);
-    } else if (pendingPaymentType === 'single' && pendingPaymentPostId) {
-        proceedStripeUnlock(pendingPaymentPostId);
+    if (type === 'subscription' && tier) {
+        proceedStripeSubscribe(tier);
+    } else if (type === 'single' && postId) {
+        proceedStripeUnlock(postId);
     }
 }
 
