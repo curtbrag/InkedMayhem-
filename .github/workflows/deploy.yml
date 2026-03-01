@@ -11,16 +11,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "18"
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Build functions
-        run: node build-functions.cjs
-
       - name: Deploy to Netlify
         run: npx --yes netlify-cli deploy --prod --dir=public --functions=netlify/functions --site=${{ secrets.NETLIFY_SITE_ID }}
         env:
