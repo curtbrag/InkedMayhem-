@@ -2,7 +2,7 @@ const esbuild = require("esbuild");
 const fs = require("fs");
 const path = require("path");
 
-const srcDir = path.join(__dirname, "netlify", "functions");
+const srcDir = path.join(__dirname, "src", "functions");
 const outDir = path.join(__dirname, "dist", "functions");
 
 fs.mkdirSync(outDir, { recursive: true });
