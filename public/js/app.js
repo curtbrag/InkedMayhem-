@@ -286,12 +286,17 @@ function initAuthModal() {
                 localStorage.setItem('im_user', JSON.stringify(data.user));
                 closeModal();
                 updateAuthUI(data.user);
-                // If user was trying to subscribe, continue that flow
+                // If user was trying to subscribe or unlock, continue that flow
                 if (pendingSubscribeTier) {
                     const tier = pendingSubscribeTier;
                     pendingSubscribeTier = null;
                     showToast(isSignUp ? 'Account created! Starting checkout...' : 'Welcome back! Starting checkout...');
                     handleSubscribe(tier);
+                } else if (pendingUnlockPostId) {
+                    const postId = pendingUnlockPostId;
+                    pendingUnlockPostId = null;
+                    showToast(isSignUp ? 'Account created! Starting checkout...' : 'Welcome back! Starting checkout...');
+                    handleUnlock(postId);
                 } else {
                     showToast(isSignUp ? 'Welcome to InkedMayhem!' : 'Welcome back!');
                 }
@@ -340,6 +345,7 @@ function updateAuthUI(user) {
 // ==================== SUBSCRIPTION / PAYMENT ====================
 let activePromoCode = null;
 let pendingSubscribeTier = null;
+let pendingUnlockPostId = null;
 
 async function applyPromoCode() {
     const input = document.getElementById('promoCodeInput');
@@ -429,9 +435,22 @@ async function handleUnlock(postId) {
     const token = localStorage.getItem('im_token');
 
     if (!token) {
+        pendingUnlockPostId = postId;
+        // Switch modal to Sign Up mode for new users
+        isSignUp = true;
+        const modalTitle = document.getElementById('modalTitle');
+        const authSubmit = document.getElementById('authSubmit');
+        const toggleText = document.getElementById('toggleText');
+        const toggleAuth = document.getElementById('toggleAuth');
+        const nameGroup = document.getElementById('nameGroup');
+        if (modalTitle) modalTitle.textContent = 'Create Account';
+        if (authSubmit) authSubmit.textContent = 'Sign Up';
+        if (toggleText) toggleText.textContent = 'Already have an account?';
+        if (toggleAuth) toggleAuth.textContent = 'Sign In';
+        if (nameGroup) nameGroup.style.display = 'block';
         document.getElementById('authModal').classList.add('active');
         document.body.style.overflow = 'hidden';
-        showToast('Sign in first to unlock content');
+        showToast('Create an account to unlock content');
         return;
     }
 
