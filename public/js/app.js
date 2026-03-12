@@ -459,11 +459,6 @@ async function payWithVenmo() {
         return;
     }
 
-    if (typeof amount !== 'number' || Number.isNaN(amount) || amount <= 0) {
-        showToast('Invalid payment amount. Please refresh and try again.', 'error');
-        return;
-    }
-
     try {
         const res = await fetch('/api/venmo-request', {
             method: 'POST',
@@ -480,11 +475,7 @@ async function payWithVenmo() {
     }
 
     const venmoUrl = `https://account.venmo.com/u/${VENMO_HANDLE}?txn=pay&amount=${amount.toFixed(2)}&note=${encodeURIComponent(note)}`;
-    const venmoWindow = window.open(venmoUrl, '_blank', 'noopener');
-    if (!venmoWindow) {
-        showToast('Popup blocked — opening Venmo in this tab.', 'error');
-        window.location.href = venmoUrl;
-    }
+    window.open(venmoUrl, '_blank', 'noopener');
 }
 
 async function applyPromoCode() {
