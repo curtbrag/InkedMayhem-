@@ -358,6 +358,22 @@ const TIER_PRICES = { vip: 9.99, elite: 24.99 };
 const TIER_NAMES = { vip: 'Ink Insider (VIP)', elite: 'Mayhem Circle (Elite)' };
 const DEFAULT_POST_PRICE = 4.99;
 
+
+function getStoredUser() {
+    try {
+        const raw = localStorage.getItem('im_user');
+        return raw ? JSON.parse(raw) : {};
+    } catch {
+        return {};
+    }
+}
+
+function resetPendingPaymentState() {
+    pendingPaymentType = null;
+    pendingPaymentTier = null;
+    pendingPaymentPostId = null;
+}
+
 function initPaymentPicker() {
     const modal = document.getElementById('paymentPickerModal');
     if (!modal) return;
@@ -370,59 +386,75 @@ function initPaymentPicker() {
 }
 
 function showPaymentPicker(type, tierOrPostId) {
-    pendingPaymentType = type;
     const modal = document.getElementById('paymentPickerModal');
     const desc = document.getElementById('paymentPickerDesc');
     const title = document.getElementById('paymentPickerTitle');
-    const venmoNote = document.getElementById('venmoNote');
-
-    if (type === 'subscription') {
-        pendingPaymentTier = tierOrPostId;
-        pendingPaymentPostId = null;
-        const price = TIER_PRICES[tierOrPostId];
-        title.textContent = 'Choose Payment';
-        desc.textContent = `${TIER_NAMES[tierOrPostId]} — $${price.toFixed(2)}/mo`;
-    } else {
-        pendingPaymentPostId = tierOrPostId;
-        pendingPaymentTier = null;
-        title.textContent = 'Choose Payment';
-        desc.textContent = `Unlock content — $${DEFAULT_POST_PRICE.toFixed(2)}`;
+    if (!modal || !desc || !title) {
+        resetPendingPaymentState();
+        showToast('Venmo checkout is temporarily unavailable. Please try again.', 'error');
+        return;
     }
 
-    venmoNote.style.display = 'none';
+    if (type === 'subscription') {
+        const price = TIER_PRICES[tierOrPostId];
+        const tierName = TIER_NAMES[tierOrPostId];
+        if (!tierName || typeof price !== 'number') {
+            resetPendingPaymentState();
+            showToast('Invalid membership tier. Please refresh and try again.', 'error');
+            return;
+        }
+        pendingPaymentType = 'subscription';
+        pendingPaymentTier = tierOrPostId;
+        pendingPaymentPostId = null;
+        title.textContent = 'Venmo Payment';
+        desc.textContent = `${tierName} — $${price.toFixed(2)}/mo`;
+    } else if (type === 'single') {
+        if (!tierOrPostId) {
+            resetPendingPaymentState();
+            showToast('Invalid unlock request. Please try again.', 'error');
+            return;
+        }
+        pendingPaymentType = 'single';
+        pendingPaymentPostId = tierOrPostId;
+        pendingPaymentTier = null;
+        title.textContent = 'Venmo Payment';
+        desc.textContent = `Unlock content — $${DEFAULT_POST_PRICE.toFixed(2)}`;
+    } else {
+        resetPendingPaymentState();
+        showToast('Invalid payment request. Please try again.', 'error');
+        return;
+    }
+
     modal.classList.add('active');
     document.body.style.overflow = 'hidden';
 }
 
 function closePaymentPicker() {
     const modal = document.getElementById('paymentPickerModal');
-    modal.classList.remove('active');
+    if (modal) modal.classList.remove('active');
     document.body.style.overflow = '';
-    pendingPaymentType = null;
-    pendingPaymentTier = null;
-    pendingPaymentPostId = null;
+    resetPendingPaymentState();
 }
 
 function payWithStripe() {
-    const type = pendingPaymentType;
-    const tier = pendingPaymentTier;
-    const postId = pendingPaymentPostId;
     closePaymentPicker();
-    if (type === 'subscription' && tier) {
-        proceedStripeSubscribe(tier);
-    } else if (type === 'single' && postId) {
-        proceedStripeUnlock(postId);
-    }
+    showToast('Card payments are not live yet. Please use Venmo for now.', 'error');
 }
 
-function payWithVenmo() {
+async function payWithVenmo() {
     const token = localStorage.getItem('im_token');
-    const user = JSON.parse(localStorage.getItem('im_user') || '{}');
-    const email = user.email || '';
+    const user = getStoredUser();
+    const email = (user.email || '').trim();
     const type = pendingPaymentType;
     const tier = pendingPaymentTier;
     const postId = pendingPaymentPostId;
     closePaymentPicker();
+
+    if (!token || !email) {
+        showToast('Please sign in before paying with Venmo.', 'error');
+        return;
+    }
+
     let amount, note, requestBody;
 
     if (type === 'subscription' && tier) {
@@ -434,23 +466,44 @@ function payWithVenmo() {
         note = `InkedMayhem unlock ${postId} - ${email}`;
         requestBody = { type: 'single', postId: postId, amount };
     } else {
+        showToast('Could not prepare Venmo payment. Please try again.', 'error');
         return;
     }
 
-    // Record the pending Venmo payment request
-    if (token) {
-        fetch('/api/venmo-request', {
+    if (typeof amount !== 'number' || Number.isNaN(amount) || amount <= 0) {
+        showToast('Invalid payment amount. Please refresh and try again.', 'error');
+        return;
+    }
+
+    const venmoUrl = `https://account.venmo.com/u/${VENMO_HANDLE}?txn=pay&amount=${amount.toFixed(2)}&note=${encodeURIComponent(note)}`;
+
+    // Open a blank tab synchronously (user gesture) so popup blockers are less likely
+    // to block the Venmo redirect after the async API request completes.
+    let venmoWindow = window.open('', '_blank', 'noopener');
+
+    try {
+        const res = await fetch('/api/venmo-request', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             body: JSON.stringify(requestBody)
-        }).catch(() => {});
+        });
+        if (!res.ok) {
+            if (venmoWindow) venmoWindow.close();
+            showToast('Could not save your payment request. Please retry.', 'error');
+            return;
+        }
+    } catch {
+        if (venmoWindow) venmoWindow.close();
+        showToast('Network error while saving request. Please retry.', 'error');
+        return;
     }
 
-    // Show the note about including email
-    document.getElementById('venmoNote').style.display = 'block';
-
-    const venmoUrl = `https://account.venmo.com/u/${VENMO_HANDLE}?txn=pay&amount=${amount}&note=${encodeURIComponent(note)}`;
-    window.open(venmoUrl, '_blank');
+    if (venmoWindow) {
+        venmoWindow.location.href = venmoUrl;
+    } else {
+        showToast('Popup blocked — opening Venmo in this tab.', 'error');
+        window.location.href = venmoUrl;
+    }
 }
 
 async function applyPromoCode() {
@@ -516,32 +569,6 @@ async function handleSubscribe(tier) {
     showPaymentPicker('subscription', tier);
 }
 
-async function proceedStripeSubscribe(tier) {
-    const token = localStorage.getItem('im_token');
-    try {
-        const body = { tier, type: 'subscription' };
-        if (activePromoCode) body.promoCode = activePromoCode;
-
-        const res = await fetch('/api/create-checkout', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify(body)
-        });
-
-        const data = await res.json();
-
-        if (data.url) {
-            window.location.href = data.url;
-        } else {
-            showToast(data.error || 'Payment setup failed', 'error');
-        }
-    } catch (err) {
-        showToast('Connection error — try again', 'error');
-    }
-}
 
 async function handleUnlock(postId) {
     const token = localStorage.getItem('im_token');
@@ -568,30 +595,6 @@ async function handleUnlock(postId) {
 
     // Show payment method picker
     showPaymentPicker('single', postId);
-}
-
-async function proceedStripeUnlock(postId) {
-    const token = localStorage.getItem('im_token');
-    try {
-        const res = await fetch('/api/create-checkout', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({ postId, type: 'single' })
-        });
-
-        const data = await res.json();
-
-        if (data.url) {
-            window.location.href = data.url;
-        } else {
-            showToast(data.error || 'Payment setup failed', 'error');
-        }
-    } catch (err) {
-        showToast('Connection error — try again', 'error');
-    }
 }
 
 // ==================== CONTACT FORM ====================
