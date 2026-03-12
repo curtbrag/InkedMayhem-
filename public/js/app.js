@@ -368,6 +368,12 @@ function getStoredUser() {
     }
 }
 
+function resetPendingPaymentState() {
+    pendingPaymentType = null;
+    pendingPaymentTier = null;
+    pendingPaymentPostId = null;
+}
+
 function initPaymentPicker() {
     const modal = document.getElementById('paymentPickerModal');
     if (!modal) return;
@@ -384,6 +390,10 @@ function showPaymentPicker(type, tierOrPostId) {
     const desc = document.getElementById('paymentPickerDesc');
     const title = document.getElementById('paymentPickerTitle');
     if (!modal || !desc || !title) {
+        resetPendingPaymentState();
+        showToast('Venmo checkout is temporarily unavailable. Please try again.', 'error');
+        return;
+    }
         showToast('Venmo checkout is temporarily unavailable. Please try again.', 'error');
         return;
     }
@@ -394,6 +404,11 @@ function showPaymentPicker(type, tierOrPostId) {
         const price = TIER_PRICES[tierOrPostId];
         const tierName = TIER_NAMES[tierOrPostId];
         if (!tierName || typeof price !== 'number') {
+            resetPendingPaymentState();
+            showToast('Invalid membership tier. Please refresh and try again.', 'error');
+            return;
+        }
+        pendingPaymentType = 'subscription';
             showToast('Invalid membership tier. Please refresh and try again.', 'error');
             return;
         }
@@ -401,6 +416,13 @@ function showPaymentPicker(type, tierOrPostId) {
         pendingPaymentPostId = null;
         title.textContent = 'Venmo Payment';
         desc.textContent = `${tierName} — $${price.toFixed(2)}/mo`;
+    } else if (type === 'single') {
+        if (!tierOrPostId) {
+            resetPendingPaymentState();
+            showToast('Invalid unlock request. Please try again.', 'error');
+            return;
+        }
+        pendingPaymentType = 'single';
     } else {
         if (!tierOrPostId) {
             showToast('Invalid unlock request. Please try again.', 'error');
@@ -410,6 +432,10 @@ function showPaymentPicker(type, tierOrPostId) {
         pendingPaymentTier = null;
         title.textContent = 'Venmo Payment';
         desc.textContent = `Unlock content — $${DEFAULT_POST_PRICE.toFixed(2)}`;
+    } else {
+        resetPendingPaymentState();
+        showToast('Invalid payment request. Please try again.', 'error');
+        return;
     }
 
     modal.classList.add('active');
@@ -420,9 +446,7 @@ function closePaymentPicker() {
     const modal = document.getElementById('paymentPickerModal');
     if (modal) modal.classList.remove('active');
     document.body.style.overflow = '';
-    pendingPaymentType = null;
-    pendingPaymentTier = null;
-    pendingPaymentPostId = null;
+    resetPendingPaymentState();
 }
 
 function payWithStripe() {
