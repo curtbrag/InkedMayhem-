@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "netlify dev",
     "build": "echo 'Static site - no build needed'",
+    "lint": "node --check public/js/app.js"
     "lint": "node -e \"console.log('Lint check: no ESLint config present; static checks only.')\""
   },
   "dependencies": {
