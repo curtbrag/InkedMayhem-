@@ -394,6 +394,11 @@ function showPaymentPicker(type, tierOrPostId) {
         showToast('Venmo checkout is temporarily unavailable. Please try again.', 'error');
         return;
     }
+        showToast('Venmo checkout is temporarily unavailable. Please try again.', 'error');
+        return;
+    }
+
+    pendingPaymentType = type;
 
     if (type === 'subscription') {
         const price = TIER_PRICES[tierOrPostId];
@@ -404,6 +409,9 @@ function showPaymentPicker(type, tierOrPostId) {
             return;
         }
         pendingPaymentType = 'subscription';
+            showToast('Invalid membership tier. Please refresh and try again.', 'error');
+            return;
+        }
         pendingPaymentTier = tierOrPostId;
         pendingPaymentPostId = null;
         title.textContent = 'Venmo Payment';
@@ -415,6 +423,11 @@ function showPaymentPicker(type, tierOrPostId) {
             return;
         }
         pendingPaymentType = 'single';
+    } else {
+        if (!tierOrPostId) {
+            showToast('Invalid unlock request. Please try again.', 'error');
+            return;
+        }
         pendingPaymentPostId = tierOrPostId;
         pendingPaymentTier = null;
         title.textContent = 'Venmo Payment';
@@ -475,12 +488,6 @@ async function payWithVenmo() {
         return;
     }
 
-    const venmoUrl = `https://account.venmo.com/u/${VENMO_HANDLE}?txn=pay&amount=${amount.toFixed(2)}&note=${encodeURIComponent(note)}`;
-
-    // Open a blank tab synchronously (user gesture) so popup blockers are less likely
-    // to block the Venmo redirect after the async API request completes.
-    let venmoWindow = window.open('', '_blank', 'noopener');
-
     try {
         const res = await fetch('/api/venmo-request', {
             method: 'POST',
@@ -488,22 +495,21 @@ async function payWithVenmo() {
             body: JSON.stringify(requestBody)
         });
         if (!res.ok) {
-            if (venmoWindow) venmoWindow.close();
             showToast('Could not save your payment request. Please retry.', 'error');
             return;
         }
     } catch {
-        if (venmoWindow) venmoWindow.close();
         showToast('Network error while saving request. Please retry.', 'error');
         return;
     }
 
-    if (venmoWindow) {
-        venmoWindow.location.href = venmoUrl;
-    } else {
+    const venmoUrl = `https://account.venmo.com/u/${VENMO_HANDLE}?txn=pay&amount=${amount.toFixed(2)}&note=${encodeURIComponent(note)}`;
+    const venmoWindow = window.open(venmoUrl, '_blank', 'noopener');
+    if (!venmoWindow) {
         showToast('Popup blocked — opening Venmo in this tab.', 'error');
         window.location.href = venmoUrl;
     }
+    window.open(venmoUrl, '_blank', 'noopener');
 }
 
 async function applyPromoCode() {
