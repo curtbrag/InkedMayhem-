@@ -316,15 +316,15 @@
         <div style="display:flex;justify-content:center;gap:2.5rem;flex-wrap:wrap;margin:2rem auto 0;max-width:700px">
             <div style="text-align:center">
                 <div style="font-size:1.2rem;margin-bottom:0.3rem">🔒</div>
-                <div style="font-size:0.55rem;letter-spacing:2px;text-transform:uppercase;color:var(--gray)">Secure Checkout</div>
+                <div style="font-size:0.55rem;letter-spacing:2px;text-transform:uppercase;color:var(--gray)">Secure Venmo Payments</div>
             </div>
             <div style="text-align:center">
                 <div style="font-size:1.2rem;margin-bottom:0.3rem">⚡</div>
-                <div style="font-size:0.55rem;letter-spacing:2px;text-transform:uppercase;color:var(--gray)">Instant Access</div>
+                <div style="font-size:0.55rem;letter-spacing:2px;text-transform:uppercase;color:var(--gray)">Fast Manual Approval</div>
             </div>
             <div style="text-align:center">
                 <div style="font-size:1.2rem;margin-bottom:0.3rem">📅</div>
-                <div style="font-size:0.55rem;letter-spacing:2px;text-transform:uppercase;color:var(--gray)">Cancel Anytime</div>
+                <div style="font-size:0.55rem;letter-spacing:2px;text-transform:uppercase;color:var(--gray)">Manual Support</div>
             </div>
             <div style="text-align:center">
                 <div style="font-size:1.2rem;margin-bottom:0.3rem">🛡️</div>
@@ -660,7 +660,7 @@
                     <span class="faq-icon">+</span>
                 </button>
                 <div class="faq-answer">
-                    <p>Absolutely. No contracts, no bs. Cancel anytime through your account settings or the Members area. You'll keep access until the end of your billing period. No hard feelings.</p>
+                    <p>Since payments are handled via Venmo, membership changes are processed manually. Reach out through the site or Instagram if you need help with your access.</p>
                 </div>
             </div>
             <div class="faq-item">
@@ -669,7 +669,7 @@
                     <span class="faq-icon">+</span>
                 </button>
                 <div class="faq-answer">
-                    <p>100%. All payments are processed through Stripe — the same payment system used by Amazon, Google, and thousands of other companies. I never see or store your card details. Your privacy is protected.</p>
+                    <p>Payments are currently handled through Venmo. Include your email in the payment note so your membership or unlock can be matched and activated. Card checkout and automated subscription management are coming later.</p>
                 </div>
             </div>
             <div class="faq-item">
@@ -773,7 +773,7 @@
         </div>
         <!-- Trust signals -->
         <div style="display:flex;justify-content:center;gap:2rem;flex-wrap:wrap;padding:1.5rem 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin:0 2rem">
-            <span style="font-size:0.55rem;letter-spacing:2px;text-transform:uppercase;color:var(--gray)">Secure payments via Stripe & Venmo</span>
+            <span style="font-size:0.55rem;letter-spacing:2px;text-transform:uppercase;color:var(--gray)">Payments currently handled via Venmo</span>
             <span style="font-size:0.55rem;letter-spacing:2px;text-transform:uppercase;color:var(--gray)">Privacy-first media processing</span>
             <span style="font-size:0.55rem;letter-spacing:2px;text-transform:uppercase;color:var(--gray)">Creator-controlled publishing</span>
             <span style="font-size:0.55rem;letter-spacing:2px;text-transform:uppercase;color:var(--gray)">DMCA protected</span>
@@ -823,15 +823,10 @@
     <div class="modal-overlay" id="paymentPickerModal">
         <div class="modal">
             <button class="modal-close" onclick="closePaymentPicker()">&times;</button>
-            <h2 class="modal-title" id="paymentPickerTitle">Choose Payment</h2>
+            <h2 class="modal-title" id="paymentPickerTitle">Venmo Payment</h2>
             <p class="payment-picker-desc" id="paymentPickerDesc"></p>
             <div class="payment-picker-options">
-                <button class="payment-option-btn" id="payWithCard" onclick="payWithStripe()">
-                    <span class="payment-option-icon">💳</span>
-                    <span class="payment-option-label">Pay with Card</span>
-                    <span class="payment-option-sub">Visa, Mastercard, etc.</span>
-                </button>
-                <button class="payment-option-btn venmo" id="payWithVenmo" onclick="payWithVenmo()">
+                <button class="payment-option-btn venmo" id="payWithVenmo" onclick="payWithVenmo()" style="max-width:420px;margin:0 auto;width:100%">
                     <svg class="venmo-logo" viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true">
                         <path d="M19.49 1c.87 1.44 1.26 2.93 1.26 4.8 0 5.98-5.1 13.74-9.24 19.2H4.28L1.26 1.82l6.6-.62 1.74 14.01c1.62-2.64 3.62-6.8 3.62-9.64 0-1.8-.3-3.01-.78-4.02L19.49 1z"/>
                     </svg>
@@ -839,8 +834,8 @@
                     <span class="payment-option-sub">@Christina-Dipietro-6</span>
                 </button>
             </div>
-            <p class="payment-picker-note" id="venmoNote" style="display:none">
-                After sending payment via Venmo, include your email in the note so we can activate your access. Access is typically granted within a few hours.
+            <p class="payment-picker-note" id="venmoNote" style="display:block;text-align:center;margin-top:0.5rem">
+                Payments are currently handled via Venmo. After sending payment, include your email in the note so your membership or post unlock can be matched and activated.
             </p>
         </div>
     </div>

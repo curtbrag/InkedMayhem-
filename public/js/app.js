@@ -374,22 +374,20 @@ function showPaymentPicker(type, tierOrPostId) {
     const modal = document.getElementById('paymentPickerModal');
     const desc = document.getElementById('paymentPickerDesc');
     const title = document.getElementById('paymentPickerTitle');
-    const venmoNote = document.getElementById('venmoNote');
 
     if (type === 'subscription') {
         pendingPaymentTier = tierOrPostId;
         pendingPaymentPostId = null;
         const price = TIER_PRICES[tierOrPostId];
-        title.textContent = 'Choose Payment';
+        title.textContent = 'Venmo Payment';
         desc.textContent = `${TIER_NAMES[tierOrPostId]} — $${price.toFixed(2)}/mo`;
     } else {
         pendingPaymentPostId = tierOrPostId;
         pendingPaymentTier = null;
-        title.textContent = 'Choose Payment';
+        title.textContent = 'Venmo Payment';
         desc.textContent = `Unlock content — $${DEFAULT_POST_PRICE.toFixed(2)}`;
     }
 
-    venmoNote.style.display = 'none';
     modal.classList.add('active');
     document.body.style.overflow = 'hidden';
 }
@@ -404,15 +402,8 @@ function closePaymentPicker() {
 }
 
 function payWithStripe() {
-    const type = pendingPaymentType;
-    const tier = pendingPaymentTier;
-    const postId = pendingPaymentPostId;
     closePaymentPicker();
-    if (type === 'subscription' && tier) {
-        proceedStripeSubscribe(tier);
-    } else if (type === 'single' && postId) {
-        proceedStripeUnlock(postId);
-    }
+    showToast('Card payments are not live yet. Please use Venmo for now.', 'error');
 }
 
 function payWithVenmo() {
@@ -445,9 +436,6 @@ function payWithVenmo() {
             body: JSON.stringify(requestBody)
         }).catch(() => {});
     }
-
-    // Show the note about including email
-    document.getElementById('venmoNote').style.display = 'block';
 
     const venmoUrl = `https://account.venmo.com/u/${VENMO_HANDLE}?txn=pay&amount=${amount}&note=${encodeURIComponent(note)}`;
     window.open(venmoUrl, '_blank');
