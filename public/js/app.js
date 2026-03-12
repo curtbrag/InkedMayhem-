@@ -391,12 +391,21 @@ function showPaymentPicker(type, tierOrPostId) {
     pendingPaymentType = type;
 
     if (type === 'subscription') {
+        const price = TIER_PRICES[tierOrPostId];
+        const tierName = TIER_NAMES[tierOrPostId];
+        if (!tierName || typeof price !== 'number') {
+            showToast('Invalid membership tier. Please refresh and try again.', 'error');
+            return;
+        }
         pendingPaymentTier = tierOrPostId;
         pendingPaymentPostId = null;
-        const price = TIER_PRICES[tierOrPostId];
         title.textContent = 'Venmo Payment';
-        desc.textContent = `${TIER_NAMES[tierOrPostId]} — $${price.toFixed(2)}/mo`;
+        desc.textContent = `${tierName} — $${price.toFixed(2)}/mo`;
     } else {
+        if (!tierOrPostId) {
+            showToast('Invalid unlock request. Please try again.', 'error');
+            return;
+        }
         pendingPaymentPostId = tierOrPostId;
         pendingPaymentTier = null;
         title.textContent = 'Venmo Payment';
