@@ -1,3 +1,29 @@
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+
+// src/functions/scheduled-publish.mts
+var scheduled_publish_exports = {};
+__export(scheduled_publish_exports, {
+  config: () => config,
+  default: () => scheduled_publish_default
+});
+module.exports = __toCommonJS(scheduled_publish_exports);
+
 // src/functions/lib/blobs.mjs
 var NF_ERROR = "x-nf-error";
 var NF_REQUEST_ID = "x-nf-request-id";
@@ -19,16 +45,16 @@ var collectIterator = async (iterator) => {
   return result;
 };
 var base64Decode = (input) => {
-  const { Buffer } = globalThis;
-  if (Buffer) {
-    return Buffer.from(input, "base64").toString();
+  const { Buffer: Buffer2 } = globalThis;
+  if (Buffer2) {
+    return Buffer2.from(input, "base64").toString();
   }
   return atob(input);
 };
 var base64Encode = (input) => {
-  const { Buffer } = globalThis;
-  if (Buffer) {
-    return Buffer.from(input).toString("base64");
+  const { Buffer: Buffer2 } = globalThis;
+  if (Buffer2) {
+    return Buffer2.from(input).toString("base64");
   }
   return btoa(input);
 };
@@ -601,278 +627,149 @@ var getStore = (input) => {
   );
 };
 
-// src/functions/drive-webhook.mts
-var CORS = {
-  "Content-Type": "application/json",
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Api-Key, X-Goog-Channel-ID, X-Goog-Resource-State",
-  "Access-Control-Allow-Methods": "GET, POST, OPTIONS"
-};
-function getSecret() {
-  return process.env.JWT_SECRET || "inkedmayhem-dev-secret-change-me";
-}
-function getPipelineApiKey() {
-  return process.env.PIPELINE_API_KEY || getSecret();
-}
-var ALLOWED_EXTENSIONS = ["jpg", "jpeg", "png", "webp", "gif", "mp4", "mov", "webm"];
-var IMAGE_EXTENSIONS = ["jpg", "jpeg", "png", "webp", "gif"];
-function getExtension(filename) {
-  return (filename.split(".").pop() || "").toLowerCase();
-}
-function isAllowedFile(filename) {
-  return ALLOWED_EXTENSIONS.includes(getExtension(filename));
-}
-async function createPipelineItem(params) {
-  const pipeStore = getStore("pipeline");
-  const logStore = getStore("pipeline-logs");
-  const ext = getExtension(params.filename);
-  const pipelineId = `pipe-${Date.now()}-${Math.random().toString(36).substr(2, 8)}`;
-  if (params.fileData) {
-    const assetStore = getStore("pipeline-assets");
-    await assetStore.set(`${pipelineId}.${ext}`, params.fileData);
-  }
-  const item = {
-    id: pipelineId,
-    creatorId: params.creatorId || "inkedmayhem",
-    status: "inbox",
-    filename: params.filename,
-    storedAs: `${pipelineId}.${ext}`,
-    mediaType: IMAGE_EXTENSIONS.includes(ext) ? "image" : "video",
-    fileExtension: ext,
-    fileSize: params.fileSize,
-    fileSizeMB: (params.fileSize / (1024 * 1024)).toFixed(2),
-    caption: params.caption || "",
-    tags: [],
-    category: "photos",
-    tier: "free",
-    source: params.source,
-    sourceId: params.sourceId || "",
-    checks: {
-      fileTypeValid: true,
-      fileSizeValid: params.fileSize < 25 * 1024 * 1024,
-      // 25MB for images
-      exifStripped: false,
-      compressed: false,
-      thumbnailGenerated: false
-    },
-    rejectReason: "",
-    scheduledAt: null,
-    publishedAt: null,
-    createdAt: (/* @__PURE__ */ new Date()).toISOString(),
-    processedAt: null,
-    queuedAt: null
-  };
-  await pipeStore.setJSON(pipelineId, item);
-  await logStore.setJSON(`log-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`, {
-    action: `${params.source}-upload`,
-    itemId: pipelineId,
-    details: { filename: params.filename, source: params.source },
-    timestamp: (/* @__PURE__ */ new Date()).toISOString()
-  });
+// src/functions/scheduled-publish.mts
+var scheduled_publish_default = async (req) => {
+  const now = /* @__PURE__ */ new Date();
+  const nowISO = now.toISOString();
+  console.log(`[SCHEDULED-PUBLISH] Running at ${nowISO}`);
   try {
-    const botToken = process.env.TELEGRAM_CREATOR_BOT_TOKEN;
-    const chatId = process.env.TELEGRAM_ADMIN_CHAT_ID || process.env.TELEGRAM_CREATOR_CHAT_ID;
-    if (botToken && chatId) {
-      await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          chat_id: chatId,
-          text: `\u{1F4E5} <b>New upload from ${params.source}</b>
-
-\u{1F4C1} ${params.filename}
-\u{1F4C2} Added to inbox`,
-          parse_mode: "HTML"
-        })
-      });
-    }
-  } catch {
-  }
-  return { pipelineId, item };
-}
-var drive_webhook_default = async (req, context) => {
-  if (req.method === "OPTIONS") {
-    return new Response("", { headers: CORS });
-  }
-  const url = new URL(req.url);
-  const path = url.pathname.replace("/api/drive-webhook", "").replace(/\/$/, "") || "";
-  if (req.method === "GET" && path === "") {
-    const challenge = url.searchParams.get("challenge");
-    if (challenge) {
-      return new Response(challenge, {
-        headers: {
-          "Content-Type": "text/plain",
-          "X-Content-Type-Options": "nosniff"
-        }
-      });
-    }
-    return new Response(JSON.stringify({ status: "Drive webhook endpoint ready" }), { headers: CORS });
-  }
-  if (path === "/google" && req.method === "POST") {
-    const resourceState = req.headers.get("x-goog-resource-state");
-    const channelId = req.headers.get("x-goog-channel-id");
-    console.log(`[DRIVE-WEBHOOK] Google notification: state=${resourceState}, channel=${channelId}`);
-    if (resourceState === "sync") {
-      return new Response(JSON.stringify({ ok: true }), { headers: CORS });
-    }
-    if (resourceState === "change" || resourceState === "update") {
+    const pipeStore = getStore("pipeline");
+    const contentStore = getStore("content");
+    const logStore = getStore("pipeline-logs");
+    const { blobs } = await pipeStore.list();
+    let published = 0;
+    let checked = 0;
+    const results = [];
+    for (const blob of blobs) {
       try {
-        const logStore = getStore("pipeline-logs");
-        await logStore.setJSON(`log-${Date.now()}-gdrive`, {
-          action: "google-drive-notification",
-          itemId: channelId || "unknown",
-          details: { resourceState, channelId },
-          timestamp: (/* @__PURE__ */ new Date()).toISOString()
-        });
+        const item = await pipeStore.get(blob.key, { type: "json" });
+        if (!item || item.status !== "queued") continue;
+        checked++;
+        if (!item.scheduledAt) continue;
+        if (item.scheduledAt > nowISO) continue;
+        const contentKey = `content-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`;
+        const contentItem = {
+          title: item.caption || item.filename,
+          body: item.caption || "",
+          tier: item.tier || "free",
+          type: item.mediaType === "video" ? "video" : "gallery",
+          imageUrl: `/api/pipeline/asset/${item.storedAs}`,
+          draft: false,
+          tags: item.tags || [],
+          category: item.category || "photos",
+          source: item.source,
+          pipelineId: item.id,
+          createdAt: (/* @__PURE__ */ new Date()).toISOString(),
+          updatedAt: (/* @__PURE__ */ new Date()).toISOString()
+        };
+        await contentStore.setJSON(contentKey, contentItem);
+        item.status = "published";
+        item.publishedAt = (/* @__PURE__ */ new Date()).toISOString();
+        item.contentKey = contentKey;
+        await pipeStore.setJSON(blob.key, item);
+        published++;
+        results.push({ id: item.id, filename: item.filename, status: "published", tier: item.tier, title: contentItem.title, category: item.category });
+        console.log(`[SCHEDULED-PUBLISH] Published: ${item.filename} (scheduled for ${item.scheduledAt})`);
+      } catch (err) {
+        console.error(`[SCHEDULED-PUBLISH] Error processing ${blob.key}:`, err);
+      }
+    }
+    await logStore.setJSON(`log-${Date.now()}-cron`, {
+      action: "scheduled-publish",
+      itemId: "cron",
+      details: { published, checked, results },
+      timestamp: nowISO
+    });
+    if (published > 0) {
+      try {
+        const siteUrl = process.env.URL || "";
+        const secret = process.env.JWT_SECRET || "inkedmayhem-dev-secret-change-me";
         const botToken = process.env.TELEGRAM_CREATOR_BOT_TOKEN;
         const chatId = process.env.TELEGRAM_ADMIN_CHAT_ID || process.env.TELEGRAM_CREATOR_CHAT_ID;
         if (botToken && chatId) {
+          const fileList = results.map((r) => `  \u2022 ${r.filename}`).join("\n");
           await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               chat_id: chatId,
-              text: `\u{1F4C1} <b>Google Drive Update</b>
+              text: `\u{1F4C5} <b>Scheduled Publish</b>
 
-New files detected in the shared folder. Check the drive and upload to pipeline.`,
+${published} item(s) auto-published:
+${fileList}`,
               parse_mode: "HTML"
             })
           });
         }
-      } catch (err) {
-        console.error("[DRIVE-WEBHOOK] Google notification error:", err);
-      }
-    }
-    return new Response(JSON.stringify({ ok: true }), { headers: CORS });
-  }
-  if (path === "/dropbox" && req.method === "POST") {
-    try {
-      const body = await req.json();
-      const accounts = body.list_folder?.accounts || [];
-      console.log(`[DRIVE-WEBHOOK] Dropbox notification: ${accounts.length} accounts changed`);
-      const logStore = getStore("pipeline-logs");
-      await logStore.setJSON(`log-${Date.now()}-dropbox`, {
-        action: "dropbox-notification",
-        itemId: "dropbox",
-        details: { accountCount: accounts.length },
-        timestamp: (/* @__PURE__ */ new Date()).toISOString()
-      });
-      const botToken = process.env.TELEGRAM_CREATOR_BOT_TOKEN;
-      const chatId = process.env.TELEGRAM_ADMIN_CHAT_ID || process.env.TELEGRAM_CREATOR_CHAT_ID;
-      if (botToken && chatId) {
-        await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            chat_id: chatId,
-            text: `\u{1F4C1} <b>Dropbox Update</b>
-
-New files detected in the shared folder. Check Dropbox and upload to pipeline.`,
-            parse_mode: "HTML"
-          })
-        });
-      }
-      return new Response(JSON.stringify({ ok: true }), { headers: CORS });
-    } catch (err) {
-      console.error("[DRIVE-WEBHOOK] Dropbox error:", err);
-      return new Response(JSON.stringify({ ok: true }), { headers: CORS });
-    }
-  }
-  if (path === "/upload" && req.method === "POST") {
-    const apiKey = req.headers.get("x-api-key");
-    if (apiKey !== getPipelineApiKey()) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: CORS });
-    }
-    try {
-      const body = await req.json();
-      const { filename, fileSize, fileData, source, caption, creatorId } = body;
-      if (!filename || !fileSize) {
-        return new Response(JSON.stringify({ error: "filename and fileSize required" }), { status: 400, headers: CORS });
-      }
-      if (!isAllowedFile(filename)) {
-        return new Response(JSON.stringify({
-          error: `File type not allowed. Allowed: ${ALLOWED_EXTENSIONS.join(", ")}`
-        }), { status: 400, headers: CORS });
-      }
-      const result = await createPipelineItem({
-        filename,
-        fileSize,
-        fileData,
-        source: source || "api",
-        caption,
-        creatorId
-      });
-      return new Response(JSON.stringify({
-        success: true,
-        pipelineId: result.pipelineId,
-        status: "inbox"
-      }), { headers: CORS });
-    } catch (err) {
-      console.error("[DRIVE-WEBHOOK] Upload error:", err);
-      return new Response(JSON.stringify({ error: "Upload failed" }), { status: 500, headers: CORS });
-    }
-  }
-  if (path === "/batch-upload" && req.method === "POST") {
-    const apiKey = req.headers.get("x-api-key");
-    if (apiKey !== getPipelineApiKey()) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: CORS });
-    }
-    try {
-      const body = await req.json();
-      const { files, source, creatorId } = body;
-      if (!files || !Array.isArray(files) || files.length === 0) {
-        return new Response(JSON.stringify({ error: "files array required" }), { status: 400, headers: CORS });
-      }
-      const results = [];
-      for (const file of files) {
-        try {
-          if (!isAllowedFile(file.filename)) {
-            results.push({ filename: file.filename, error: "File type not allowed" });
-            continue;
-          }
-          const result = await createPipelineItem({
-            filename: file.filename,
-            fileSize: file.fileSize || 0,
-            fileData: file.fileData,
-            source: source || "batch",
-            caption: file.caption,
-            creatorId
+        if (siteUrl) {
+          await fetch(`${siteUrl}/api/notify`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "x-internal-key": secret
+            },
+            body: JSON.stringify({
+              type: "pipeline_publish",
+              data: {
+                filename: `${published} scheduled items`,
+                tier: "mixed",
+                contentKey: "scheduled-batch"
+              }
+            })
           });
-          results.push({ filename: file.filename, pipelineId: result.pipelineId });
-        } catch (err) {
-          results.push({ filename: file.filename, error: "Upload failed" });
+          for (const r of results) {
+            try {
+              await fetch(`${siteUrl}/api/notify`, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  "x-internal-key": secret
+                },
+                body: JSON.stringify({
+                  type: "content_drop",
+                  data: {
+                    title: r.title || r.filename,
+                    category: r.category || "photos",
+                    tier: r.tier || "free"
+                  }
+                })
+              });
+            } catch {
+            }
+          }
         }
+      } catch (notifyErr) {
+        console.error("[SCHEDULED-PUBLISH] Notification failed:", notifyErr);
       }
-      const succeeded = results.filter((r) => r.pipelineId).length;
-      return new Response(JSON.stringify({
-        success: true,
-        total: files.length,
-        succeeded,
-        failed: files.length - succeeded,
-        results
-      }), { headers: CORS });
-    } catch (err) {
-      return new Response(JSON.stringify({ error: "Batch upload failed" }), { status: 500, headers: CORS });
     }
+    console.log(`[SCHEDULED-PUBLISH] Done. Checked ${checked} queued items, published ${published}.`);
+  } catch (err) {
+    console.error("[SCHEDULED-PUBLISH] Fatal error:", err);
   }
-  if (path === "/status" && req.method === "GET") {
-    return new Response(JSON.stringify({
-      status: "active",
-      endpoints: {
-        google: "/api/drive-webhook/google",
-        dropbox: "/api/drive-webhook/dropbox",
-        upload: "/api/drive-webhook/upload",
-        batchUpload: "/api/drive-webhook/batch-upload"
-      },
-      auth: "x-api-key header required for upload endpoints"
-    }), { headers: CORS });
-  }
-  return new Response(JSON.stringify({ error: "Not found" }), { status: 404, headers: CORS });
 };
 var config = {
-  path: ["/api/drive-webhook", "/api/drive-webhook/*"]
+  schedule: "*/15 * * * *"
 };
-export {
-  config,
-  drive_webhook_default as default
-};
+// Annotate the CommonJS export names for ESM import in node:
+0 && (module.exports = {
+  config
+});
+
+;(function() {
+  var _orig = module.exports.default;
+  if (typeof _orig !== 'function') return;
+  module.exports.handler = async function(event, context) {
+    var url = event.rawUrl || ('https://' + ((event.headers && event.headers.host) || 'localhost') + (event.path || '/'));
+    var init = { method: event.httpMethod || 'GET', headers: event.headers || {} };
+    if (event.body) {
+      init.body = event.isBase64Encoded ? Buffer.from(event.body, 'base64').toString() : event.body;
+    }
+    var req = new Request(url, init);
+    var res = await _orig(req, context);
+    var body = await res.text();
+    var responseHeaders = {};
+    res.headers.forEach(function(v, k) { responseHeaders[k] = v; });
+    return { statusCode: res.status, headers: responseHeaders, body: body };
+  };
+})();
+

@@ -4,14 +4,12 @@ var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __getOwnPropNames = Object.getOwnPropertyNames;
 var __getProtoOf = Object.getPrototypeOf;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
-var __require = /* @__PURE__ */ ((x) => typeof require !== "undefined" ? require : typeof Proxy !== "undefined" ? new Proxy(x, {
-  get: (a, b) => (typeof require !== "undefined" ? require : a)[b]
-}) : x)(function(x) {
-  if (typeof require !== "undefined") return require.apply(this, arguments);
-  throw Error('Dynamic require of "' + x + '" is not supported');
-});
-var __commonJS = (cb, mod) => function __require2() {
+var __commonJS = (cb, mod) => function __require() {
   return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
+};
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
 };
 var __copyProps = (to, from, except, desc) => {
   if (from && typeof from === "object" || typeof from === "function") {
@@ -29,11 +27,12 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
   isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
   mod
 ));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
 // node_modules/safe-buffer/index.js
 var require_safe_buffer = __commonJS({
-  "node_modules/safe-buffer/index.js"(exports, module) {
-    var buffer = __require("buffer");
+  "node_modules/safe-buffer/index.js"(exports2, module2) {
+    var buffer = require("buffer");
     var Buffer2 = buffer.Buffer;
     function copyProps(src, dst) {
       for (var key in src) {
@@ -41,10 +40,10 @@ var require_safe_buffer = __commonJS({
       }
     }
     if (Buffer2.from && Buffer2.alloc && Buffer2.allocUnsafe && Buffer2.allocUnsafeSlow) {
-      module.exports = buffer;
+      module2.exports = buffer;
     } else {
-      copyProps(buffer, exports);
-      exports.Buffer = SafeBuffer;
+      copyProps(buffer, exports2);
+      exports2.Buffer = SafeBuffer;
     }
     function SafeBuffer(arg, encodingOrOffset, length) {
       return Buffer2(arg, encodingOrOffset, length);
@@ -90,10 +89,10 @@ var require_safe_buffer = __commonJS({
 
 // node_modules/jws/lib/data-stream.js
 var require_data_stream = __commonJS({
-  "node_modules/jws/lib/data-stream.js"(exports, module) {
+  "node_modules/jws/lib/data-stream.js"(exports2, module2) {
     var Buffer2 = require_safe_buffer().Buffer;
-    var Stream = __require("stream");
-    var util = __require("util");
+    var Stream = require("stream");
+    var util = require("util");
     function DataStream(data) {
       this.buffer = null;
       this.writable = true;
@@ -132,13 +131,13 @@ var require_data_stream = __commonJS({
       this.writable = false;
       this.readable = false;
     };
-    module.exports = DataStream;
+    module2.exports = DataStream;
   }
 });
 
 // node_modules/ecdsa-sig-formatter/src/param-bytes-for-alg.js
 var require_param_bytes_for_alg = __commonJS({
-  "node_modules/ecdsa-sig-formatter/src/param-bytes-for-alg.js"(exports, module) {
+  "node_modules/ecdsa-sig-formatter/src/param-bytes-for-alg.js"(exports2, module2) {
     "use strict";
     function getParamSize(keySize) {
       var result = (keySize / 8 | 0) + (keySize % 8 === 0 ? 0 : 1);
@@ -156,13 +155,13 @@ var require_param_bytes_for_alg = __commonJS({
       }
       throw new Error('Unknown algorithm "' + alg + '"');
     }
-    module.exports = getParamBytesForAlg;
+    module2.exports = getParamBytesForAlg;
   }
 });
 
 // node_modules/ecdsa-sig-formatter/src/ecdsa-sig-formatter.js
 var require_ecdsa_sig_formatter = __commonJS({
-  "node_modules/ecdsa-sig-formatter/src/ecdsa-sig-formatter.js"(exports, module) {
+  "node_modules/ecdsa-sig-formatter/src/ecdsa-sig-formatter.js"(exports2, module2) {
     "use strict";
     var Buffer2 = require_safe_buffer().Buffer;
     var getParamBytesForAlg = require_param_bytes_for_alg();
@@ -293,7 +292,7 @@ var require_ecdsa_sig_formatter = __commonJS({
       }
       return dst;
     }
-    module.exports = {
+    module2.exports = {
       derToJose,
       joseToDer
     };
@@ -302,11 +301,11 @@ var require_ecdsa_sig_formatter = __commonJS({
 
 // node_modules/buffer-equal-constant-time/index.js
 var require_buffer_equal_constant_time = __commonJS({
-  "node_modules/buffer-equal-constant-time/index.js"(exports, module) {
+  "node_modules/buffer-equal-constant-time/index.js"(exports2, module2) {
     "use strict";
-    var Buffer2 = __require("buffer").Buffer;
-    var SlowBuffer = __require("buffer").SlowBuffer;
-    module.exports = bufferEq;
+    var Buffer2 = require("buffer").Buffer;
+    var SlowBuffer = require("buffer").SlowBuffer;
+    module2.exports = bufferEq;
     function bufferEq(a, b) {
       if (!Buffer2.isBuffer(a) || !Buffer2.isBuffer(b)) {
         return false;
@@ -336,11 +335,11 @@ var require_buffer_equal_constant_time = __commonJS({
 
 // node_modules/jwa/index.js
 var require_jwa = __commonJS({
-  "node_modules/jwa/index.js"(exports, module) {
+  "node_modules/jwa/index.js"(exports2, module2) {
     var Buffer2 = require_safe_buffer().Buffer;
-    var crypto = __require("crypto");
+    var crypto = require("crypto");
     var formatEcdsa = require_ecdsa_sig_formatter();
-    var util = __require("util");
+    var util = require("util");
     var MSG_INVALID_ALGORITHM = '"%s" is not a valid algorithm.\n  Supported algorithms are:\n  "HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "PS256", "PS384", "PS512", "ES256", "ES384", "ES512" and "none".';
     var MSG_INVALID_SECRET = "secret must be a string or buffer";
     var MSG_INVALID_VERIFIER_KEY = "key must be a string or a buffer";
@@ -530,7 +529,7 @@ var require_jwa = __commonJS({
         return signature === "";
       };
     }
-    module.exports = function jwa(algorithm) {
+    module2.exports = function jwa(algorithm) {
       var signerFactories = {
         hs: createHmacSigner,
         rs: createKeySigner,
@@ -560,9 +559,9 @@ var require_jwa = __commonJS({
 
 // node_modules/jws/lib/tostring.js
 var require_tostring = __commonJS({
-  "node_modules/jws/lib/tostring.js"(exports, module) {
-    var Buffer2 = __require("buffer").Buffer;
-    module.exports = function toString(obj) {
+  "node_modules/jws/lib/tostring.js"(exports2, module2) {
+    var Buffer2 = require("buffer").Buffer;
+    module2.exports = function toString(obj) {
       if (typeof obj === "string")
         return obj;
       if (typeof obj === "number" || Buffer2.isBuffer(obj))
@@ -574,13 +573,13 @@ var require_tostring = __commonJS({
 
 // node_modules/jws/lib/sign-stream.js
 var require_sign_stream = __commonJS({
-  "node_modules/jws/lib/sign-stream.js"(exports, module) {
+  "node_modules/jws/lib/sign-stream.js"(exports2, module2) {
     var Buffer2 = require_safe_buffer().Buffer;
     var DataStream = require_data_stream();
     var jwa = require_jwa();
-    var Stream = __require("stream");
+    var Stream = require("stream");
     var toString = require_tostring();
-    var util = __require("util");
+    var util = require("util");
     function base64url(string, encoding) {
       return Buffer2.from(string, encoding).toString("base64").replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_");
     }
@@ -643,19 +642,19 @@ var require_sign_stream = __commonJS({
       }
     };
     SignStream.sign = jwsSign;
-    module.exports = SignStream;
+    module2.exports = SignStream;
   }
 });
 
 // node_modules/jws/lib/verify-stream.js
 var require_verify_stream = __commonJS({
-  "node_modules/jws/lib/verify-stream.js"(exports, module) {
+  "node_modules/jws/lib/verify-stream.js"(exports2, module2) {
     var Buffer2 = require_safe_buffer().Buffer;
     var DataStream = require_data_stream();
     var jwa = require_jwa();
-    var Stream = __require("stream");
+    var Stream = require("stream");
     var toString = require_tostring();
-    var util = __require("util");
+    var util = require("util");
     var JWS_REGEX = /^[a-zA-Z0-9\-_]+?\.[a-zA-Z0-9\-_]+?\.([a-zA-Z0-9\-_]+)?$/;
     function isObject(thing) {
       return Object.prototype.toString.call(thing) === "[object Object]";
@@ -758,13 +757,13 @@ var require_verify_stream = __commonJS({
     VerifyStream.decode = jwsDecode;
     VerifyStream.isValid = isValidJws;
     VerifyStream.verify = jwsVerify;
-    module.exports = VerifyStream;
+    module2.exports = VerifyStream;
   }
 });
 
 // node_modules/jws/index.js
 var require_jws = __commonJS({
-  "node_modules/jws/index.js"(exports) {
+  "node_modules/jws/index.js"(exports2) {
     var SignStream = require_sign_stream();
     var VerifyStream = require_verify_stream();
     var ALGORITHMS = [
@@ -781,15 +780,15 @@ var require_jws = __commonJS({
       "ES384",
       "ES512"
     ];
-    exports.ALGORITHMS = ALGORITHMS;
-    exports.sign = SignStream.sign;
-    exports.verify = VerifyStream.verify;
-    exports.decode = VerifyStream.decode;
-    exports.isValid = VerifyStream.isValid;
-    exports.createSign = function createSign(opts) {
+    exports2.ALGORITHMS = ALGORITHMS;
+    exports2.sign = SignStream.sign;
+    exports2.verify = VerifyStream.verify;
+    exports2.decode = VerifyStream.decode;
+    exports2.isValid = VerifyStream.isValid;
+    exports2.createSign = function createSign(opts) {
       return new SignStream(opts);
     };
-    exports.createVerify = function createVerify(opts) {
+    exports2.createVerify = function createVerify(opts) {
       return new VerifyStream(opts);
     };
   }
@@ -797,9 +796,9 @@ var require_jws = __commonJS({
 
 // node_modules/jsonwebtoken/decode.js
 var require_decode = __commonJS({
-  "node_modules/jsonwebtoken/decode.js"(exports, module) {
+  "node_modules/jsonwebtoken/decode.js"(exports2, module2) {
     var jws = require_jws();
-    module.exports = function(jwt2, options) {
+    module2.exports = function(jwt2, options) {
       options = options || {};
       var decoded = jws.decode(jwt2, options);
       if (!decoded) {
@@ -829,7 +828,7 @@ var require_decode = __commonJS({
 
 // node_modules/jsonwebtoken/lib/JsonWebTokenError.js
 var require_JsonWebTokenError = __commonJS({
-  "node_modules/jsonwebtoken/lib/JsonWebTokenError.js"(exports, module) {
+  "node_modules/jsonwebtoken/lib/JsonWebTokenError.js"(exports2, module2) {
     var JsonWebTokenError = function(message, error) {
       Error.call(this, message);
       if (Error.captureStackTrace) {
@@ -841,13 +840,13 @@ var require_JsonWebTokenError = __commonJS({
     };
     JsonWebTokenError.prototype = Object.create(Error.prototype);
     JsonWebTokenError.prototype.constructor = JsonWebTokenError;
-    module.exports = JsonWebTokenError;
+    module2.exports = JsonWebTokenError;
   }
 });
 
 // node_modules/jsonwebtoken/lib/NotBeforeError.js
 var require_NotBeforeError = __commonJS({
-  "node_modules/jsonwebtoken/lib/NotBeforeError.js"(exports, module) {
+  "node_modules/jsonwebtoken/lib/NotBeforeError.js"(exports2, module2) {
     var JsonWebTokenError = require_JsonWebTokenError();
     var NotBeforeError = function(message, date) {
       JsonWebTokenError.call(this, message);
@@ -856,13 +855,13 @@ var require_NotBeforeError = __commonJS({
     };
     NotBeforeError.prototype = Object.create(JsonWebTokenError.prototype);
     NotBeforeError.prototype.constructor = NotBeforeError;
-    module.exports = NotBeforeError;
+    module2.exports = NotBeforeError;
   }
 });
 
 // node_modules/jsonwebtoken/lib/TokenExpiredError.js
 var require_TokenExpiredError = __commonJS({
-  "node_modules/jsonwebtoken/lib/TokenExpiredError.js"(exports, module) {
+  "node_modules/jsonwebtoken/lib/TokenExpiredError.js"(exports2, module2) {
     var JsonWebTokenError = require_JsonWebTokenError();
     var TokenExpiredError = function(message, expiredAt) {
       JsonWebTokenError.call(this, message);
@@ -871,20 +870,20 @@ var require_TokenExpiredError = __commonJS({
     };
     TokenExpiredError.prototype = Object.create(JsonWebTokenError.prototype);
     TokenExpiredError.prototype.constructor = TokenExpiredError;
-    module.exports = TokenExpiredError;
+    module2.exports = TokenExpiredError;
   }
 });
 
 // node_modules/ms/index.js
 var require_ms = __commonJS({
-  "node_modules/ms/index.js"(exports, module) {
+  "node_modules/ms/index.js"(exports2, module2) {
     var s = 1e3;
     var m = s * 60;
     var h = m * 60;
     var d = h * 24;
     var w = d * 7;
     var y = d * 365.25;
-    module.exports = function(val, options) {
+    module2.exports = function(val, options) {
       options = options || {};
       var type = typeof val;
       if (type === "string" && val.length > 0) {
@@ -993,9 +992,9 @@ var require_ms = __commonJS({
 
 // node_modules/jsonwebtoken/lib/timespan.js
 var require_timespan = __commonJS({
-  "node_modules/jsonwebtoken/lib/timespan.js"(exports, module) {
+  "node_modules/jsonwebtoken/lib/timespan.js"(exports2, module2) {
     var ms = require_ms();
-    module.exports = function(time, iat) {
+    module2.exports = function(time, iat) {
       var timestamp = iat || Math.floor(Date.now() / 1e3);
       if (typeof time === "string") {
         var milliseconds = ms(time);
@@ -1014,7 +1013,7 @@ var require_timespan = __commonJS({
 
 // node_modules/semver/internal/constants.js
 var require_constants = __commonJS({
-  "node_modules/semver/internal/constants.js"(exports, module) {
+  "node_modules/semver/internal/constants.js"(exports2, module2) {
     "use strict";
     var SEMVER_SPEC_VERSION = "2.0.0";
     var MAX_LENGTH = 256;
@@ -1031,7 +1030,7 @@ var require_constants = __commonJS({
       "prepatch",
       "prerelease"
     ];
-    module.exports = {
+    module2.exports = {
       MAX_LENGTH,
       MAX_SAFE_COMPONENT_LENGTH,
       MAX_SAFE_BUILD_LENGTH,
@@ -1046,17 +1045,17 @@ var require_constants = __commonJS({
 
 // node_modules/semver/internal/debug.js
 var require_debug = __commonJS({
-  "node_modules/semver/internal/debug.js"(exports, module) {
+  "node_modules/semver/internal/debug.js"(exports2, module2) {
     "use strict";
     var debug = typeof process === "object" && process.env && process.env.NODE_DEBUG && /\bsemver\b/i.test(process.env.NODE_DEBUG) ? (...args) => console.error("SEMVER", ...args) : () => {
     };
-    module.exports = debug;
+    module2.exports = debug;
   }
 });
 
 // node_modules/semver/internal/re.js
 var require_re = __commonJS({
-  "node_modules/semver/internal/re.js"(exports, module) {
+  "node_modules/semver/internal/re.js"(exports2, module2) {
     "use strict";
     var {
       MAX_SAFE_COMPONENT_LENGTH,
@@ -1064,12 +1063,12 @@ var require_re = __commonJS({
       MAX_LENGTH
     } = require_constants();
     var debug = require_debug();
-    exports = module.exports = {};
-    var re = exports.re = [];
-    var safeRe = exports.safeRe = [];
-    var src = exports.src = [];
-    var safeSrc = exports.safeSrc = [];
-    var t = exports.t = {};
+    exports2 = module2.exports = {};
+    var re = exports2.re = [];
+    var safeRe = exports2.safeRe = [];
+    var src = exports2.src = [];
+    var safeSrc = exports2.safeSrc = [];
+    var t = exports2.t = {};
     var R = 0;
     var LETTERDASHNUMBER = "[a-zA-Z0-9-]";
     var safeRegexReplacements = [
@@ -1122,18 +1121,18 @@ var require_re = __commonJS({
     createToken("COERCERTLFULL", src[t.COERCEFULL], true);
     createToken("LONETILDE", "(?:~>?)");
     createToken("TILDETRIM", `(\\s*)${src[t.LONETILDE]}\\s+`, true);
-    exports.tildeTrimReplace = "$1~";
+    exports2.tildeTrimReplace = "$1~";
     createToken("TILDE", `^${src[t.LONETILDE]}${src[t.XRANGEPLAIN]}$`);
     createToken("TILDELOOSE", `^${src[t.LONETILDE]}${src[t.XRANGEPLAINLOOSE]}$`);
     createToken("LONECARET", "(?:\\^)");
     createToken("CARETTRIM", `(\\s*)${src[t.LONECARET]}\\s+`, true);
-    exports.caretTrimReplace = "$1^";
+    exports2.caretTrimReplace = "$1^";
     createToken("CARET", `^${src[t.LONECARET]}${src[t.XRANGEPLAIN]}$`);
     createToken("CARETLOOSE", `^${src[t.LONECARET]}${src[t.XRANGEPLAINLOOSE]}$`);
     createToken("COMPARATORLOOSE", `^${src[t.GTLT]}\\s*(${src[t.LOOSEPLAIN]})$|^$`);
     createToken("COMPARATOR", `^${src[t.GTLT]}\\s*(${src[t.FULLPLAIN]})$|^$`);
     createToken("COMPARATORTRIM", `(\\s*)${src[t.GTLT]}\\s*(${src[t.LOOSEPLAIN]}|${src[t.XRANGEPLAIN]})`, true);
-    exports.comparatorTrimReplace = "$1$2$3";
+    exports2.comparatorTrimReplace = "$1$2$3";
     createToken("HYPHENRANGE", `^\\s*(${src[t.XRANGEPLAIN]})\\s+-\\s+(${src[t.XRANGEPLAIN]})\\s*$`);
     createToken("HYPHENRANGELOOSE", `^\\s*(${src[t.XRANGEPLAINLOOSE]})\\s+-\\s+(${src[t.XRANGEPLAINLOOSE]})\\s*$`);
     createToken("STAR", "(<|>)?=?\\s*\\*");
@@ -1144,7 +1143,7 @@ var require_re = __commonJS({
 
 // node_modules/semver/internal/parse-options.js
 var require_parse_options = __commonJS({
-  "node_modules/semver/internal/parse-options.js"(exports, module) {
+  "node_modules/semver/internal/parse-options.js"(exports2, module2) {
     "use strict";
     var looseOption = Object.freeze({ loose: true });
     var emptyOpts = Object.freeze({});
@@ -1157,13 +1156,13 @@ var require_parse_options = __commonJS({
       }
       return options;
     };
-    module.exports = parseOptions;
+    module2.exports = parseOptions;
   }
 });
 
 // node_modules/semver/internal/identifiers.js
 var require_identifiers = __commonJS({
-  "node_modules/semver/internal/identifiers.js"(exports, module) {
+  "node_modules/semver/internal/identifiers.js"(exports2, module2) {
     "use strict";
     var numeric = /^[0-9]+$/;
     var compareIdentifiers = (a, b) => {
@@ -1179,7 +1178,7 @@ var require_identifiers = __commonJS({
       return a === b ? 0 : anum && !bnum ? -1 : bnum && !anum ? 1 : a < b ? -1 : 1;
     };
     var rcompareIdentifiers = (a, b) => compareIdentifiers(b, a);
-    module.exports = {
+    module2.exports = {
       compareIdentifiers,
       rcompareIdentifiers
     };
@@ -1188,7 +1187,7 @@ var require_identifiers = __commonJS({
 
 // node_modules/semver/classes/semver.js
 var require_semver = __commonJS({
-  "node_modules/semver/classes/semver.js"(exports, module) {
+  "node_modules/semver/classes/semver.js"(exports2, module2) {
     "use strict";
     var debug = require_debug();
     var { MAX_LENGTH, MAX_SAFE_INTEGER } = require_constants();
@@ -1461,13 +1460,13 @@ var require_semver = __commonJS({
         return this;
       }
     };
-    module.exports = SemVer;
+    module2.exports = SemVer;
   }
 });
 
 // node_modules/semver/functions/parse.js
 var require_parse = __commonJS({
-  "node_modules/semver/functions/parse.js"(exports, module) {
+  "node_modules/semver/functions/parse.js"(exports2, module2) {
     "use strict";
     var SemVer = require_semver();
     var parse = (version, options, throwErrors = false) => {
@@ -1483,39 +1482,39 @@ var require_parse = __commonJS({
         throw er;
       }
     };
-    module.exports = parse;
+    module2.exports = parse;
   }
 });
 
 // node_modules/semver/functions/valid.js
 var require_valid = __commonJS({
-  "node_modules/semver/functions/valid.js"(exports, module) {
+  "node_modules/semver/functions/valid.js"(exports2, module2) {
     "use strict";
     var parse = require_parse();
     var valid = (version, options) => {
       const v = parse(version, options);
       return v ? v.version : null;
     };
-    module.exports = valid;
+    module2.exports = valid;
   }
 });
 
 // node_modules/semver/functions/clean.js
 var require_clean = __commonJS({
-  "node_modules/semver/functions/clean.js"(exports, module) {
+  "node_modules/semver/functions/clean.js"(exports2, module2) {
     "use strict";
     var parse = require_parse();
     var clean = (version, options) => {
       const s = parse(version.trim().replace(/^[=v]+/, ""), options);
       return s ? s.version : null;
     };
-    module.exports = clean;
+    module2.exports = clean;
   }
 });
 
 // node_modules/semver/functions/inc.js
 var require_inc = __commonJS({
-  "node_modules/semver/functions/inc.js"(exports, module) {
+  "node_modules/semver/functions/inc.js"(exports2, module2) {
     "use strict";
     var SemVer = require_semver();
     var inc = (version, release, options, identifier, identifierBase) => {
@@ -1533,13 +1532,13 @@ var require_inc = __commonJS({
         return null;
       }
     };
-    module.exports = inc;
+    module2.exports = inc;
   }
 });
 
 // node_modules/semver/functions/diff.js
 var require_diff = __commonJS({
-  "node_modules/semver/functions/diff.js"(exports, module) {
+  "node_modules/semver/functions/diff.js"(exports2, module2) {
     "use strict";
     var parse = require_parse();
     var diff = (version1, version2) => {
@@ -1577,86 +1576,86 @@ var require_diff = __commonJS({
       }
       return "prerelease";
     };
-    module.exports = diff;
+    module2.exports = diff;
   }
 });
 
 // node_modules/semver/functions/major.js
 var require_major = __commonJS({
-  "node_modules/semver/functions/major.js"(exports, module) {
+  "node_modules/semver/functions/major.js"(exports2, module2) {
     "use strict";
     var SemVer = require_semver();
     var major = (a, loose) => new SemVer(a, loose).major;
-    module.exports = major;
+    module2.exports = major;
   }
 });
 
 // node_modules/semver/functions/minor.js
 var require_minor = __commonJS({
-  "node_modules/semver/functions/minor.js"(exports, module) {
+  "node_modules/semver/functions/minor.js"(exports2, module2) {
     "use strict";
     var SemVer = require_semver();
     var minor = (a, loose) => new SemVer(a, loose).minor;
-    module.exports = minor;
+    module2.exports = minor;
   }
 });
 
 // node_modules/semver/functions/patch.js
 var require_patch = __commonJS({
-  "node_modules/semver/functions/patch.js"(exports, module) {
+  "node_modules/semver/functions/patch.js"(exports2, module2) {
     "use strict";
     var SemVer = require_semver();
     var patch = (a, loose) => new SemVer(a, loose).patch;
-    module.exports = patch;
+    module2.exports = patch;
   }
 });
 
 // node_modules/semver/functions/prerelease.js
 var require_prerelease = __commonJS({
-  "node_modules/semver/functions/prerelease.js"(exports, module) {
+  "node_modules/semver/functions/prerelease.js"(exports2, module2) {
     "use strict";
     var parse = require_parse();
     var prerelease = (version, options) => {
       const parsed = parse(version, options);
       return parsed && parsed.prerelease.length ? parsed.prerelease : null;
     };
-    module.exports = prerelease;
+    module2.exports = prerelease;
   }
 });
 
 // node_modules/semver/functions/compare.js
 var require_compare = __commonJS({
-  "node_modules/semver/functions/compare.js"(exports, module) {
+  "node_modules/semver/functions/compare.js"(exports2, module2) {
     "use strict";
     var SemVer = require_semver();
     var compare = (a, b, loose) => new SemVer(a, loose).compare(new SemVer(b, loose));
-    module.exports = compare;
+    module2.exports = compare;
   }
 });
 
 // node_modules/semver/functions/rcompare.js
 var require_rcompare = __commonJS({
-  "node_modules/semver/functions/rcompare.js"(exports, module) {
+  "node_modules/semver/functions/rcompare.js"(exports2, module2) {
     "use strict";
     var compare = require_compare();
     var rcompare = (a, b, loose) => compare(b, a, loose);
-    module.exports = rcompare;
+    module2.exports = rcompare;
   }
 });
 
 // node_modules/semver/functions/compare-loose.js
 var require_compare_loose = __commonJS({
-  "node_modules/semver/functions/compare-loose.js"(exports, module) {
+  "node_modules/semver/functions/compare-loose.js"(exports2, module2) {
     "use strict";
     var compare = require_compare();
     var compareLoose = (a, b) => compare(a, b, true);
-    module.exports = compareLoose;
+    module2.exports = compareLoose;
   }
 });
 
 // node_modules/semver/functions/compare-build.js
 var require_compare_build = __commonJS({
-  "node_modules/semver/functions/compare-build.js"(exports, module) {
+  "node_modules/semver/functions/compare-build.js"(exports2, module2) {
     "use strict";
     var SemVer = require_semver();
     var compareBuild = (a, b, loose) => {
@@ -1664,93 +1663,93 @@ var require_compare_build = __commonJS({
       const versionB = new SemVer(b, loose);
       return versionA.compare(versionB) || versionA.compareBuild(versionB);
     };
-    module.exports = compareBuild;
+    module2.exports = compareBuild;
   }
 });
 
 // node_modules/semver/functions/sort.js
 var require_sort = __commonJS({
-  "node_modules/semver/functions/sort.js"(exports, module) {
+  "node_modules/semver/functions/sort.js"(exports2, module2) {
     "use strict";
     var compareBuild = require_compare_build();
     var sort = (list, loose) => list.sort((a, b) => compareBuild(a, b, loose));
-    module.exports = sort;
+    module2.exports = sort;
   }
 });
 
 // node_modules/semver/functions/rsort.js
 var require_rsort = __commonJS({
-  "node_modules/semver/functions/rsort.js"(exports, module) {
+  "node_modules/semver/functions/rsort.js"(exports2, module2) {
     "use strict";
     var compareBuild = require_compare_build();
     var rsort = (list, loose) => list.sort((a, b) => compareBuild(b, a, loose));
-    module.exports = rsort;
+    module2.exports = rsort;
   }
 });
 
 // node_modules/semver/functions/gt.js
 var require_gt = __commonJS({
-  "node_modules/semver/functions/gt.js"(exports, module) {
+  "node_modules/semver/functions/gt.js"(exports2, module2) {
     "use strict";
     var compare = require_compare();
     var gt = (a, b, loose) => compare(a, b, loose) > 0;
-    module.exports = gt;
+    module2.exports = gt;
   }
 });
 
 // node_modules/semver/functions/lt.js
 var require_lt = __commonJS({
-  "node_modules/semver/functions/lt.js"(exports, module) {
+  "node_modules/semver/functions/lt.js"(exports2, module2) {
     "use strict";
     var compare = require_compare();
     var lt = (a, b, loose) => compare(a, b, loose) < 0;
-    module.exports = lt;
+    module2.exports = lt;
   }
 });
 
 // node_modules/semver/functions/eq.js
 var require_eq = __commonJS({
-  "node_modules/semver/functions/eq.js"(exports, module) {
+  "node_modules/semver/functions/eq.js"(exports2, module2) {
     "use strict";
     var compare = require_compare();
     var eq = (a, b, loose) => compare(a, b, loose) === 0;
-    module.exports = eq;
+    module2.exports = eq;
   }
 });
 
 // node_modules/semver/functions/neq.js
 var require_neq = __commonJS({
-  "node_modules/semver/functions/neq.js"(exports, module) {
+  "node_modules/semver/functions/neq.js"(exports2, module2) {
     "use strict";
     var compare = require_compare();
     var neq = (a, b, loose) => compare(a, b, loose) !== 0;
-    module.exports = neq;
+    module2.exports = neq;
   }
 });
 
 // node_modules/semver/functions/gte.js
 var require_gte = __commonJS({
-  "node_modules/semver/functions/gte.js"(exports, module) {
+  "node_modules/semver/functions/gte.js"(exports2, module2) {
     "use strict";
     var compare = require_compare();
     var gte = (a, b, loose) => compare(a, b, loose) >= 0;
-    module.exports = gte;
+    module2.exports = gte;
   }
 });
 
 // node_modules/semver/functions/lte.js
 var require_lte = __commonJS({
-  "node_modules/semver/functions/lte.js"(exports, module) {
+  "node_modules/semver/functions/lte.js"(exports2, module2) {
     "use strict";
     var compare = require_compare();
     var lte = (a, b, loose) => compare(a, b, loose) <= 0;
-    module.exports = lte;
+    module2.exports = lte;
   }
 });
 
 // node_modules/semver/functions/cmp.js
 var require_cmp = __commonJS({
-  "node_modules/semver/functions/cmp.js"(exports, module) {
+  "node_modules/semver/functions/cmp.js"(exports2, module2) {
     "use strict";
     var eq = require_eq();
     var neq = require_neq();
@@ -1794,13 +1793,13 @@ var require_cmp = __commonJS({
           throw new TypeError(`Invalid operator: ${op}`);
       }
     };
-    module.exports = cmp;
+    module2.exports = cmp;
   }
 });
 
 // node_modules/semver/functions/coerce.js
 var require_coerce = __commonJS({
-  "node_modules/semver/functions/coerce.js"(exports, module) {
+  "node_modules/semver/functions/coerce.js"(exports2, module2) {
     "use strict";
     var SemVer = require_semver();
     var parse = require_parse();
@@ -1840,13 +1839,13 @@ var require_coerce = __commonJS({
       const build = options.includePrerelease && match[6] ? `+${match[6]}` : "";
       return parse(`${major}.${minor}.${patch}${prerelease}${build}`, options);
     };
-    module.exports = coerce;
+    module2.exports = coerce;
   }
 });
 
 // node_modules/semver/internal/lrucache.js
 var require_lrucache = __commonJS({
-  "node_modules/semver/internal/lrucache.js"(exports, module) {
+  "node_modules/semver/internal/lrucache.js"(exports2, module2) {
     "use strict";
     var LRUCache = class {
       constructor() {
@@ -1878,13 +1877,13 @@ var require_lrucache = __commonJS({
         return this;
       }
     };
-    module.exports = LRUCache;
+    module2.exports = LRUCache;
   }
 });
 
 // node_modules/semver/classes/range.js
 var require_range = __commonJS({
-  "node_modules/semver/classes/range.js"(exports, module) {
+  "node_modules/semver/classes/range.js"(exports2, module2) {
     "use strict";
     var SPACE_CHARACTERS = /\s+/g;
     var Range = class _Range {
@@ -2025,7 +2024,7 @@ var require_range = __commonJS({
         return false;
       }
     };
-    module.exports = Range;
+    module2.exports = Range;
     var LRU = require_lrucache();
     var cache = new LRU();
     var parseOptions = require_parse_options();
@@ -2261,7 +2260,7 @@ var require_range = __commonJS({
 
 // node_modules/semver/classes/comparator.js
 var require_comparator = __commonJS({
-  "node_modules/semver/classes/comparator.js"(exports, module) {
+  "node_modules/semver/classes/comparator.js"(exports2, module2) {
     "use strict";
     var ANY = Symbol("SemVer ANY");
     var Comparator = class _Comparator {
@@ -2362,7 +2361,7 @@ var require_comparator = __commonJS({
         return false;
       }
     };
-    module.exports = Comparator;
+    module2.exports = Comparator;
     var parseOptions = require_parse_options();
     var { safeRe: re, t } = require_re();
     var cmp = require_cmp();
@@ -2374,7 +2373,7 @@ var require_comparator = __commonJS({
 
 // node_modules/semver/functions/satisfies.js
 var require_satisfies = __commonJS({
-  "node_modules/semver/functions/satisfies.js"(exports, module) {
+  "node_modules/semver/functions/satisfies.js"(exports2, module2) {
     "use strict";
     var Range = require_range();
     var satisfies = (version, range, options) => {
@@ -2385,23 +2384,23 @@ var require_satisfies = __commonJS({
       }
       return range.test(version);
     };
-    module.exports = satisfies;
+    module2.exports = satisfies;
   }
 });
 
 // node_modules/semver/ranges/to-comparators.js
 var require_to_comparators = __commonJS({
-  "node_modules/semver/ranges/to-comparators.js"(exports, module) {
+  "node_modules/semver/ranges/to-comparators.js"(exports2, module2) {
     "use strict";
     var Range = require_range();
     var toComparators = (range, options) => new Range(range, options).set.map((comp) => comp.map((c) => c.value).join(" ").trim().split(" "));
-    module.exports = toComparators;
+    module2.exports = toComparators;
   }
 });
 
 // node_modules/semver/ranges/max-satisfying.js
 var require_max_satisfying = __commonJS({
-  "node_modules/semver/ranges/max-satisfying.js"(exports, module) {
+  "node_modules/semver/ranges/max-satisfying.js"(exports2, module2) {
     "use strict";
     var SemVer = require_semver();
     var Range = require_range();
@@ -2424,13 +2423,13 @@ var require_max_satisfying = __commonJS({
       });
       return max;
     };
-    module.exports = maxSatisfying;
+    module2.exports = maxSatisfying;
   }
 });
 
 // node_modules/semver/ranges/min-satisfying.js
 var require_min_satisfying = __commonJS({
-  "node_modules/semver/ranges/min-satisfying.js"(exports, module) {
+  "node_modules/semver/ranges/min-satisfying.js"(exports2, module2) {
     "use strict";
     var SemVer = require_semver();
     var Range = require_range();
@@ -2453,13 +2452,13 @@ var require_min_satisfying = __commonJS({
       });
       return min;
     };
-    module.exports = minSatisfying;
+    module2.exports = minSatisfying;
   }
 });
 
 // node_modules/semver/ranges/min-version.js
 var require_min_version = __commonJS({
-  "node_modules/semver/ranges/min-version.js"(exports, module) {
+  "node_modules/semver/ranges/min-version.js"(exports2, module2) {
     "use strict";
     var SemVer = require_semver();
     var Range = require_range();
@@ -2512,13 +2511,13 @@ var require_min_version = __commonJS({
       }
       return null;
     };
-    module.exports = minVersion;
+    module2.exports = minVersion;
   }
 });
 
 // node_modules/semver/ranges/valid.js
 var require_valid2 = __commonJS({
-  "node_modules/semver/ranges/valid.js"(exports, module) {
+  "node_modules/semver/ranges/valid.js"(exports2, module2) {
     "use strict";
     var Range = require_range();
     var validRange = (range, options) => {
@@ -2528,13 +2527,13 @@ var require_valid2 = __commonJS({
         return null;
       }
     };
-    module.exports = validRange;
+    module2.exports = validRange;
   }
 });
 
 // node_modules/semver/ranges/outside.js
 var require_outside = __commonJS({
-  "node_modules/semver/ranges/outside.js"(exports, module) {
+  "node_modules/semver/ranges/outside.js"(exports2, module2) {
     "use strict";
     var SemVer = require_semver();
     var Comparator = require_comparator();
@@ -2597,33 +2596,33 @@ var require_outside = __commonJS({
       }
       return true;
     };
-    module.exports = outside;
+    module2.exports = outside;
   }
 });
 
 // node_modules/semver/ranges/gtr.js
 var require_gtr = __commonJS({
-  "node_modules/semver/ranges/gtr.js"(exports, module) {
+  "node_modules/semver/ranges/gtr.js"(exports2, module2) {
     "use strict";
     var outside = require_outside();
     var gtr = (version, range, options) => outside(version, range, ">", options);
-    module.exports = gtr;
+    module2.exports = gtr;
   }
 });
 
 // node_modules/semver/ranges/ltr.js
 var require_ltr = __commonJS({
-  "node_modules/semver/ranges/ltr.js"(exports, module) {
+  "node_modules/semver/ranges/ltr.js"(exports2, module2) {
     "use strict";
     var outside = require_outside();
     var ltr = (version, range, options) => outside(version, range, "<", options);
-    module.exports = ltr;
+    module2.exports = ltr;
   }
 });
 
 // node_modules/semver/ranges/intersects.js
 var require_intersects = __commonJS({
-  "node_modules/semver/ranges/intersects.js"(exports, module) {
+  "node_modules/semver/ranges/intersects.js"(exports2, module2) {
     "use strict";
     var Range = require_range();
     var intersects = (r1, r2, options) => {
@@ -2631,17 +2630,17 @@ var require_intersects = __commonJS({
       r2 = new Range(r2, options);
       return r1.intersects(r2, options);
     };
-    module.exports = intersects;
+    module2.exports = intersects;
   }
 });
 
 // node_modules/semver/ranges/simplify.js
 var require_simplify = __commonJS({
-  "node_modules/semver/ranges/simplify.js"(exports, module) {
+  "node_modules/semver/ranges/simplify.js"(exports2, module2) {
     "use strict";
     var satisfies = require_satisfies();
     var compare = require_compare();
-    module.exports = (versions, range, options) => {
+    module2.exports = (versions, range, options) => {
       const set = [];
       let first = null;
       let prev = null;
@@ -2687,7 +2686,7 @@ var require_simplify = __commonJS({
 
 // node_modules/semver/ranges/subset.js
 var require_subset = __commonJS({
-  "node_modules/semver/ranges/subset.js"(exports, module) {
+  "node_modules/semver/ranges/subset.js"(exports2, module2) {
     "use strict";
     var Range = require_range();
     var Comparator = require_comparator();
@@ -2843,13 +2842,13 @@ var require_subset = __commonJS({
       const comp = compare(a.semver, b.semver, options);
       return comp < 0 ? a : comp > 0 ? b : b.operator === "<" && a.operator === "<=" ? b : a;
     };
-    module.exports = subset;
+    module2.exports = subset;
   }
 });
 
 // node_modules/semver/index.js
 var require_semver2 = __commonJS({
-  "node_modules/semver/index.js"(exports, module) {
+  "node_modules/semver/index.js"(exports2, module2) {
     "use strict";
     var internalRe = require_re();
     var constants = require_constants();
@@ -2892,7 +2891,7 @@ var require_semver2 = __commonJS({
     var intersects = require_intersects();
     var simplifyRange = require_simplify();
     var subset = require_subset();
-    module.exports = {
+    module2.exports = {
       parse,
       valid,
       clean,
@@ -2944,23 +2943,23 @@ var require_semver2 = __commonJS({
 
 // node_modules/jsonwebtoken/lib/asymmetricKeyDetailsSupported.js
 var require_asymmetricKeyDetailsSupported = __commonJS({
-  "node_modules/jsonwebtoken/lib/asymmetricKeyDetailsSupported.js"(exports, module) {
+  "node_modules/jsonwebtoken/lib/asymmetricKeyDetailsSupported.js"(exports2, module2) {
     var semver = require_semver2();
-    module.exports = semver.satisfies(process.version, ">=15.7.0");
+    module2.exports = semver.satisfies(process.version, ">=15.7.0");
   }
 });
 
 // node_modules/jsonwebtoken/lib/rsaPssKeyDetailsSupported.js
 var require_rsaPssKeyDetailsSupported = __commonJS({
-  "node_modules/jsonwebtoken/lib/rsaPssKeyDetailsSupported.js"(exports, module) {
+  "node_modules/jsonwebtoken/lib/rsaPssKeyDetailsSupported.js"(exports2, module2) {
     var semver = require_semver2();
-    module.exports = semver.satisfies(process.version, ">=16.9.0");
+    module2.exports = semver.satisfies(process.version, ">=16.9.0");
   }
 });
 
 // node_modules/jsonwebtoken/lib/validateAsymmetricKey.js
 var require_validateAsymmetricKey = __commonJS({
-  "node_modules/jsonwebtoken/lib/validateAsymmetricKey.js"(exports, module) {
+  "node_modules/jsonwebtoken/lib/validateAsymmetricKey.js"(exports2, module2) {
     var ASYMMETRIC_KEY_DETAILS_SUPPORTED = require_asymmetricKeyDetailsSupported();
     var RSA_PSS_KEY_DETAILS_SUPPORTED = require_rsaPssKeyDetailsSupported();
     var allowedAlgorithmsForKeys = {
@@ -2973,7 +2972,7 @@ var require_validateAsymmetricKey = __commonJS({
       ES384: "secp384r1",
       ES512: "secp521r1"
     };
-    module.exports = function(algorithm, key) {
+    module2.exports = function(algorithm, key) {
       if (!algorithm || !key) return;
       const keyType = key.asymmetricKeyType;
       if (!keyType) return;
@@ -3013,15 +3012,15 @@ var require_validateAsymmetricKey = __commonJS({
 
 // node_modules/jsonwebtoken/lib/psSupported.js
 var require_psSupported = __commonJS({
-  "node_modules/jsonwebtoken/lib/psSupported.js"(exports, module) {
+  "node_modules/jsonwebtoken/lib/psSupported.js"(exports2, module2) {
     var semver = require_semver2();
-    module.exports = semver.satisfies(process.version, "^6.12.0 || >=8.0.0");
+    module2.exports = semver.satisfies(process.version, "^6.12.0 || >=8.0.0");
   }
 });
 
 // node_modules/jsonwebtoken/verify.js
 var require_verify = __commonJS({
-  "node_modules/jsonwebtoken/verify.js"(exports, module) {
+  "node_modules/jsonwebtoken/verify.js"(exports2, module2) {
     var JsonWebTokenError = require_JsonWebTokenError();
     var NotBeforeError = require_NotBeforeError();
     var TokenExpiredError = require_TokenExpiredError();
@@ -3030,7 +3029,7 @@ var require_verify = __commonJS({
     var validateAsymmetricKey = require_validateAsymmetricKey();
     var PS_SUPPORTED = require_psSupported();
     var jws = require_jws();
-    var { KeyObject, createSecretKey, createPublicKey } = __require("crypto");
+    var { KeyObject, createSecretKey, createPublicKey } = require("crypto");
     var PUB_KEY_ALGS = ["RS256", "RS384", "RS512"];
     var EC_KEY_ALGS = ["ES256", "ES384", "ES512"];
     var RSA_KEY_ALGS = ["RS256", "RS384", "RS512"];
@@ -3039,7 +3038,7 @@ var require_verify = __commonJS({
       PUB_KEY_ALGS.splice(PUB_KEY_ALGS.length, 0, "PS256", "PS384", "PS512");
       RSA_KEY_ALGS.splice(RSA_KEY_ALGS.length, 0, "PS256", "PS384", "PS512");
     }
-    module.exports = function(jwtString, secretOrPublicKey, options, callback) {
+    module2.exports = function(jwtString, secretOrPublicKey, options, callback) {
       if (typeof options === "function" && !callback) {
         callback = options;
         options = {};
@@ -3236,7 +3235,7 @@ var require_verify = __commonJS({
 
 // node_modules/lodash.includes/index.js
 var require_lodash = __commonJS({
-  "node_modules/lodash.includes/index.js"(exports, module) {
+  "node_modules/lodash.includes/index.js"(exports2, module2) {
     var INFINITY = 1 / 0;
     var MAX_SAFE_INTEGER = 9007199254740991;
     var MAX_INTEGER = 17976931348623157e292;
@@ -3414,13 +3413,13 @@ var require_lodash = __commonJS({
     function values(object) {
       return object ? baseValues(object, keys(object)) : [];
     }
-    module.exports = includes;
+    module2.exports = includes;
   }
 });
 
 // node_modules/lodash.isboolean/index.js
 var require_lodash2 = __commonJS({
-  "node_modules/lodash.isboolean/index.js"(exports, module) {
+  "node_modules/lodash.isboolean/index.js"(exports2, module2) {
     var boolTag = "[object Boolean]";
     var objectProto = Object.prototype;
     var objectToString = objectProto.toString;
@@ -3430,13 +3429,13 @@ var require_lodash2 = __commonJS({
     function isObjectLike(value) {
       return !!value && typeof value == "object";
     }
-    module.exports = isBoolean;
+    module2.exports = isBoolean;
   }
 });
 
 // node_modules/lodash.isinteger/index.js
 var require_lodash3 = __commonJS({
-  "node_modules/lodash.isinteger/index.js"(exports, module) {
+  "node_modules/lodash.isinteger/index.js"(exports2, module2) {
     var INFINITY = 1 / 0;
     var MAX_INTEGER = 17976931348623157e292;
     var NAN = 0 / 0;
@@ -3494,13 +3493,13 @@ var require_lodash3 = __commonJS({
       var isBinary = reIsBinary.test(value);
       return isBinary || reIsOctal.test(value) ? freeParseInt(value.slice(2), isBinary ? 2 : 8) : reIsBadHex.test(value) ? NAN : +value;
     }
-    module.exports = isInteger;
+    module2.exports = isInteger;
   }
 });
 
 // node_modules/lodash.isnumber/index.js
 var require_lodash4 = __commonJS({
-  "node_modules/lodash.isnumber/index.js"(exports, module) {
+  "node_modules/lodash.isnumber/index.js"(exports2, module2) {
     var numberTag = "[object Number]";
     var objectProto = Object.prototype;
     var objectToString = objectProto.toString;
@@ -3510,13 +3509,13 @@ var require_lodash4 = __commonJS({
     function isNumber(value) {
       return typeof value == "number" || isObjectLike(value) && objectToString.call(value) == numberTag;
     }
-    module.exports = isNumber;
+    module2.exports = isNumber;
   }
 });
 
 // node_modules/lodash.isplainobject/index.js
 var require_lodash5 = __commonJS({
-  "node_modules/lodash.isplainobject/index.js"(exports, module) {
+  "node_modules/lodash.isplainobject/index.js"(exports2, module2) {
     var objectTag = "[object Object]";
     function isHostObject(value) {
       var result = false;
@@ -3554,13 +3553,13 @@ var require_lodash5 = __commonJS({
       var Ctor = hasOwnProperty.call(proto, "constructor") && proto.constructor;
       return typeof Ctor == "function" && Ctor instanceof Ctor && funcToString.call(Ctor) == objectCtorString;
     }
-    module.exports = isPlainObject;
+    module2.exports = isPlainObject;
   }
 });
 
 // node_modules/lodash.isstring/index.js
 var require_lodash6 = __commonJS({
-  "node_modules/lodash.isstring/index.js"(exports, module) {
+  "node_modules/lodash.isstring/index.js"(exports2, module2) {
     var stringTag = "[object String]";
     var objectProto = Object.prototype;
     var objectToString = objectProto.toString;
@@ -3571,13 +3570,13 @@ var require_lodash6 = __commonJS({
     function isString(value) {
       return typeof value == "string" || !isArray(value) && isObjectLike(value) && objectToString.call(value) == stringTag;
     }
-    module.exports = isString;
+    module2.exports = isString;
   }
 });
 
 // node_modules/lodash.once/index.js
 var require_lodash7 = __commonJS({
-  "node_modules/lodash.once/index.js"(exports, module) {
+  "node_modules/lodash.once/index.js"(exports2, module2) {
     var FUNC_ERROR_TEXT = "Expected a function";
     var INFINITY = 1 / 0;
     var MAX_INTEGER = 17976931348623157e292;
@@ -3652,13 +3651,13 @@ var require_lodash7 = __commonJS({
       var isBinary = reIsBinary.test(value);
       return isBinary || reIsOctal.test(value) ? freeParseInt(value.slice(2), isBinary ? 2 : 8) : reIsBadHex.test(value) ? NAN : +value;
     }
-    module.exports = once;
+    module2.exports = once;
   }
 });
 
 // node_modules/jsonwebtoken/sign.js
 var require_sign = __commonJS({
-  "node_modules/jsonwebtoken/sign.js"(exports, module) {
+  "node_modules/jsonwebtoken/sign.js"(exports2, module2) {
     var timespan = require_timespan();
     var PS_SUPPORTED = require_psSupported();
     var validateAsymmetricKey = require_validateAsymmetricKey();
@@ -3670,7 +3669,7 @@ var require_sign = __commonJS({
     var isPlainObject = require_lodash5();
     var isString = require_lodash6();
     var once = require_lodash7();
-    var { KeyObject, createSecretKey, createPrivateKey } = __require("crypto");
+    var { KeyObject, createSecretKey, createPrivateKey } = require("crypto");
     var SUPPORTED_ALGS = ["RS256", "RS384", "RS512", "ES256", "ES384", "ES512", "HS256", "HS384", "HS512", "none"];
     if (PS_SUPPORTED) {
       SUPPORTED_ALGS.splice(3, 0, "PS256", "PS384", "PS512");
@@ -3740,7 +3739,7 @@ var require_sign = __commonJS({
       "subject",
       "jwtid"
     ];
-    module.exports = function(payload, secretOrPrivateKey, options, callback) {
+    module2.exports = function(payload, secretOrPrivateKey, options, callback) {
       if (typeof options === "function") {
         callback = options;
         options = {};
@@ -3883,8 +3882,8 @@ var require_sign = __commonJS({
 
 // node_modules/jsonwebtoken/index.js
 var require_jsonwebtoken = __commonJS({
-  "node_modules/jsonwebtoken/index.js"(exports, module) {
-    module.exports = {
+  "node_modules/jsonwebtoken/index.js"(exports2, module2) {
+    module2.exports = {
       decode: require_decode(),
       verify: require_verify(),
       sign: require_sign(),
@@ -3894,6 +3893,14 @@ var require_jsonwebtoken = __commonJS({
     };
   }
 });
+
+// src/functions/admin-export.mts
+var admin_export_exports = {};
+__export(admin_export_exports, {
+  config: () => config,
+  default: () => admin_export_default
+});
+module.exports = __toCommonJS(admin_export_exports);
 
 // src/functions/lib/blobs.mjs
 var NF_ERROR = "x-nf-error";
@@ -4030,13 +4037,13 @@ var DEFAULT_RETRY_DELAY = getEnvironment().get("NODE_ENV") === "test" ? 1 : 5e3;
 var MIN_RETRY_DELAY = 1e3;
 var MAX_RETRY = 5;
 var RATE_LIMIT_HEADER = "X-RateLimit-Reset";
-var fetchAndRetry = async (fetch2, url, options, attemptsLeft = MAX_RETRY) => {
+var fetchAndRetry = async (fetch, url, options, attemptsLeft = MAX_RETRY) => {
   try {
-    const res = await fetch2(url, options);
+    const res = await fetch(url, options);
     if (attemptsLeft > 0 && (res.status === 429 || res.status >= 500)) {
       const delay = getDelay(res.headers.get(RATE_LIMIT_HEADER));
       await sleep(delay);
-      return fetchAndRetry(fetch2, url, options, attemptsLeft - 1);
+      return fetchAndRetry(fetch, url, options, attemptsLeft - 1);
     }
     return res;
   } catch (error) {
@@ -4045,7 +4052,7 @@ var fetchAndRetry = async (fetch2, url, options, attemptsLeft = MAX_RETRY) => {
     }
     const delay = getDelay();
     await sleep(delay);
-    return fetchAndRetry(fetch2, url, options, attemptsLeft - 1);
+    return fetchAndRetry(fetch, url, options, attemptsLeft - 1);
   }
 };
 var getDelay = (rateLimitReset) => {
@@ -4059,11 +4066,11 @@ var sleep = (ms) => new Promise((resolve) => {
 });
 var SIGNED_URL_ACCEPT_HEADER = "application/json;type=signed-url";
 var Client = class {
-  constructor({ apiURL, consistency, edgeURL, fetch: fetch2, region, siteID, token, uncachedEdgeURL }) {
+  constructor({ apiURL, consistency, edgeURL, fetch, region, siteID, token, uncachedEdgeURL }) {
     this.apiURL = apiURL;
     this.consistency = consistency ?? "eventual";
     this.edgeURL = edgeURL;
-    this.fetch = fetch2 ?? globalThis.fetch;
+    this.fetch = fetch ?? globalThis.fetch;
     this.region = region;
     this.siteID = siteID;
     this.token = token;
@@ -4498,142 +4505,12 @@ var getStore = (input) => {
   );
 };
 
-// src/functions/pipeline.mts
+// src/functions/admin-export.mts
 var import_jsonwebtoken = __toESM(require_jsonwebtoken(), 1);
-
-// src/functions/media-processor.mts
-import sharp from "sharp";
-var IMAGE_EXTENSIONS = ["jpg", "jpeg", "png", "webp", "gif"];
-var THUMBNAIL_WIDTH = 400;
-var THUMBNAIL_HEIGHT = 500;
-var WEB_MAX_WIDTH = 1920;
-var WEB_MAX_HEIGHT = 1920;
-var WEB_QUALITY = 82;
-var THUMBNAIL_QUALITY = 70;
-async function processImage(assetKey, options = {}) {
-  const {
-    stripExif = true,
-    compress = true,
-    generateThumbnail = true,
-    watermark = false,
-    watermarkText = "",
-    outputFormat = "original"
-  } = options;
-  const result = {
-    exifStripped: false,
-    compressed: false,
-    thumbnailGenerated: false,
-    watermarked: false,
-    originalSizeBytes: 0,
-    processedSizeBytes: 0,
-    thumbnailSizeBytes: 0,
-    format: "",
-    width: 0,
-    height: 0,
-    errors: []
-  };
-  const assetStore = getStore("pipeline-assets");
-  try {
-    const rawData = await assetStore.get(assetKey, { type: "arrayBuffer" });
-    if (!rawData) {
-      result.errors.push("Asset not found in store");
-      return result;
-    }
-    const inputBuffer = Buffer.from(rawData);
-    result.originalSizeBytes = inputBuffer.length;
-    const ext = (assetKey.split(".").pop() || "").toLowerCase();
-    if (!IMAGE_EXTENSIONS.includes(ext)) {
-      result.errors.push(`Not an image format: ${ext}`);
-      return result;
-    }
-    let pipeline = sharp(inputBuffer);
-    const metadata = await pipeline.metadata();
-    result.format = metadata.format || ext;
-    result.width = metadata.width || 0;
-    result.height = metadata.height || 0;
-    if (stripExif) {
-      pipeline = pipeline.rotate();
-      result.exifStripped = true;
-    }
-    if (compress && (result.width > WEB_MAX_WIDTH || result.height > WEB_MAX_HEIGHT)) {
-      pipeline = pipeline.resize(WEB_MAX_WIDTH, WEB_MAX_HEIGHT, {
-        fit: "inside",
-        withoutEnlargement: true
-      });
-    }
-    if (watermark && watermarkText) {
-      const wWidth = Math.max(result.width, 800);
-      const fontSize = Math.round(wWidth * 0.03);
-      const svgOverlay = Buffer.from(`
-                <svg width="${result.width}" height="${result.height}">
-                    <style>
-                        .watermark {
-                            fill: rgba(255,255,255,0.25);
-                            font-family: sans-serif;
-                            font-size: ${fontSize}px;
-                            font-weight: bold;
-                            letter-spacing: 4px;
-                        }
-                    </style>
-                    <text x="50%" y="95%" text-anchor="middle" class="watermark">${escapeXml(watermarkText)}</text>
-                </svg>
-            `);
-      pipeline = pipeline.composite([{ input: svgOverlay, top: 0, left: 0 }]);
-      result.watermarked = true;
-    }
-    let outputExt = ext;
-    if (compress) {
-      if (outputFormat === "webp" || outputFormat === "original" && ext !== "png" && ext !== "gif") {
-        if (ext === "png" || ext === "gif") {
-          pipeline = pipeline.png({ quality: WEB_QUALITY, effort: 4 });
-          outputExt = ext;
-        } else {
-          pipeline = pipeline.webp({ quality: WEB_QUALITY, effort: 4 });
-          outputExt = "webp";
-        }
-      } else if (outputFormat === "jpeg" || ext === "jpg" || ext === "jpeg") {
-        pipeline = pipeline.jpeg({ quality: WEB_QUALITY, mozjpeg: true });
-        outputExt = "jpg";
-      } else if (outputFormat === "png" || ext === "png") {
-        pipeline = pipeline.png({ quality: WEB_QUALITY, effort: 4 });
-        outputExt = "png";
-      }
-      result.compressed = true;
-    }
-    pipeline = pipeline.withMetadata(stripExif ? {} : void 0);
-    const processedBuffer = await pipeline.toBuffer();
-    result.processedSizeBytes = processedBuffer.length;
-    const processedMeta = await sharp(processedBuffer).metadata();
-    result.width = processedMeta.width || result.width;
-    result.height = processedMeta.height || result.height;
-    const processedKey = assetKey.replace(/\.[^.]+$/, `-processed.${outputExt}`);
-    await assetStore.set(processedKey, processedBuffer);
-    await assetStore.set(assetKey, processedBuffer);
-    if (generateThumbnail) {
-      const thumbBuffer = await sharp(processedBuffer).resize(THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT, {
-        fit: "cover",
-        position: "centre"
-      }).webp({ quality: THUMBNAIL_QUALITY }).toBuffer();
-      const thumbKey = assetKey.replace(/\.[^.]+$/, "-thumb.webp");
-      await assetStore.set(thumbKey, thumbBuffer);
-      result.thumbnailSizeBytes = thumbBuffer.length;
-      result.thumbnailGenerated = true;
-    }
-  } catch (err) {
-    result.errors.push(`Processing error: ${err.message || err}`);
-  }
-  return result;
-}
-function escapeXml(str) {
-  return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&apos;");
-}
-
-// src/functions/pipeline.mts
 var CORS = {
-  "Content-Type": "application/json",
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "Content-Type, Authorization",
-  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS"
+  "Access-Control-Allow-Methods": "GET, POST, OPTIONS"
 };
 function getSecret() {
   return process.env.JWT_SECRET || "inkedmayhem-dev-secret-change-me";
@@ -4650,813 +4527,219 @@ function verifyAdmin(req) {
     return null;
   }
 }
-function getCreatorConfig() {
-  return {
-    allowedFileTypes: ["jpg", "jpeg", "png", "webp", "mp4", "mov"],
-    maxImageSizeMB: 25,
-    maxVideoSizeMB: 500,
-    stripExif: true,
-    compressImages: true,
-    generateThumbnails: true,
-    explicitAllowed: false,
-    categories: ["photos", "selfies", "lifestyle", "behind-the-scenes"],
-    moderationLevel: "manual",
-    // manual | trusted | scheduled
-    autoApproveAfterChecks: false
-  };
-}
-var IMAGE_TYPES = ["jpg", "jpeg", "png", "webp", "gif"];
-var VIDEO_TYPES = ["mp4", "mov", "webm", "avi"];
-function getFileExtension(filename) {
-  return (filename.split(".").pop() || "").toLowerCase();
-}
-function isImage(ext) {
-  return IMAGE_TYPES.includes(ext);
-}
-function isVideo(ext) {
-  return VIDEO_TYPES.includes(ext);
-}
-function validateFile(filename, sizeBytes, config2) {
-  const ext = getFileExtension(filename);
-  const checks = {
-    fileTypeValid: false,
-    fileSizeValid: false,
-    exifStripped: false,
-    compressed: false,
-    thumbnailGenerated: false,
-    errors: []
-  };
-  if (config2.allowedFileTypes.includes(ext)) {
-    checks.fileTypeValid = true;
-  } else {
-    checks.errors.push(`File type .${ext} not allowed. Allowed: ${config2.allowedFileTypes.join(", ")}`);
+async function exportStore(storeName) {
+  const store = getStore(storeName);
+  const { blobs } = await store.list();
+  const data = {};
+  for (const blob of blobs) {
+    try {
+      const item = await store.get(blob.key, { type: "json" });
+      if (item) data[blob.key] = item;
+    } catch {
+      data[blob.key] = { _binary: true, _key: blob.key };
+    }
   }
-  const sizeMB = sizeBytes / (1024 * 1024);
-  const maxMB = isImage(ext) ? config2.maxImageSizeMB : config2.maxVideoSizeMB;
-  if (sizeMB <= maxMB) {
-    checks.fileSizeValid = true;
-  } else {
-    checks.errors.push(`File size ${sizeMB.toFixed(1)}MB exceeds max ${maxMB}MB`);
-  }
-  if (config2.stripExif) {
-    checks.exifStripped = false;
-  } else {
-    checks.exifStripped = true;
-  }
-  checks.compressed = false;
-  checks.thumbnailGenerated = false;
-  return checks;
+  return { store: storeName, count: Object.keys(data).length, data };
 }
-function generatePipelineId() {
-  return `pipe-${Date.now()}-${Math.random().toString(36).substr(2, 8)}`;
-}
-async function notifyAdmin(type, data) {
-  try {
-    const siteUrl = process.env.URL || "http://localhost:8888";
-    await fetch(`${siteUrl}/api/notify`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-internal-key": getSecret()
-      },
-      body: JSON.stringify({ type, data })
-    });
-  } catch (err) {
-    console.error("[PIPELINE] Notification failed:", err);
-  }
-}
-async function logPipelineEvent(action, itemId, details = {}) {
-  try {
-    const store = getStore("pipeline-logs");
-    const logKey = `log-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`;
-    await store.setJSON(logKey, {
-      action,
-      itemId,
-      details,
-      timestamp: (/* @__PURE__ */ new Date()).toISOString()
-    });
-  } catch (err) {
-    console.error("[PIPELINE] Log write failed:", err);
-  }
-}
-var pipeline_default = async (req, context) => {
+var admin_export_default = async (req, context) => {
   if (req.method === "OPTIONS") {
-    return new Response("", { headers: CORS });
+    return new Response("", { headers: { ...CORS, "Content-Type": "application/json" } });
+  }
+  if (!verifyAdmin(req)) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers: { ...CORS, "Content-Type": "application/json" }
+    });
   }
   const url = new URL(req.url);
-  const path = url.pathname.replace("/api/pipeline", "").replace(/\/$/, "") || "";
-  if (path === "/ingest" && req.method === "POST") {
-    const admin = verifyAdmin(req);
-    const apiKey = req.headers.get("x-api-key");
-    const expectedApiKey = process.env.PIPELINE_API_KEY || getSecret();
-    const isAuthorized = admin || apiKey === expectedApiKey;
-    if (!isAuthorized) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: CORS });
-    }
+  const path = url.pathname.replace("/api/admin-export", "").replace(/\/$/, "") || "";
+  if (path === "" && req.method === "GET") {
     try {
-      const body = await req.json();
-      const { filename, fileSize, fileData, caption, tags, category, tier, source, creatorId } = body;
-      if (!filename || !fileSize) {
-        return new Response(JSON.stringify({ error: "filename and fileSize required" }), { status: 400, headers: CORS });
+      const storeNames = [
+        "users",
+        "content",
+        "pipeline",
+        "pipeline-logs",
+        "conversations",
+        "creator-configs",
+        "telegram-logs",
+        "telegram-escalations",
+        "telegram-faq-stats"
+      ];
+      const exports2 = {};
+      const summary = {};
+      for (const name of storeNames) {
+        try {
+          const result = await exportStore(name);
+          exports2[name] = result.data;
+          summary[name] = result.count;
+        } catch (err) {
+          exports2[name] = { _error: String(err) };
+          summary[name] = 0;
+        }
       }
-      const config2 = getCreatorConfig();
-      const checks = validateFile(filename, fileSize, config2);
-      if (!checks.fileTypeValid || !checks.fileSizeValid) {
-        return new Response(JSON.stringify({
-          error: "File validation failed",
-          checks,
-          errors: checks.errors
-        }), { status: 400, headers: CORS });
-      }
-      const pipelineId = generatePipelineId();
-      const ext = getFileExtension(filename);
-      const mediaType = isImage(ext) ? "image" : isVideo(ext) ? "video" : "other";
-      if (fileData) {
-        const assetStore = getStore("pipeline-assets");
-        await assetStore.set(`${pipelineId}.${ext}`, fileData);
-      }
-      const pipelineStore = getStore("pipeline");
-      const item = {
-        id: pipelineId,
-        creatorId: creatorId || "inkedmayhem",
-        status: "inbox",
-        filename,
-        storedAs: `${pipelineId}.${ext}`,
-        mediaType,
-        fileExtension: ext,
-        fileSize,
-        fileSizeMB: (fileSize / (1024 * 1024)).toFixed(2),
-        caption: caption || "",
-        tags: tags || [],
-        category: category || "photos",
-        tier: tier || "free",
-        source: source || "upload",
-        checks: {
-          fileTypeValid: checks.fileTypeValid,
-          fileSizeValid: checks.fileSizeValid,
-          exifStripped: false,
-          compressed: false,
-          thumbnailGenerated: false
-        },
-        rejectReason: "",
-        scheduledAt: null,
-        publishedAt: null,
-        createdAt: (/* @__PURE__ */ new Date()).toISOString(),
-        processedAt: null,
-        queuedAt: null
+      const backup = {
+        version: "1.0",
+        exportedAt: (/* @__PURE__ */ new Date()).toISOString(),
+        platform: "InkedMayhem Creator Platform",
+        summary,
+        stores: exports2
       };
-      await pipelineStore.setJSON(pipelineId, item);
-      await logPipelineEvent("ingest", pipelineId, { filename, source: item.source, fileSize });
-      if (config2.moderationLevel === "manual") {
-        await notifyAdmin("pipeline_ingest", {
-          filename,
-          source: item.source,
-          pipelineId
+      return new Response(JSON.stringify(backup, null, 2), {
+        headers: {
+          ...CORS,
+          "Content-Type": "application/json",
+          "Content-Disposition": `attachment; filename="inkedmayhem-backup-${(/* @__PURE__ */ new Date()).toISOString().split("T")[0]}.json"`
+        }
+      });
+    } catch (err) {
+      return new Response(JSON.stringify({ error: "Export failed" }), {
+        status: 500,
+        headers: { ...CORS, "Content-Type": "application/json" }
+      });
+    }
+  }
+  if (path === "/store" && req.method === "GET") {
+    try {
+      const storeName = url.searchParams.get("name");
+      if (!storeName) {
+        return new Response(JSON.stringify({ error: "name parameter required" }), {
+          status: 400,
+          headers: { ...CORS, "Content-Type": "application/json" }
         });
       }
+      const result = await exportStore(storeName);
       return new Response(JSON.stringify({
-        success: true,
-        pipelineId,
-        status: "inbox",
-        checks: item.checks
-      }), { headers: CORS });
-    } catch (err) {
-      console.error("[PIPELINE] Ingest error:", err);
-      return new Response(JSON.stringify({ error: "Ingest failed" }), { status: 500, headers: CORS });
-    }
-  }
-  if (path === "/process" && req.method === "POST") {
-    if (!verifyAdmin(req)) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: CORS });
-    }
-    try {
-      const { pipelineId } = await req.json();
-      if (!pipelineId) {
-        return new Response(JSON.stringify({ error: "pipelineId required" }), { status: 400, headers: CORS });
-      }
-      const store = getStore("pipeline");
-      const item = await store.get(pipelineId, { type: "json" });
-      if (!item) {
-        return new Response(JSON.stringify({ error: "Item not found" }), { status: 404, headers: CORS });
-      }
-      if (item.status !== "inbox") {
-        return new Response(JSON.stringify({ error: `Cannot process item in '${item.status}' state` }), { status: 400, headers: CORS });
-      }
-      const config2 = getCreatorConfig();
-      if (item.mediaType === "image" && item.storedAs) {
-        try {
-          let watermarkText = "";
-          let doWatermark = false;
-          try {
-            const creatorStore = getStore("creator-configs");
-            const creatorCfg = await creatorStore.get(item.creatorId || "inkedmayhem", { type: "json" });
-            if (creatorCfg?.content?.autoWatermark) {
-              doWatermark = true;
-              watermarkText = creatorCfg?.brand?.name || "InkedMayhem";
-            }
-          } catch {
-          }
-          const processingResult = await processImage(item.storedAs, {
-            stripExif: config2.stripExif,
-            compress: config2.compressImages,
-            generateThumbnail: config2.generateThumbnails,
-            watermark: doWatermark,
-            watermarkText
-          });
-          item.checks.exifStripped = processingResult.exifStripped;
-          item.checks.compressed = processingResult.compressed;
-          item.checks.thumbnailGenerated = processingResult.thumbnailGenerated;
-          item.processing = {
-            originalSizeBytes: processingResult.originalSizeBytes,
-            processedSizeBytes: processingResult.processedSizeBytes,
-            thumbnailSizeBytes: processingResult.thumbnailSizeBytes,
-            savings: processingResult.originalSizeBytes > 0 ? `${Math.round((1 - processingResult.processedSizeBytes / processingResult.originalSizeBytes) * 100)}%` : "0%",
-            format: processingResult.format,
-            width: processingResult.width,
-            height: processingResult.height,
-            watermarked: processingResult.watermarked,
-            errors: processingResult.errors
-          };
-          if (processingResult.errors.length > 0) {
-            console.warn("[PIPELINE] Processing warnings:", processingResult.errors);
-          }
-        } catch (procErr) {
-          console.error("[PIPELINE] Sharp processing failed, marking as manual:", procErr);
-          item.checks.exifStripped = false;
-          item.checks.compressed = false;
-          item.checks.thumbnailGenerated = false;
-          item.processing = { errors: [procErr.message || "Processing failed"] };
+        version: "1.0",
+        exportedAt: (/* @__PURE__ */ new Date()).toISOString(),
+        ...result
+      }, null, 2), {
+        headers: {
+          ...CORS,
+          "Content-Type": "application/json",
+          "Content-Disposition": `attachment; filename="${storeName}-export-${(/* @__PURE__ */ new Date()).toISOString().split("T")[0]}.json"`
         }
-      } else {
-        item.checks.exifStripped = true;
-        item.checks.compressed = false;
-        item.checks.thumbnailGenerated = false;
-        item.processing = { note: "Video processing requires FFmpeg \u2014 skipped" };
-      }
-      item.status = "processed";
-      item.processedAt = (/* @__PURE__ */ new Date()).toISOString();
-      await store.setJSON(pipelineId, item);
-      await logPipelineEvent("process", pipelineId, {
-        checks: item.checks,
-        processing: item.processing
       });
-      if (config2.autoApproveAfterChecks) {
-        item.status = "queued";
-        item.queuedAt = (/* @__PURE__ */ new Date()).toISOString();
-        await store.setJSON(pipelineId, item);
-        await logPipelineEvent("auto-queue", pipelineId, {});
-      }
-      return new Response(JSON.stringify({
-        success: true,
-        pipelineId,
-        status: item.status,
-        checks: item.checks,
-        processing: item.processing
-      }), { headers: CORS });
     } catch (err) {
-      console.error("[PIPELINE] Process error:", err);
-      return new Response(JSON.stringify({ error: "Processing failed" }), { status: 500, headers: CORS });
-    }
-  }
-  if (path === "/process-all" && req.method === "POST") {
-    if (!verifyAdmin(req)) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: CORS });
-    }
-    try {
-      const store = getStore("pipeline");
-      const { blobs } = await store.list();
-      const config2 = getCreatorConfig();
-      let processed = 0;
-      for (const blob of blobs) {
-        const item = await store.get(blob.key, { type: "json" });
-        if (item && item.status === "inbox") {
-          if (item.mediaType === "image" && item.storedAs) {
-            try {
-              const procResult = await processImage(item.storedAs, {
-                stripExif: config2.stripExif,
-                compress: config2.compressImages,
-                generateThumbnail: config2.generateThumbnails
-              });
-              item.checks.exifStripped = procResult.exifStripped;
-              item.checks.compressed = procResult.compressed;
-              item.checks.thumbnailGenerated = procResult.thumbnailGenerated;
-              item.processing = {
-                originalSizeBytes: procResult.originalSizeBytes,
-                processedSizeBytes: procResult.processedSizeBytes,
-                savings: procResult.originalSizeBytes > 0 ? `${Math.round((1 - procResult.processedSizeBytes / procResult.originalSizeBytes) * 100)}%` : "0%",
-                errors: procResult.errors
-              };
-            } catch (procErr) {
-              item.checks.exifStripped = false;
-              item.checks.compressed = false;
-              item.checks.thumbnailGenerated = false;
-              item.processing = { errors: [procErr.message || "Processing failed"] };
-            }
-          } else {
-            item.checks.exifStripped = true;
-            item.checks.compressed = false;
-            item.checks.thumbnailGenerated = false;
-          }
-          item.status = "processed";
-          item.processedAt = (/* @__PURE__ */ new Date()).toISOString();
-          if (config2.autoApproveAfterChecks) {
-            item.status = "queued";
-            item.queuedAt = (/* @__PURE__ */ new Date()).toISOString();
-          }
-          await store.setJSON(blob.key, item);
-          processed++;
-        }
-      }
-      await logPipelineEvent("process-all", "batch", { processed });
-      return new Response(JSON.stringify({ success: true, processed }), { headers: CORS });
-    } catch (err) {
-      return new Response(JSON.stringify({ error: "Batch processing failed" }), { status: 500, headers: CORS });
-    }
-  }
-  if (path === "/approve" && req.method === "POST") {
-    if (!verifyAdmin(req)) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: CORS });
-    }
-    try {
-      const { pipelineId, caption, tags, category, tier, scheduledAt } = await req.json();
-      if (!pipelineId) {
-        return new Response(JSON.stringify({ error: "pipelineId required" }), { status: 400, headers: CORS });
-      }
-      const store = getStore("pipeline");
-      const item = await store.get(pipelineId, { type: "json" });
-      if (!item) {
-        return new Response(JSON.stringify({ error: "Item not found" }), { status: 404, headers: CORS });
-      }
-      if (item.status !== "processed" && item.status !== "inbox") {
-        return new Response(JSON.stringify({ error: `Cannot approve item in '${item.status}' state` }), { status: 400, headers: CORS });
-      }
-      if (caption !== void 0) item.caption = caption;
-      if (tags) item.tags = tags;
-      if (category) item.category = category;
-      if (tier) item.tier = tier;
-      if (scheduledAt) item.scheduledAt = scheduledAt;
-      item.status = "queued";
-      item.queuedAt = (/* @__PURE__ */ new Date()).toISOString();
-      if (!item.processedAt) {
-        if (item.mediaType === "image" && item.storedAs) {
-          try {
-            const config2 = getCreatorConfig();
-            const procResult = await processImage(item.storedAs, {
-              stripExif: config2.stripExif,
-              compress: config2.compressImages,
-              generateThumbnail: config2.generateThumbnails
-            });
-            item.checks.exifStripped = procResult.exifStripped;
-            item.checks.compressed = procResult.compressed;
-            item.checks.thumbnailGenerated = procResult.thumbnailGenerated;
-          } catch {
-            item.checks.exifStripped = false;
-            item.checks.compressed = false;
-            item.checks.thumbnailGenerated = false;
-          }
-        }
-        item.processedAt = (/* @__PURE__ */ new Date()).toISOString();
-      }
-      await store.setJSON(pipelineId, item);
-      await logPipelineEvent("approve", pipelineId, { tier: item.tier, scheduledAt: item.scheduledAt });
-      return new Response(JSON.stringify({ success: true, status: "queued" }), { headers: CORS });
-    } catch (err) {
-      return new Response(JSON.stringify({ error: "Approve failed" }), { status: 500, headers: CORS });
-    }
-  }
-  if (path === "/reject" && req.method === "POST") {
-    if (!verifyAdmin(req)) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: CORS });
-    }
-    try {
-      const { pipelineId, reason } = await req.json();
-      if (!pipelineId) {
-        return new Response(JSON.stringify({ error: "pipelineId required" }), { status: 400, headers: CORS });
-      }
-      const store = getStore("pipeline");
-      const item = await store.get(pipelineId, { type: "json" });
-      if (!item) {
-        return new Response(JSON.stringify({ error: "Item not found" }), { status: 404, headers: CORS });
-      }
-      item.status = "rejected";
-      item.rejectReason = reason || "Rejected by admin";
-      await store.setJSON(pipelineId, item);
-      await logPipelineEvent("reject", pipelineId, { reason: item.rejectReason });
-      return new Response(JSON.stringify({ success: true, status: "rejected" }), { headers: CORS });
-    } catch (err) {
-      return new Response(JSON.stringify({ error: "Reject failed" }), { status: 500, headers: CORS });
-    }
-  }
-  if (path === "/publish" && req.method === "POST") {
-    if (!verifyAdmin(req)) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: CORS });
-    }
-    try {
-      const { pipelineId } = await req.json();
-      if (!pipelineId) {
-        return new Response(JSON.stringify({ error: "pipelineId required" }), { status: 400, headers: CORS });
-      }
-      const pipeStore = getStore("pipeline");
-      const item = await pipeStore.get(pipelineId, { type: "json" });
-      if (!item) {
-        return new Response(JSON.stringify({ error: "Item not found" }), { status: 404, headers: CORS });
-      }
-      if (item.status !== "queued") {
-        return new Response(JSON.stringify({ error: `Cannot publish item in '${item.status}' state` }), { status: 400, headers: CORS });
-      }
-      const contentStore = getStore("content");
-      const contentKey = `content-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`;
-      const assetStore = getStore("pipeline-assets");
-      let assetUrl = "";
-      try {
-        const assetData = await assetStore.get(item.storedAs);
-        if (assetData) {
-          assetUrl = `/api/pipeline/asset/${item.storedAs}`;
-        }
-      } catch {
-      }
-      const contentItem = {
-        title: item.caption || item.filename,
-        body: item.caption || "",
-        tier: item.tier || "free",
-        type: item.mediaType === "video" ? "video" : "gallery",
-        imageUrl: assetUrl,
-        draft: false,
-        tags: item.tags || [],
-        category: item.category || "photos",
-        source: item.source,
-        pipelineId: item.id,
-        createdAt: (/* @__PURE__ */ new Date()).toISOString(),
-        updatedAt: (/* @__PURE__ */ new Date()).toISOString()
-      };
-      await contentStore.setJSON(contentKey, contentItem);
-      item.status = "published";
-      item.publishedAt = (/* @__PURE__ */ new Date()).toISOString();
-      item.contentKey = contentKey;
-      await pipeStore.setJSON(pipelineId, item);
-      await logPipelineEvent("publish", pipelineId, { contentKey });
-      await notifyAdmin("pipeline_publish", {
-        filename: item.filename,
-        contentKey,
-        tier: item.tier
+      return new Response(JSON.stringify({ error: "Store export failed" }), {
+        status: 500,
+        headers: { ...CORS, "Content-Type": "application/json" }
       });
-      if (item.tier === "free" || item.tier === "vip" || item.tier === "elite") {
-        notifyAdmin("content_drop", {
-          title: contentItem.title,
-          category: item.category,
-          tier: item.tier
+    }
+  }
+  if (path === "/import" && req.method === "POST") {
+    try {
+      const { store: storeName, data } = await req.json();
+      if (!storeName || !data || typeof data !== "object") {
+        return new Response(JSON.stringify({ error: "store and data required" }), {
+          status: 400,
+          headers: { ...CORS, "Content-Type": "application/json" }
         });
       }
-      return new Response(JSON.stringify({
-        success: true,
-        status: "published",
-        contentKey
-      }), { headers: CORS });
-    } catch (err) {
-      console.error("[PIPELINE] Publish error:", err);
-      return new Response(JSON.stringify({ error: "Publish failed" }), { status: 500, headers: CORS });
-    }
-  }
-  if (path === "/publish-all" && req.method === "POST") {
-    if (!verifyAdmin(req)) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: CORS });
-    }
-    try {
-      const pipeStore = getStore("pipeline");
-      const contentStore = getStore("content");
-      const { blobs } = await pipeStore.list();
-      let published = 0;
-      for (const blob of blobs) {
-        const item = await pipeStore.get(blob.key, { type: "json" });
-        if (item && item.status === "queued") {
-          const contentKey = `content-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`;
-          const contentItem = {
-            title: item.caption || item.filename,
-            body: item.caption || "",
-            tier: item.tier || "free",
-            type: item.mediaType === "video" ? "video" : "gallery",
-            imageUrl: `/api/pipeline/asset/${item.storedAs}`,
-            draft: false,
-            tags: item.tags || [],
-            category: item.category || "photos",
-            source: item.source,
-            pipelineId: item.id,
-            createdAt: (/* @__PURE__ */ new Date()).toISOString(),
-            updatedAt: (/* @__PURE__ */ new Date()).toISOString()
-          };
-          await contentStore.setJSON(contentKey, contentItem);
-          item.status = "published";
-          item.publishedAt = (/* @__PURE__ */ new Date()).toISOString();
-          item.contentKey = contentKey;
-          await pipeStore.setJSON(blob.key, item);
-          published++;
-        }
-      }
-      await logPipelineEvent("publish-all", "batch", { published });
-      return new Response(JSON.stringify({ success: true, published }), { headers: CORS });
-    } catch (err) {
-      return new Response(JSON.stringify({ error: "Bulk publish failed" }), { status: 500, headers: CORS });
-    }
-  }
-  if (path === "/list" && req.method === "GET") {
-    if (!verifyAdmin(req)) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: CORS });
-    }
-    try {
-      const statusFilter = url.searchParams.get("status") || "all";
-      const store = getStore("pipeline");
-      const { blobs } = await store.list();
-      const items = [];
-      for (const blob of blobs) {
+      const store = getStore(storeName);
+      let imported = 0;
+      let errors = 0;
+      for (const [key, value] of Object.entries(data)) {
         try {
-          const item = await store.get(blob.key, { type: "json" });
-          if (item) {
-            if (statusFilter === "all" || item.status === statusFilter) {
-              items.push(item);
-            }
+          if (value && typeof value === "object" && !value._binary) {
+            await store.setJSON(key, value);
+            imported++;
           }
         } catch {
-        }
-      }
-      items.sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""));
-      const allItems = items.length;
-      const counts = {};
-      if (statusFilter === "all") {
-        for (const item of items) {
-          counts[item.status] = (counts[item.status] || 0) + 1;
+          errors++;
         }
       }
       return new Response(JSON.stringify({
         success: true,
-        items,
-        total: allItems,
-        counts
-      }), { headers: CORS });
+        store: storeName,
+        imported,
+        errors,
+        total: Object.keys(data).length
+      }), {
+        headers: { ...CORS, "Content-Type": "application/json" }
+      });
     } catch (err) {
-      return new Response(JSON.stringify({ error: "List failed" }), { status: 500, headers: CORS });
+      return new Response(JSON.stringify({ error: "Import failed" }), {
+        status: 500,
+        headers: { ...CORS, "Content-Type": "application/json" }
+      });
     }
   }
   if (path === "/stats" && req.method === "GET") {
-    if (!verifyAdmin(req)) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: CORS });
-    }
     try {
-      const store = getStore("pipeline");
-      const { blobs } = await store.list();
-      const counts = { inbox: 0, processed: 0, queued: 0, published: 0, rejected: 0, total: 0 };
-      for (const blob of blobs) {
+      const storeNames = [
+        "users",
+        "content",
+        "pipeline",
+        "pipeline-logs",
+        "pipeline-assets",
+        "conversations",
+        "creator-configs",
+        "telegram-logs",
+        "telegram-escalations",
+        "telegram-faq-stats",
+        "telegram-ratelimits"
+      ];
+      const stats = {};
+      let totalItems = 0;
+      for (const name of storeNames) {
         try {
-          const item = await store.get(blob.key, { type: "json" });
-          if (item?.status) {
-            counts[item.status] = (counts[item.status] || 0) + 1;
-            counts.total++;
-          }
+          const store = getStore(name);
+          const { blobs } = await store.list();
+          stats[name] = blobs.length;
+          totalItems += blobs.length;
         } catch {
+          stats[name] = -1;
         }
       }
-      const logStore = getStore("pipeline-logs");
-      const logBlobs = await logStore.list();
-      const recentLogs = [];
-      const logKeys = logBlobs.blobs.slice(-20);
-      for (const blob of logKeys) {
-        try {
-          const log = await logStore.get(blob.key, { type: "json" });
-          if (log) recentLogs.push(log);
-        } catch {
-        }
-      }
-      recentLogs.sort((a, b) => (b.timestamp || "").localeCompare(a.timestamp || ""));
       return new Response(JSON.stringify({
         success: true,
-        pipeline: counts,
-        recentActivity: recentLogs.slice(0, 10)
-      }), { headers: CORS });
-    } catch (err) {
-      return new Response(JSON.stringify({ error: "Stats failed" }), { status: 500, headers: CORS });
-    }
-  }
-  if (path === "/item" && req.method === "GET") {
-    if (!verifyAdmin(req)) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: CORS });
-    }
-    try {
-      const itemId = url.searchParams.get("id");
-      if (!itemId) {
-        return new Response(JSON.stringify({ error: "id required" }), { status: 400, headers: CORS });
-      }
-      const store = getStore("pipeline");
-      const item = await store.get(itemId, { type: "json" });
-      if (!item) {
-        return new Response(JSON.stringify({ error: "Item not found" }), { status: 404, headers: CORS });
-      }
-      return new Response(JSON.stringify({ success: true, item }), { headers: CORS });
-    } catch (err) {
-      return new Response(JSON.stringify({ error: "Failed" }), { status: 500, headers: CORS });
-    }
-  }
-  if (path === "/update" && req.method === "POST") {
-    if (!verifyAdmin(req)) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: CORS });
-    }
-    try {
-      const { pipelineId, caption, tags, category, tier, scheduledAt } = await req.json();
-      if (!pipelineId) {
-        return new Response(JSON.stringify({ error: "pipelineId required" }), { status: 400, headers: CORS });
-      }
-      const store = getStore("pipeline");
-      const item = await store.get(pipelineId, { type: "json" });
-      if (!item) {
-        return new Response(JSON.stringify({ error: "Item not found" }), { status: 404, headers: CORS });
-      }
-      if (caption !== void 0) item.caption = caption;
-      if (tags !== void 0) item.tags = tags;
-      if (category !== void 0) item.category = category;
-      if (tier !== void 0) item.tier = tier;
-      if (scheduledAt !== void 0) item.scheduledAt = scheduledAt;
-      await store.setJSON(pipelineId, item);
-      await logPipelineEvent("update", pipelineId, { caption, tags, category, tier });
-      return new Response(JSON.stringify({ success: true, item }), { headers: CORS });
-    } catch (err) {
-      return new Response(JSON.stringify({ error: "Update failed" }), { status: 500, headers: CORS });
-    }
-  }
-  if (path === "/delete" && req.method === "POST") {
-    if (!verifyAdmin(req)) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: CORS });
-    }
-    try {
-      const { pipelineId } = await req.json();
-      if (!pipelineId) {
-        return new Response(JSON.stringify({ error: "pipelineId required" }), { status: 400, headers: CORS });
-      }
-      const store = getStore("pipeline");
-      const item = await store.get(pipelineId, { type: "json" });
-      if (item?.storedAs) {
-        try {
-          const assetStore = getStore("pipeline-assets");
-          await assetStore.delete(item.storedAs);
-          const baseName = item.storedAs.replace(/\.[^.]+$/, "");
-          const variants = [
-            `${baseName}-processed.webp`,
-            `${baseName}-processed.jpg`,
-            `${baseName}-processed.png`,
-            `${baseName}-thumb.webp`
-          ];
-          for (const v of variants) {
-            try {
-              await assetStore.delete(v);
-            } catch {
-            }
-          }
-        } catch {
-        }
-      }
-      await store.delete(pipelineId);
-      await logPipelineEvent("delete", pipelineId, {});
-      return new Response(JSON.stringify({ success: true }), { headers: CORS });
-    } catch (err) {
-      return new Response(JSON.stringify({ error: "Delete failed" }), { status: 500, headers: CORS });
-    }
-  }
-  if (path.startsWith("/asset/") && req.method === "GET") {
-    try {
-      const assetKey = path.replace("/asset/", "");
-      const assetStore = getStore("pipeline-assets");
-      const data = await assetStore.get(assetKey);
-      if (!data) {
-        return new Response("Not found", { status: 404 });
-      }
-      const ext = assetKey.split(".").pop()?.toLowerCase() || "";
-      const contentTypes = {
-        jpg: "image/jpeg",
-        jpeg: "image/jpeg",
-        png: "image/png",
-        webp: "image/webp",
-        gif: "image/gif",
-        mp4: "video/mp4",
-        mov: "video/quicktime",
-        webm: "video/webm"
-      };
-      return new Response(data, {
-        headers: {
-          "Content-Type": contentTypes[ext] || "application/octet-stream",
-          "Cache-Control": "public, max-age=31536000",
-          "Access-Control-Allow-Origin": "*"
-        }
+        timestamp: (/* @__PURE__ */ new Date()).toISOString(),
+        totalItems,
+        stores: stats
+      }), {
+        headers: { ...CORS, "Content-Type": "application/json" }
       });
     } catch (err) {
-      return new Response("Asset not found", { status: 404 });
-    }
-  }
-  if (path.startsWith("/thumb/") && req.method === "GET") {
-    try {
-      const assetKey = path.replace("/thumb/", "");
-      const baseName = assetKey.replace(/\.[^.]+$/, "");
-      const thumbKey = `${baseName}-thumb.webp`;
-      const assetStore = getStore("pipeline-assets");
-      const data = await assetStore.get(thumbKey);
-      if (!data) {
-        const original = await assetStore.get(assetKey);
-        if (!original) return new Response("Not found", { status: 404 });
-        const ext = assetKey.split(".").pop()?.toLowerCase() || "";
-        const ct = { jpg: "image/jpeg", jpeg: "image/jpeg", png: "image/png", webp: "image/webp", gif: "image/gif" };
-        return new Response(original, {
-          headers: { "Content-Type": ct[ext] || "image/jpeg", "Cache-Control": "public, max-age=31536000", "Access-Control-Allow-Origin": "*" }
-        });
-      }
-      return new Response(data, {
-        headers: {
-          "Content-Type": "image/webp",
-          "Cache-Control": "public, max-age=31536000",
-          "Access-Control-Allow-Origin": "*"
-        }
+      return new Response(JSON.stringify({ error: "Stats failed" }), {
+        status: 500,
+        headers: { ...CORS, "Content-Type": "application/json" }
       });
-    } catch (err) {
-      return new Response("Thumbnail not found", { status: 404 });
     }
   }
-  if (path === "/logs" && req.method === "GET") {
-    if (!verifyAdmin(req)) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: CORS });
-    }
-    try {
-      const limit = parseInt(url.searchParams.get("limit") || "50");
-      const logStore = getStore("pipeline-logs");
-      const { blobs } = await logStore.list();
-      const logs = [];
-      for (const blob of blobs) {
-        try {
-          const log = await logStore.get(blob.key, { type: "json" });
-          if (log) logs.push(log);
-        } catch {
-        }
-      }
-      logs.sort((a, b) => (b.timestamp || "").localeCompare(a.timestamp || ""));
-      return new Response(JSON.stringify({
-        success: true,
-        logs: logs.slice(0, limit),
-        total: logs.length
-      }), { headers: CORS });
-    } catch (err) {
-      return new Response(JSON.stringify({ error: "Logs failed" }), { status: 500, headers: CORS });
-    }
-  }
-  if (path === "/check-schedule" && req.method === "POST") {
-    const admin = verifyAdmin(req);
-    const apiKey = req.headers.get("x-api-key");
-    const expectedApiKey = process.env.PIPELINE_API_KEY || getSecret();
-    if (!admin && apiKey !== expectedApiKey) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: CORS });
-    }
-    try {
-      const now = (/* @__PURE__ */ new Date()).toISOString();
-      const pipeStore = getStore("pipeline");
-      const contentStore = getStore("content");
-      const { blobs } = await pipeStore.list();
-      let published = 0;
-      for (const blob of blobs) {
-        const item = await pipeStore.get(blob.key, { type: "json" });
-        if (item && item.status === "queued" && item.scheduledAt && item.scheduledAt <= now) {
-          const contentKey = `content-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`;
-          const contentItem = {
-            title: item.caption || item.filename,
-            body: item.caption || "",
-            tier: item.tier || "free",
-            type: item.mediaType === "video" ? "video" : "gallery",
-            imageUrl: `/api/pipeline/asset/${item.storedAs}`,
-            draft: false,
-            tags: item.tags || [],
-            category: item.category || "photos",
-            source: item.source,
-            pipelineId: item.id,
-            createdAt: (/* @__PURE__ */ new Date()).toISOString(),
-            updatedAt: (/* @__PURE__ */ new Date()).toISOString()
-          };
-          await contentStore.setJSON(contentKey, contentItem);
-          item.status = "published";
-          item.publishedAt = (/* @__PURE__ */ new Date()).toISOString();
-          item.contentKey = contentKey;
-          await pipeStore.setJSON(blob.key, item);
-          published++;
-        }
-      }
-      await logPipelineEvent("schedule-check", "cron", { published, checkedAt: now });
-      return new Response(JSON.stringify({ success: true, published }), { headers: CORS });
-    } catch (err) {
-      return new Response(JSON.stringify({ error: "Schedule check failed" }), { status: 500, headers: CORS });
-    }
-  }
-  return new Response(JSON.stringify({ error: "Not found" }), { status: 404, headers: CORS });
+  return new Response(JSON.stringify({ error: "Not found" }), {
+    status: 404,
+    headers: { ...CORS, "Content-Type": "application/json" }
+  });
 };
 var config = {
-  path: ["/api/pipeline", "/api/pipeline/*"]
+  path: ["/api/admin-export", "/api/admin-export/*"]
 };
-export {
-  config,
-  pipeline_default as default
-};
+// Annotate the CommonJS export names for ESM import in node:
+0 && (module.exports = {
+  config
+});
 /*! Bundled license information:
 
 safe-buffer/index.js:
   (*! safe-buffer. MIT License. Feross Aboukhadijeh <https://feross.org/opensource> *)
 */
+
+;(function() {
+  var _orig = module.exports.default;
+  if (typeof _orig !== 'function') return;
+  module.exports.handler = async function(event, context) {
+    var url = event.rawUrl || ('https://' + ((event.headers && event.headers.host) || 'localhost') + (event.path || '/'));
+    var init = { method: event.httpMethod || 'GET', headers: event.headers || {} };
+    if (event.body) {
+      init.body = event.isBase64Encoded ? Buffer.from(event.body, 'base64').toString() : event.body;
+    }
+    var req = new Request(url, init);
+    var res = await _orig(req, context);
+    var body = await res.text();
+    var responseHeaders = {};
+    res.headers.forEach(function(v, k) { responseHeaders[k] = v; });
+    return { statusCode: res.status, headers: responseHeaders, body: body };
+  };
+})();
+

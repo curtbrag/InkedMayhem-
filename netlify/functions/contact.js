@@ -1,3 +1,29 @@
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+
+// src/functions/contact.mts
+var contact_exports = {};
+__export(contact_exports, {
+  config: () => config,
+  default: () => contact_default
+});
+module.exports = __toCommonJS(contact_exports);
+
 // src/functions/lib/blobs.mjs
 var NF_ERROR = "x-nf-error";
 var NF_REQUEST_ID = "x-nf-request-id";
@@ -19,16 +45,16 @@ var collectIterator = async (iterator) => {
   return result;
 };
 var base64Decode = (input) => {
-  const { Buffer } = globalThis;
-  if (Buffer) {
-    return Buffer.from(input, "base64").toString();
+  const { Buffer: Buffer2 } = globalThis;
+  if (Buffer2) {
+    return Buffer2.from(input, "base64").toString();
   }
   return atob(input);
 };
 var base64Encode = (input) => {
-  const { Buffer } = globalThis;
-  if (Buffer) {
-    return Buffer.from(input).toString("base64");
+  const { Buffer: Buffer2 } = globalThis;
+  if (Buffer2) {
+    return Buffer2.from(input).toString("base64");
   }
   return btoa(input);
 };
@@ -601,130 +627,134 @@ var getStore = (input) => {
   );
 };
 
-// src/functions/scheduled-publish.mts
-var scheduled_publish_default = async (req) => {
-  const now = /* @__PURE__ */ new Date();
-  const nowISO = now.toISOString();
-  console.log(`[SCHEDULED-PUBLISH] Running at ${nowISO}`);
+// src/functions/contact.mts
+var CORS = {
+  "Content-Type": "application/json",
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "Content-Type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS"
+};
+var RATE_LIMIT_MAX = 5;
+var RATE_LIMIT_WINDOW_MS = 60 * 60 * 1e3;
+async function checkRateLimit(ip) {
+  const store = getStore("auth-ratelimits");
+  const key = `contact-${ip.replace(/[^a-z0-9.:]/gi, "")}`;
   try {
-    const pipeStore = getStore("pipeline");
-    const contentStore = getStore("content");
-    const logStore = getStore("pipeline-logs");
-    const { blobs } = await pipeStore.list();
-    let published = 0;
-    let checked = 0;
-    const results = [];
-    for (const blob of blobs) {
-      try {
-        const item = await pipeStore.get(blob.key, { type: "json" });
-        if (!item || item.status !== "queued") continue;
-        checked++;
-        if (!item.scheduledAt) continue;
-        if (item.scheduledAt > nowISO) continue;
-        const contentKey = `content-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`;
-        const contentItem = {
-          title: item.caption || item.filename,
-          body: item.caption || "",
-          tier: item.tier || "free",
-          type: item.mediaType === "video" ? "video" : "gallery",
-          imageUrl: `/api/pipeline/asset/${item.storedAs}`,
-          draft: false,
-          tags: item.tags || [],
-          category: item.category || "photos",
-          source: item.source,
-          pipelineId: item.id,
-          createdAt: (/* @__PURE__ */ new Date()).toISOString(),
-          updatedAt: (/* @__PURE__ */ new Date()).toISOString()
-        };
-        await contentStore.setJSON(contentKey, contentItem);
-        item.status = "published";
-        item.publishedAt = (/* @__PURE__ */ new Date()).toISOString();
-        item.contentKey = contentKey;
-        await pipeStore.setJSON(blob.key, item);
-        published++;
-        results.push({ id: item.id, filename: item.filename, status: "published", tier: item.tier, title: contentItem.title, category: item.category });
-        console.log(`[SCHEDULED-PUBLISH] Published: ${item.filename} (scheduled for ${item.scheduledAt})`);
-      } catch (err) {
-        console.error(`[SCHEDULED-PUBLISH] Error processing ${blob.key}:`, err);
+    const record = await store.get(key, { type: "json" });
+    if (record) {
+      const windowStart = new Date(record.windowStart).getTime();
+      if (Date.now() - windowStart < RATE_LIMIT_WINDOW_MS) {
+        if (record.count >= RATE_LIMIT_MAX) return false;
+        record.count++;
+        await store.setJSON(key, record);
+        return true;
       }
     }
-    await logStore.setJSON(`log-${Date.now()}-cron`, {
-      action: "scheduled-publish",
-      itemId: "cron",
-      details: { published, checked, results },
-      timestamp: nowISO
+    await store.setJSON(key, { count: 1, windowStart: (/* @__PURE__ */ new Date()).toISOString() });
+    return true;
+  } catch {
+    return true;
+  }
+}
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+function isSpammy(text) {
+  const spamPatterns = [
+    /\b(viagra|cialis|casino|lottery|winner|congratulations.*won)\b/i,
+    /(http[s]?:\/\/[^\s]+){3,}/i,
+    // 3+ URLs
+    /(.)\1{10,}/
+    // 10+ repeated chars
+  ];
+  return spamPatterns.some((p) => p.test(text));
+}
+async function notifyAdmin(type, data) {
+  const secret = process.env.JWT_SECRET || "inkedmayhem-dev-secret-change-me";
+  const siteUrl = process.env.URL || "https://inkedmayhem.netlify.app";
+  try {
+    await fetch(`${siteUrl}/api/notify`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-internal-key": secret },
+      body: JSON.stringify({ type, data })
     });
-    if (published > 0) {
-      try {
-        const siteUrl = process.env.URL || "";
-        const secret = process.env.JWT_SECRET || "inkedmayhem-dev-secret-change-me";
-        const botToken = process.env.TELEGRAM_CREATOR_BOT_TOKEN;
-        const chatId = process.env.TELEGRAM_ADMIN_CHAT_ID || process.env.TELEGRAM_CREATOR_CHAT_ID;
-        if (botToken && chatId) {
-          const fileList = results.map((r) => `  \u2022 ${r.filename}`).join("\n");
-          await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              chat_id: chatId,
-              text: `\u{1F4C5} <b>Scheduled Publish</b>
-
-${published} item(s) auto-published:
-${fileList}`,
-              parse_mode: "HTML"
-            })
-          });
-        }
-        if (siteUrl) {
-          await fetch(`${siteUrl}/api/notify`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "x-internal-key": secret
-            },
-            body: JSON.stringify({
-              type: "pipeline_publish",
-              data: {
-                filename: `${published} scheduled items`,
-                tier: "mixed",
-                contentKey: "scheduled-batch"
-              }
-            })
-          });
-          for (const r of results) {
-            try {
-              await fetch(`${siteUrl}/api/notify`, {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  "x-internal-key": secret
-                },
-                body: JSON.stringify({
-                  type: "content_drop",
-                  data: {
-                    title: r.title || r.filename,
-                    category: r.category || "photos",
-                    tier: r.tier || "free"
-                  }
-                })
-              });
-            } catch {
-            }
-          }
-        }
-      } catch (notifyErr) {
-        console.error("[SCHEDULED-PUBLISH] Notification failed:", notifyErr);
-      }
-    }
-    console.log(`[SCHEDULED-PUBLISH] Done. Checked ${checked} queued items, published ${published}.`);
   } catch (err) {
-    console.error("[SCHEDULED-PUBLISH] Fatal error:", err);
+    console.error("Notify error:", err);
+  }
+}
+var contact_default = async (req, context) => {
+  if (req.method === "OPTIONS") {
+    return new Response("", { headers: CORS });
+  }
+  if (req.method !== "POST") {
+    return new Response(JSON.stringify({ error: "Method not allowed" }), { status: 405, headers: CORS });
+  }
+  try {
+    const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || req.headers.get("x-nf-client-connection-ip") || "unknown";
+    const allowed = await checkRateLimit(clientIp);
+    if (!allowed) {
+      return new Response(JSON.stringify({ error: "Too many submissions. Try again later." }), {
+        status: 429,
+        headers: { ...CORS, "Retry-After": "3600" }
+      });
+    }
+    const { name, email, subject, message, _hp } = await req.json();
+    if (_hp) {
+      return new Response(JSON.stringify({ success: true }), { headers: CORS });
+    }
+    if (!name || !email || !message) {
+      return new Response(JSON.stringify({ error: "Name, email, and message required" }), { status: 400, headers: CORS });
+    }
+    if (!isValidEmail(email)) {
+      return new Response(JSON.stringify({ error: "Invalid email address" }), { status: 400, headers: CORS });
+    }
+    if (name.length > 100 || email.length > 200 || message.length > 5e3) {
+      return new Response(JSON.stringify({ error: "Input too long" }), { status: 400, headers: CORS });
+    }
+    if (isSpammy(message) || isSpammy(name)) {
+      return new Response(JSON.stringify({ success: true }), { headers: CORS });
+    }
+    const store = getStore("contacts");
+    const key = `msg-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`;
+    await store.setJSON(key, {
+      name,
+      email,
+      subject: subject || "General",
+      message,
+      receivedAt: (/* @__PURE__ */ new Date()).toISOString(),
+      read: false,
+      ip: clientIp
+    });
+    notifyAdmin("contact_form", { name, email, subject, message });
+    return new Response(JSON.stringify({ success: true }), { headers: CORS });
+  } catch (err) {
+    console.error("Contact error:", err);
+    return new Response(JSON.stringify({ error: "Server error" }), { status: 500, headers: CORS });
   }
 };
 var config = {
-  schedule: "*/15 * * * *"
+  path: "/api/contact"
 };
-export {
-  config,
-  scheduled_publish_default as default
-};
+// Annotate the CommonJS export names for ESM import in node:
+0 && (module.exports = {
+  config
+});
+
+;(function() {
+  var _orig = module.exports.default;
+  if (typeof _orig !== 'function') return;
+  module.exports.handler = async function(event, context) {
+    var url = event.rawUrl || ('https://' + ((event.headers && event.headers.host) || 'localhost') + (event.path || '/'));
+    var init = { method: event.httpMethod || 'GET', headers: event.headers || {} };
+    if (event.body) {
+      init.body = event.isBase64Encoded ? Buffer.from(event.body, 'base64').toString() : event.body;
+    }
+    var req = new Request(url, init);
+    var res = await _orig(req, context);
+    var body = await res.text();
+    var responseHeaders = {};
+    res.headers.forEach(function(v, k) { responseHeaders[k] = v; });
+    return { statusCode: res.status, headers: responseHeaders, body: body };
+  };
+})();
+

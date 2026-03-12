@@ -4,14 +4,12 @@ var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __getOwnPropNames = Object.getOwnPropertyNames;
 var __getProtoOf = Object.getPrototypeOf;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
-var __require = /* @__PURE__ */ ((x) => typeof require !== "undefined" ? require : typeof Proxy !== "undefined" ? new Proxy(x, {
-  get: (a, b) => (typeof require !== "undefined" ? require : a)[b]
-}) : x)(function(x) {
-  if (typeof require !== "undefined") return require.apply(this, arguments);
-  throw Error('Dynamic require of "' + x + '" is not supported');
-});
-var __commonJS = (cb, mod) => function __require2() {
+var __commonJS = (cb, mod) => function __require() {
   return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
+};
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
 };
 var __copyProps = (to, from, except, desc) => {
   if (from && typeof from === "object" || typeof from === "function") {
@@ -29,11 +27,12 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
   isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
   mod
 ));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
 // node_modules/safe-buffer/index.js
 var require_safe_buffer = __commonJS({
-  "node_modules/safe-buffer/index.js"(exports, module) {
-    var buffer = __require("buffer");
+  "node_modules/safe-buffer/index.js"(exports2, module2) {
+    var buffer = require("buffer");
     var Buffer2 = buffer.Buffer;
     function copyProps(src, dst) {
       for (var key in src) {
@@ -41,10 +40,10 @@ var require_safe_buffer = __commonJS({
       }
     }
     if (Buffer2.from && Buffer2.alloc && Buffer2.allocUnsafe && Buffer2.allocUnsafeSlow) {
-      module.exports = buffer;
+      module2.exports = buffer;
     } else {
-      copyProps(buffer, exports);
-      exports.Buffer = SafeBuffer;
+      copyProps(buffer, exports2);
+      exports2.Buffer = SafeBuffer;
     }
     function SafeBuffer(arg, encodingOrOffset, length) {
       return Buffer2(arg, encodingOrOffset, length);
@@ -90,10 +89,10 @@ var require_safe_buffer = __commonJS({
 
 // node_modules/jws/lib/data-stream.js
 var require_data_stream = __commonJS({
-  "node_modules/jws/lib/data-stream.js"(exports, module) {
+  "node_modules/jws/lib/data-stream.js"(exports2, module2) {
     var Buffer2 = require_safe_buffer().Buffer;
-    var Stream = __require("stream");
-    var util = __require("util");
+    var Stream = require("stream");
+    var util = require("util");
     function DataStream(data) {
       this.buffer = null;
       this.writable = true;
@@ -132,13 +131,13 @@ var require_data_stream = __commonJS({
       this.writable = false;
       this.readable = false;
     };
-    module.exports = DataStream;
+    module2.exports = DataStream;
   }
 });
 
 // node_modules/ecdsa-sig-formatter/src/param-bytes-for-alg.js
 var require_param_bytes_for_alg = __commonJS({
-  "node_modules/ecdsa-sig-formatter/src/param-bytes-for-alg.js"(exports, module) {
+  "node_modules/ecdsa-sig-formatter/src/param-bytes-for-alg.js"(exports2, module2) {
     "use strict";
     function getParamSize(keySize) {
       var result = (keySize / 8 | 0) + (keySize % 8 === 0 ? 0 : 1);
@@ -156,13 +155,13 @@ var require_param_bytes_for_alg = __commonJS({
       }
       throw new Error('Unknown algorithm "' + alg + '"');
     }
-    module.exports = getParamBytesForAlg;
+    module2.exports = getParamBytesForAlg;
   }
 });
 
 // node_modules/ecdsa-sig-formatter/src/ecdsa-sig-formatter.js
 var require_ecdsa_sig_formatter = __commonJS({
-  "node_modules/ecdsa-sig-formatter/src/ecdsa-sig-formatter.js"(exports, module) {
+  "node_modules/ecdsa-sig-formatter/src/ecdsa-sig-formatter.js"(exports2, module2) {
     "use strict";
     var Buffer2 = require_safe_buffer().Buffer;
     var getParamBytesForAlg = require_param_bytes_for_alg();
@@ -293,7 +292,7 @@ var require_ecdsa_sig_formatter = __commonJS({
       }
       return dst;
     }
-    module.exports = {
+    module2.exports = {
       derToJose,
       joseToDer
     };
@@ -302,11 +301,11 @@ var require_ecdsa_sig_formatter = __commonJS({
 
 // node_modules/buffer-equal-constant-time/index.js
 var require_buffer_equal_constant_time = __commonJS({
-  "node_modules/buffer-equal-constant-time/index.js"(exports, module) {
+  "node_modules/buffer-equal-constant-time/index.js"(exports2, module2) {
     "use strict";
-    var Buffer2 = __require("buffer").Buffer;
-    var SlowBuffer = __require("buffer").SlowBuffer;
-    module.exports = bufferEq;
+    var Buffer2 = require("buffer").Buffer;
+    var SlowBuffer = require("buffer").SlowBuffer;
+    module2.exports = bufferEq;
     function bufferEq(a, b) {
       if (!Buffer2.isBuffer(a) || !Buffer2.isBuffer(b)) {
         return false;
@@ -336,11 +335,11 @@ var require_buffer_equal_constant_time = __commonJS({
 
 // node_modules/jwa/index.js
 var require_jwa = __commonJS({
-  "node_modules/jwa/index.js"(exports, module) {
+  "node_modules/jwa/index.js"(exports2, module2) {
     var Buffer2 = require_safe_buffer().Buffer;
-    var crypto = __require("crypto");
+    var crypto = require("crypto");
     var formatEcdsa = require_ecdsa_sig_formatter();
-    var util = __require("util");
+    var util = require("util");
     var MSG_INVALID_ALGORITHM = '"%s" is not a valid algorithm.\n  Supported algorithms are:\n  "HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "PS256", "PS384", "PS512", "ES256", "ES384", "ES512" and "none".';
     var MSG_INVALID_SECRET = "secret must be a string or buffer";
     var MSG_INVALID_VERIFIER_KEY = "key must be a string or a buffer";
@@ -530,7 +529,7 @@ var require_jwa = __commonJS({
         return signature === "";
       };
     }
-    module.exports = function jwa(algorithm) {
+    module2.exports = function jwa(algorithm) {
       var signerFactories = {
         hs: createHmacSigner,
         rs: createKeySigner,
@@ -560,9 +559,9 @@ var require_jwa = __commonJS({
 
 // node_modules/jws/lib/tostring.js
 var require_tostring = __commonJS({
-  "node_modules/jws/lib/tostring.js"(exports, module) {
-    var Buffer2 = __require("buffer").Buffer;
-    module.exports = function toString(obj) {
+  "node_modules/jws/lib/tostring.js"(exports2, module2) {
+    var Buffer2 = require("buffer").Buffer;
+    module2.exports = function toString(obj) {
       if (typeof obj === "string")
         return obj;
       if (typeof obj === "number" || Buffer2.isBuffer(obj))
@@ -574,13 +573,13 @@ var require_tostring = __commonJS({
 
 // node_modules/jws/lib/sign-stream.js
 var require_sign_stream = __commonJS({
-  "node_modules/jws/lib/sign-stream.js"(exports, module) {
+  "node_modules/jws/lib/sign-stream.js"(exports2, module2) {
     var Buffer2 = require_safe_buffer().Buffer;
     var DataStream = require_data_stream();
     var jwa = require_jwa();
-    var Stream = __require("stream");
+    var Stream = require("stream");
     var toString = require_tostring();
-    var util = __require("util");
+    var util = require("util");
     function base64url(string, encoding) {
       return Buffer2.from(string, encoding).toString("base64").replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_");
     }
@@ -643,19 +642,19 @@ var require_sign_stream = __commonJS({
       }
     };
     SignStream.sign = jwsSign;
-    module.exports = SignStream;
+    module2.exports = SignStream;
   }
 });
 
 // node_modules/jws/lib/verify-stream.js
 var require_verify_stream = __commonJS({
-  "node_modules/jws/lib/verify-stream.js"(exports, module) {
+  "node_modules/jws/lib/verify-stream.js"(exports2, module2) {
     var Buffer2 = require_safe_buffer().Buffer;
     var DataStream = require_data_stream();
     var jwa = require_jwa();
-    var Stream = __require("stream");
+    var Stream = require("stream");
     var toString = require_tostring();
-    var util = __require("util");
+    var util = require("util");
     var JWS_REGEX = /^[a-zA-Z0-9\-_]+?\.[a-zA-Z0-9\-_]+?\.([a-zA-Z0-9\-_]+)?$/;
     function isObject(thing) {
       return Object.prototype.toString.call(thing) === "[object Object]";
@@ -758,13 +757,13 @@ var require_verify_stream = __commonJS({
     VerifyStream.decode = jwsDecode;
     VerifyStream.isValid = isValidJws;
     VerifyStream.verify = jwsVerify;
-    module.exports = VerifyStream;
+    module2.exports = VerifyStream;
   }
 });
 
 // node_modules/jws/index.js
 var require_jws = __commonJS({
-  "node_modules/jws/index.js"(exports) {
+  "node_modules/jws/index.js"(exports2) {
     var SignStream = require_sign_stream();
     var VerifyStream = require_verify_stream();
     var ALGORITHMS = [
@@ -781,15 +780,15 @@ var require_jws = __commonJS({
       "ES384",
       "ES512"
     ];
-    exports.ALGORITHMS = ALGORITHMS;
-    exports.sign = SignStream.sign;
-    exports.verify = VerifyStream.verify;
-    exports.decode = VerifyStream.decode;
-    exports.isValid = VerifyStream.isValid;
-    exports.createSign = function createSign(opts) {
+    exports2.ALGORITHMS = ALGORITHMS;
+    exports2.sign = SignStream.sign;
+    exports2.verify = VerifyStream.verify;
+    exports2.decode = VerifyStream.decode;
+    exports2.isValid = VerifyStream.isValid;
+    exports2.createSign = function createSign(opts) {
       return new SignStream(opts);
     };
-    exports.createVerify = function createVerify(opts) {
+    exports2.createVerify = function createVerify(opts) {
       return new VerifyStream(opts);
     };
   }
@@ -797,9 +796,9 @@ var require_jws = __commonJS({
 
 // node_modules/jsonwebtoken/decode.js
 var require_decode = __commonJS({
-  "node_modules/jsonwebtoken/decode.js"(exports, module) {
+  "node_modules/jsonwebtoken/decode.js"(exports2, module2) {
     var jws = require_jws();
-    module.exports = function(jwt2, options) {
+    module2.exports = function(jwt2, options) {
       options = options || {};
       var decoded = jws.decode(jwt2, options);
       if (!decoded) {
@@ -829,7 +828,7 @@ var require_decode = __commonJS({
 
 // node_modules/jsonwebtoken/lib/JsonWebTokenError.js
 var require_JsonWebTokenError = __commonJS({
-  "node_modules/jsonwebtoken/lib/JsonWebTokenError.js"(exports, module) {
+  "node_modules/jsonwebtoken/lib/JsonWebTokenError.js"(exports2, module2) {
     var JsonWebTokenError = function(message, error) {
       Error.call(this, message);
       if (Error.captureStackTrace) {
@@ -841,13 +840,13 @@ var require_JsonWebTokenError = __commonJS({
     };
     JsonWebTokenError.prototype = Object.create(Error.prototype);
     JsonWebTokenError.prototype.constructor = JsonWebTokenError;
-    module.exports = JsonWebTokenError;
+    module2.exports = JsonWebTokenError;
   }
 });
 
 // node_modules/jsonwebtoken/lib/NotBeforeError.js
 var require_NotBeforeError = __commonJS({
-  "node_modules/jsonwebtoken/lib/NotBeforeError.js"(exports, module) {
+  "node_modules/jsonwebtoken/lib/NotBeforeError.js"(exports2, module2) {
     var JsonWebTokenError = require_JsonWebTokenError();
     var NotBeforeError = function(message, date) {
       JsonWebTokenError.call(this, message);
@@ -856,13 +855,13 @@ var require_NotBeforeError = __commonJS({
     };
     NotBeforeError.prototype = Object.create(JsonWebTokenError.prototype);
     NotBeforeError.prototype.constructor = NotBeforeError;
-    module.exports = NotBeforeError;
+    module2.exports = NotBeforeError;
   }
 });
 
 // node_modules/jsonwebtoken/lib/TokenExpiredError.js
 var require_TokenExpiredError = __commonJS({
-  "node_modules/jsonwebtoken/lib/TokenExpiredError.js"(exports, module) {
+  "node_modules/jsonwebtoken/lib/TokenExpiredError.js"(exports2, module2) {
     var JsonWebTokenError = require_JsonWebTokenError();
     var TokenExpiredError = function(message, expiredAt) {
       JsonWebTokenError.call(this, message);
@@ -871,20 +870,20 @@ var require_TokenExpiredError = __commonJS({
     };
     TokenExpiredError.prototype = Object.create(JsonWebTokenError.prototype);
     TokenExpiredError.prototype.constructor = TokenExpiredError;
-    module.exports = TokenExpiredError;
+    module2.exports = TokenExpiredError;
   }
 });
 
 // node_modules/ms/index.js
 var require_ms = __commonJS({
-  "node_modules/ms/index.js"(exports, module) {
+  "node_modules/ms/index.js"(exports2, module2) {
     var s = 1e3;
     var m = s * 60;
     var h = m * 60;
     var d = h * 24;
     var w = d * 7;
     var y = d * 365.25;
-    module.exports = function(val, options) {
+    module2.exports = function(val, options) {
       options = options || {};
       var type = typeof val;
       if (type === "string" && val.length > 0) {
@@ -993,9 +992,9 @@ var require_ms = __commonJS({
 
 // node_modules/jsonwebtoken/lib/timespan.js
 var require_timespan = __commonJS({
-  "node_modules/jsonwebtoken/lib/timespan.js"(exports, module) {
+  "node_modules/jsonwebtoken/lib/timespan.js"(exports2, module2) {
     var ms = require_ms();
-    module.exports = function(time, iat) {
+    module2.exports = function(time, iat) {
       var timestamp = iat || Math.floor(Date.now() / 1e3);
       if (typeof time === "string") {
         var milliseconds = ms(time);
@@ -1014,7 +1013,7 @@ var require_timespan = __commonJS({
 
 // node_modules/semver/internal/constants.js
 var require_constants = __commonJS({
-  "node_modules/semver/internal/constants.js"(exports, module) {
+  "node_modules/semver/internal/constants.js"(exports2, module2) {
     "use strict";
     var SEMVER_SPEC_VERSION = "2.0.0";
     var MAX_LENGTH = 256;
@@ -1031,7 +1030,7 @@ var require_constants = __commonJS({
       "prepatch",
       "prerelease"
     ];
-    module.exports = {
+    module2.exports = {
       MAX_LENGTH,
       MAX_SAFE_COMPONENT_LENGTH,
       MAX_SAFE_BUILD_LENGTH,
@@ -1046,17 +1045,17 @@ var require_constants = __commonJS({
 
 // node_modules/semver/internal/debug.js
 var require_debug = __commonJS({
-  "node_modules/semver/internal/debug.js"(exports, module) {
+  "node_modules/semver/internal/debug.js"(exports2, module2) {
     "use strict";
     var debug = typeof process === "object" && process.env && process.env.NODE_DEBUG && /\bsemver\b/i.test(process.env.NODE_DEBUG) ? (...args) => console.error("SEMVER", ...args) : () => {
     };
-    module.exports = debug;
+    module2.exports = debug;
   }
 });
 
 // node_modules/semver/internal/re.js
 var require_re = __commonJS({
-  "node_modules/semver/internal/re.js"(exports, module) {
+  "node_modules/semver/internal/re.js"(exports2, module2) {
     "use strict";
     var {
       MAX_SAFE_COMPONENT_LENGTH,
@@ -1064,12 +1063,12 @@ var require_re = __commonJS({
       MAX_LENGTH
     } = require_constants();
     var debug = require_debug();
-    exports = module.exports = {};
-    var re = exports.re = [];
-    var safeRe = exports.safeRe = [];
-    var src = exports.src = [];
-    var safeSrc = exports.safeSrc = [];
-    var t = exports.t = {};
+    exports2 = module2.exports = {};
+    var re = exports2.re = [];
+    var safeRe = exports2.safeRe = [];
+    var src = exports2.src = [];
+    var safeSrc = exports2.safeSrc = [];
+    var t = exports2.t = {};
     var R = 0;
     var LETTERDASHNUMBER = "[a-zA-Z0-9-]";
     var safeRegexReplacements = [
@@ -1122,18 +1121,18 @@ var require_re = __commonJS({
     createToken("COERCERTLFULL", src[t.COERCEFULL], true);
     createToken("LONETILDE", "(?:~>?)");
     createToken("TILDETRIM", `(\\s*)${src[t.LONETILDE]}\\s+`, true);
-    exports.tildeTrimReplace = "$1~";
+    exports2.tildeTrimReplace = "$1~";
     createToken("TILDE", `^${src[t.LONETILDE]}${src[t.XRANGEPLAIN]}$`);
     createToken("TILDELOOSE", `^${src[t.LONETILDE]}${src[t.XRANGEPLAINLOOSE]}$`);
     createToken("LONECARET", "(?:\\^)");
     createToken("CARETTRIM", `(\\s*)${src[t.LONECARET]}\\s+`, true);
-    exports.caretTrimReplace = "$1^";
+    exports2.caretTrimReplace = "$1^";
     createToken("CARET", `^${src[t.LONECARET]}${src[t.XRANGEPLAIN]}$`);
     createToken("CARETLOOSE", `^${src[t.LONECARET]}${src[t.XRANGEPLAINLOOSE]}$`);
     createToken("COMPARATORLOOSE", `^${src[t.GTLT]}\\s*(${src[t.LOOSEPLAIN]})$|^$`);
     createToken("COMPARATOR", `^${src[t.GTLT]}\\s*(${src[t.FULLPLAIN]})$|^$`);
     createToken("COMPARATORTRIM", `(\\s*)${src[t.GTLT]}\\s*(${src[t.LOOSEPLAIN]}|${src[t.XRANGEPLAIN]})`, true);
-    exports.comparatorTrimReplace = "$1$2$3";
+    exports2.comparatorTrimReplace = "$1$2$3";
     createToken("HYPHENRANGE", `^\\s*(${src[t.XRANGEPLAIN]})\\s+-\\s+(${src[t.XRANGEPLAIN]})\\s*$`);
     createToken("HYPHENRANGELOOSE", `^\\s*(${src[t.XRANGEPLAINLOOSE]})\\s+-\\s+(${src[t.XRANGEPLAINLOOSE]})\\s*$`);
     createToken("STAR", "(<|>)?=?\\s*\\*");
@@ -1144,7 +1143,7 @@ var require_re = __commonJS({
 
 // node_modules/semver/internal/parse-options.js
 var require_parse_options = __commonJS({
-  "node_modules/semver/internal/parse-options.js"(exports, module) {
+  "node_modules/semver/internal/parse-options.js"(exports2, module2) {
     "use strict";
     var looseOption = Object.freeze({ loose: true });
     var emptyOpts = Object.freeze({});
@@ -1157,13 +1156,13 @@ var require_parse_options = __commonJS({
       }
       return options;
     };
-    module.exports = parseOptions;
+    module2.exports = parseOptions;
   }
 });
 
 // node_modules/semver/internal/identifiers.js
 var require_identifiers = __commonJS({
-  "node_modules/semver/internal/identifiers.js"(exports, module) {
+  "node_modules/semver/internal/identifiers.js"(exports2, module2) {
     "use strict";
     var numeric = /^[0-9]+$/;
     var compareIdentifiers = (a, b) => {
@@ -1179,7 +1178,7 @@ var require_identifiers = __commonJS({
       return a === b ? 0 : anum && !bnum ? -1 : bnum && !anum ? 1 : a < b ? -1 : 1;
     };
     var rcompareIdentifiers = (a, b) => compareIdentifiers(b, a);
-    module.exports = {
+    module2.exports = {
       compareIdentifiers,
       rcompareIdentifiers
     };
@@ -1188,7 +1187,7 @@ var require_identifiers = __commonJS({
 
 // node_modules/semver/classes/semver.js
 var require_semver = __commonJS({
-  "node_modules/semver/classes/semver.js"(exports, module) {
+  "node_modules/semver/classes/semver.js"(exports2, module2) {
     "use strict";
     var debug = require_debug();
     var { MAX_LENGTH, MAX_SAFE_INTEGER } = require_constants();
@@ -1461,13 +1460,13 @@ var require_semver = __commonJS({
         return this;
       }
     };
-    module.exports = SemVer;
+    module2.exports = SemVer;
   }
 });
 
 // node_modules/semver/functions/parse.js
 var require_parse = __commonJS({
-  "node_modules/semver/functions/parse.js"(exports, module) {
+  "node_modules/semver/functions/parse.js"(exports2, module2) {
     "use strict";
     var SemVer = require_semver();
     var parse = (version, options, throwErrors = false) => {
@@ -1483,39 +1482,39 @@ var require_parse = __commonJS({
         throw er;
       }
     };
-    module.exports = parse;
+    module2.exports = parse;
   }
 });
 
 // node_modules/semver/functions/valid.js
 var require_valid = __commonJS({
-  "node_modules/semver/functions/valid.js"(exports, module) {
+  "node_modules/semver/functions/valid.js"(exports2, module2) {
     "use strict";
     var parse = require_parse();
     var valid = (version, options) => {
       const v = parse(version, options);
       return v ? v.version : null;
     };
-    module.exports = valid;
+    module2.exports = valid;
   }
 });
 
 // node_modules/semver/functions/clean.js
 var require_clean = __commonJS({
-  "node_modules/semver/functions/clean.js"(exports, module) {
+  "node_modules/semver/functions/clean.js"(exports2, module2) {
     "use strict";
     var parse = require_parse();
     var clean = (version, options) => {
       const s = parse(version.trim().replace(/^[=v]+/, ""), options);
       return s ? s.version : null;
     };
-    module.exports = clean;
+    module2.exports = clean;
   }
 });
 
 // node_modules/semver/functions/inc.js
 var require_inc = __commonJS({
-  "node_modules/semver/functions/inc.js"(exports, module) {
+  "node_modules/semver/functions/inc.js"(exports2, module2) {
     "use strict";
     var SemVer = require_semver();
     var inc = (version, release, options, identifier, identifierBase) => {
@@ -1533,13 +1532,13 @@ var require_inc = __commonJS({
         return null;
       }
     };
-    module.exports = inc;
+    module2.exports = inc;
   }
 });
 
 // node_modules/semver/functions/diff.js
 var require_diff = __commonJS({
-  "node_modules/semver/functions/diff.js"(exports, module) {
+  "node_modules/semver/functions/diff.js"(exports2, module2) {
     "use strict";
     var parse = require_parse();
     var diff = (version1, version2) => {
@@ -1577,86 +1576,86 @@ var require_diff = __commonJS({
       }
       return "prerelease";
     };
-    module.exports = diff;
+    module2.exports = diff;
   }
 });
 
 // node_modules/semver/functions/major.js
 var require_major = __commonJS({
-  "node_modules/semver/functions/major.js"(exports, module) {
+  "node_modules/semver/functions/major.js"(exports2, module2) {
     "use strict";
     var SemVer = require_semver();
     var major = (a, loose) => new SemVer(a, loose).major;
-    module.exports = major;
+    module2.exports = major;
   }
 });
 
 // node_modules/semver/functions/minor.js
 var require_minor = __commonJS({
-  "node_modules/semver/functions/minor.js"(exports, module) {
+  "node_modules/semver/functions/minor.js"(exports2, module2) {
     "use strict";
     var SemVer = require_semver();
     var minor = (a, loose) => new SemVer(a, loose).minor;
-    module.exports = minor;
+    module2.exports = minor;
   }
 });
 
 // node_modules/semver/functions/patch.js
 var require_patch = __commonJS({
-  "node_modules/semver/functions/patch.js"(exports, module) {
+  "node_modules/semver/functions/patch.js"(exports2, module2) {
     "use strict";
     var SemVer = require_semver();
     var patch = (a, loose) => new SemVer(a, loose).patch;
-    module.exports = patch;
+    module2.exports = patch;
   }
 });
 
 // node_modules/semver/functions/prerelease.js
 var require_prerelease = __commonJS({
-  "node_modules/semver/functions/prerelease.js"(exports, module) {
+  "node_modules/semver/functions/prerelease.js"(exports2, module2) {
     "use strict";
     var parse = require_parse();
     var prerelease = (version, options) => {
       const parsed = parse(version, options);
       return parsed && parsed.prerelease.length ? parsed.prerelease : null;
     };
-    module.exports = prerelease;
+    module2.exports = prerelease;
   }
 });
 
 // node_modules/semver/functions/compare.js
 var require_compare = __commonJS({
-  "node_modules/semver/functions/compare.js"(exports, module) {
+  "node_modules/semver/functions/compare.js"(exports2, module2) {
     "use strict";
     var SemVer = require_semver();
     var compare = (a, b, loose) => new SemVer(a, loose).compare(new SemVer(b, loose));
-    module.exports = compare;
+    module2.exports = compare;
   }
 });
 
 // node_modules/semver/functions/rcompare.js
 var require_rcompare = __commonJS({
-  "node_modules/semver/functions/rcompare.js"(exports, module) {
+  "node_modules/semver/functions/rcompare.js"(exports2, module2) {
     "use strict";
     var compare = require_compare();
     var rcompare = (a, b, loose) => compare(b, a, loose);
-    module.exports = rcompare;
+    module2.exports = rcompare;
   }
 });
 
 // node_modules/semver/functions/compare-loose.js
 var require_compare_loose = __commonJS({
-  "node_modules/semver/functions/compare-loose.js"(exports, module) {
+  "node_modules/semver/functions/compare-loose.js"(exports2, module2) {
     "use strict";
     var compare = require_compare();
     var compareLoose = (a, b) => compare(a, b, true);
-    module.exports = compareLoose;
+    module2.exports = compareLoose;
   }
 });
 
 // node_modules/semver/functions/compare-build.js
 var require_compare_build = __commonJS({
-  "node_modules/semver/functions/compare-build.js"(exports, module) {
+  "node_modules/semver/functions/compare-build.js"(exports2, module2) {
     "use strict";
     var SemVer = require_semver();
     var compareBuild = (a, b, loose) => {
@@ -1664,93 +1663,93 @@ var require_compare_build = __commonJS({
       const versionB = new SemVer(b, loose);
       return versionA.compare(versionB) || versionA.compareBuild(versionB);
     };
-    module.exports = compareBuild;
+    module2.exports = compareBuild;
   }
 });
 
 // node_modules/semver/functions/sort.js
 var require_sort = __commonJS({
-  "node_modules/semver/functions/sort.js"(exports, module) {
+  "node_modules/semver/functions/sort.js"(exports2, module2) {
     "use strict";
     var compareBuild = require_compare_build();
     var sort = (list, loose) => list.sort((a, b) => compareBuild(a, b, loose));
-    module.exports = sort;
+    module2.exports = sort;
   }
 });
 
 // node_modules/semver/functions/rsort.js
 var require_rsort = __commonJS({
-  "node_modules/semver/functions/rsort.js"(exports, module) {
+  "node_modules/semver/functions/rsort.js"(exports2, module2) {
     "use strict";
     var compareBuild = require_compare_build();
     var rsort = (list, loose) => list.sort((a, b) => compareBuild(b, a, loose));
-    module.exports = rsort;
+    module2.exports = rsort;
   }
 });
 
 // node_modules/semver/functions/gt.js
 var require_gt = __commonJS({
-  "node_modules/semver/functions/gt.js"(exports, module) {
+  "node_modules/semver/functions/gt.js"(exports2, module2) {
     "use strict";
     var compare = require_compare();
     var gt = (a, b, loose) => compare(a, b, loose) > 0;
-    module.exports = gt;
+    module2.exports = gt;
   }
 });
 
 // node_modules/semver/functions/lt.js
 var require_lt = __commonJS({
-  "node_modules/semver/functions/lt.js"(exports, module) {
+  "node_modules/semver/functions/lt.js"(exports2, module2) {
     "use strict";
     var compare = require_compare();
     var lt = (a, b, loose) => compare(a, b, loose) < 0;
-    module.exports = lt;
+    module2.exports = lt;
   }
 });
 
 // node_modules/semver/functions/eq.js
 var require_eq = __commonJS({
-  "node_modules/semver/functions/eq.js"(exports, module) {
+  "node_modules/semver/functions/eq.js"(exports2, module2) {
     "use strict";
     var compare = require_compare();
     var eq = (a, b, loose) => compare(a, b, loose) === 0;
-    module.exports = eq;
+    module2.exports = eq;
   }
 });
 
 // node_modules/semver/functions/neq.js
 var require_neq = __commonJS({
-  "node_modules/semver/functions/neq.js"(exports, module) {
+  "node_modules/semver/functions/neq.js"(exports2, module2) {
     "use strict";
     var compare = require_compare();
     var neq = (a, b, loose) => compare(a, b, loose) !== 0;
-    module.exports = neq;
+    module2.exports = neq;
   }
 });
 
 // node_modules/semver/functions/gte.js
 var require_gte = __commonJS({
-  "node_modules/semver/functions/gte.js"(exports, module) {
+  "node_modules/semver/functions/gte.js"(exports2, module2) {
     "use strict";
     var compare = require_compare();
     var gte = (a, b, loose) => compare(a, b, loose) >= 0;
-    module.exports = gte;
+    module2.exports = gte;
   }
 });
 
 // node_modules/semver/functions/lte.js
 var require_lte = __commonJS({
-  "node_modules/semver/functions/lte.js"(exports, module) {
+  "node_modules/semver/functions/lte.js"(exports2, module2) {
     "use strict";
     var compare = require_compare();
     var lte = (a, b, loose) => compare(a, b, loose) <= 0;
-    module.exports = lte;
+    module2.exports = lte;
   }
 });
 
 // node_modules/semver/functions/cmp.js
 var require_cmp = __commonJS({
-  "node_modules/semver/functions/cmp.js"(exports, module) {
+  "node_modules/semver/functions/cmp.js"(exports2, module2) {
     "use strict";
     var eq = require_eq();
     var neq = require_neq();
@@ -1794,13 +1793,13 @@ var require_cmp = __commonJS({
           throw new TypeError(`Invalid operator: ${op}`);
       }
     };
-    module.exports = cmp;
+    module2.exports = cmp;
   }
 });
 
 // node_modules/semver/functions/coerce.js
 var require_coerce = __commonJS({
-  "node_modules/semver/functions/coerce.js"(exports, module) {
+  "node_modules/semver/functions/coerce.js"(exports2, module2) {
     "use strict";
     var SemVer = require_semver();
     var parse = require_parse();
@@ -1840,13 +1839,13 @@ var require_coerce = __commonJS({
       const build = options.includePrerelease && match[6] ? `+${match[6]}` : "";
       return parse(`${major}.${minor}.${patch}${prerelease}${build}`, options);
     };
-    module.exports = coerce;
+    module2.exports = coerce;
   }
 });
 
 // node_modules/semver/internal/lrucache.js
 var require_lrucache = __commonJS({
-  "node_modules/semver/internal/lrucache.js"(exports, module) {
+  "node_modules/semver/internal/lrucache.js"(exports2, module2) {
     "use strict";
     var LRUCache = class {
       constructor() {
@@ -1878,13 +1877,13 @@ var require_lrucache = __commonJS({
         return this;
       }
     };
-    module.exports = LRUCache;
+    module2.exports = LRUCache;
   }
 });
 
 // node_modules/semver/classes/range.js
 var require_range = __commonJS({
-  "node_modules/semver/classes/range.js"(exports, module) {
+  "node_modules/semver/classes/range.js"(exports2, module2) {
     "use strict";
     var SPACE_CHARACTERS = /\s+/g;
     var Range = class _Range {
@@ -2025,7 +2024,7 @@ var require_range = __commonJS({
         return false;
       }
     };
-    module.exports = Range;
+    module2.exports = Range;
     var LRU = require_lrucache();
     var cache = new LRU();
     var parseOptions = require_parse_options();
@@ -2261,7 +2260,7 @@ var require_range = __commonJS({
 
 // node_modules/semver/classes/comparator.js
 var require_comparator = __commonJS({
-  "node_modules/semver/classes/comparator.js"(exports, module) {
+  "node_modules/semver/classes/comparator.js"(exports2, module2) {
     "use strict";
     var ANY = Symbol("SemVer ANY");
     var Comparator = class _Comparator {
@@ -2362,7 +2361,7 @@ var require_comparator = __commonJS({
         return false;
       }
     };
-    module.exports = Comparator;
+    module2.exports = Comparator;
     var parseOptions = require_parse_options();
     var { safeRe: re, t } = require_re();
     var cmp = require_cmp();
@@ -2374,7 +2373,7 @@ var require_comparator = __commonJS({
 
 // node_modules/semver/functions/satisfies.js
 var require_satisfies = __commonJS({
-  "node_modules/semver/functions/satisfies.js"(exports, module) {
+  "node_modules/semver/functions/satisfies.js"(exports2, module2) {
     "use strict";
     var Range = require_range();
     var satisfies = (version, range, options) => {
@@ -2385,23 +2384,23 @@ var require_satisfies = __commonJS({
       }
       return range.test(version);
     };
-    module.exports = satisfies;
+    module2.exports = satisfies;
   }
 });
 
 // node_modules/semver/ranges/to-comparators.js
 var require_to_comparators = __commonJS({
-  "node_modules/semver/ranges/to-comparators.js"(exports, module) {
+  "node_modules/semver/ranges/to-comparators.js"(exports2, module2) {
     "use strict";
     var Range = require_range();
     var toComparators = (range, options) => new Range(range, options).set.map((comp) => comp.map((c) => c.value).join(" ").trim().split(" "));
-    module.exports = toComparators;
+    module2.exports = toComparators;
   }
 });
 
 // node_modules/semver/ranges/max-satisfying.js
 var require_max_satisfying = __commonJS({
-  "node_modules/semver/ranges/max-satisfying.js"(exports, module) {
+  "node_modules/semver/ranges/max-satisfying.js"(exports2, module2) {
     "use strict";
     var SemVer = require_semver();
     var Range = require_range();
@@ -2424,13 +2423,13 @@ var require_max_satisfying = __commonJS({
       });
       return max;
     };
-    module.exports = maxSatisfying;
+    module2.exports = maxSatisfying;
   }
 });
 
 // node_modules/semver/ranges/min-satisfying.js
 var require_min_satisfying = __commonJS({
-  "node_modules/semver/ranges/min-satisfying.js"(exports, module) {
+  "node_modules/semver/ranges/min-satisfying.js"(exports2, module2) {
     "use strict";
     var SemVer = require_semver();
     var Range = require_range();
@@ -2453,13 +2452,13 @@ var require_min_satisfying = __commonJS({
       });
       return min;
     };
-    module.exports = minSatisfying;
+    module2.exports = minSatisfying;
   }
 });
 
 // node_modules/semver/ranges/min-version.js
 var require_min_version = __commonJS({
-  "node_modules/semver/ranges/min-version.js"(exports, module) {
+  "node_modules/semver/ranges/min-version.js"(exports2, module2) {
     "use strict";
     var SemVer = require_semver();
     var Range = require_range();
@@ -2512,13 +2511,13 @@ var require_min_version = __commonJS({
       }
       return null;
     };
-    module.exports = minVersion;
+    module2.exports = minVersion;
   }
 });
 
 // node_modules/semver/ranges/valid.js
 var require_valid2 = __commonJS({
-  "node_modules/semver/ranges/valid.js"(exports, module) {
+  "node_modules/semver/ranges/valid.js"(exports2, module2) {
     "use strict";
     var Range = require_range();
     var validRange = (range, options) => {
@@ -2528,13 +2527,13 @@ var require_valid2 = __commonJS({
         return null;
       }
     };
-    module.exports = validRange;
+    module2.exports = validRange;
   }
 });
 
 // node_modules/semver/ranges/outside.js
 var require_outside = __commonJS({
-  "node_modules/semver/ranges/outside.js"(exports, module) {
+  "node_modules/semver/ranges/outside.js"(exports2, module2) {
     "use strict";
     var SemVer = require_semver();
     var Comparator = require_comparator();
@@ -2597,33 +2596,33 @@ var require_outside = __commonJS({
       }
       return true;
     };
-    module.exports = outside;
+    module2.exports = outside;
   }
 });
 
 // node_modules/semver/ranges/gtr.js
 var require_gtr = __commonJS({
-  "node_modules/semver/ranges/gtr.js"(exports, module) {
+  "node_modules/semver/ranges/gtr.js"(exports2, module2) {
     "use strict";
     var outside = require_outside();
     var gtr = (version, range, options) => outside(version, range, ">", options);
-    module.exports = gtr;
+    module2.exports = gtr;
   }
 });
 
 // node_modules/semver/ranges/ltr.js
 var require_ltr = __commonJS({
-  "node_modules/semver/ranges/ltr.js"(exports, module) {
+  "node_modules/semver/ranges/ltr.js"(exports2, module2) {
     "use strict";
     var outside = require_outside();
     var ltr = (version, range, options) => outside(version, range, "<", options);
-    module.exports = ltr;
+    module2.exports = ltr;
   }
 });
 
 // node_modules/semver/ranges/intersects.js
 var require_intersects = __commonJS({
-  "node_modules/semver/ranges/intersects.js"(exports, module) {
+  "node_modules/semver/ranges/intersects.js"(exports2, module2) {
     "use strict";
     var Range = require_range();
     var intersects = (r1, r2, options) => {
@@ -2631,17 +2630,17 @@ var require_intersects = __commonJS({
       r2 = new Range(r2, options);
       return r1.intersects(r2, options);
     };
-    module.exports = intersects;
+    module2.exports = intersects;
   }
 });
 
 // node_modules/semver/ranges/simplify.js
 var require_simplify = __commonJS({
-  "node_modules/semver/ranges/simplify.js"(exports, module) {
+  "node_modules/semver/ranges/simplify.js"(exports2, module2) {
     "use strict";
     var satisfies = require_satisfies();
     var compare = require_compare();
-    module.exports = (versions, range, options) => {
+    module2.exports = (versions, range, options) => {
       const set = [];
       let first = null;
       let prev = null;
@@ -2687,7 +2686,7 @@ var require_simplify = __commonJS({
 
 // node_modules/semver/ranges/subset.js
 var require_subset = __commonJS({
-  "node_modules/semver/ranges/subset.js"(exports, module) {
+  "node_modules/semver/ranges/subset.js"(exports2, module2) {
     "use strict";
     var Range = require_range();
     var Comparator = require_comparator();
@@ -2843,13 +2842,13 @@ var require_subset = __commonJS({
       const comp = compare(a.semver, b.semver, options);
       return comp < 0 ? a : comp > 0 ? b : b.operator === "<" && a.operator === "<=" ? b : a;
     };
-    module.exports = subset;
+    module2.exports = subset;
   }
 });
 
 // node_modules/semver/index.js
 var require_semver2 = __commonJS({
-  "node_modules/semver/index.js"(exports, module) {
+  "node_modules/semver/index.js"(exports2, module2) {
     "use strict";
     var internalRe = require_re();
     var constants = require_constants();
@@ -2892,7 +2891,7 @@ var require_semver2 = __commonJS({
     var intersects = require_intersects();
     var simplifyRange = require_simplify();
     var subset = require_subset();
-    module.exports = {
+    module2.exports = {
       parse,
       valid,
       clean,
@@ -2944,23 +2943,23 @@ var require_semver2 = __commonJS({
 
 // node_modules/jsonwebtoken/lib/asymmetricKeyDetailsSupported.js
 var require_asymmetricKeyDetailsSupported = __commonJS({
-  "node_modules/jsonwebtoken/lib/asymmetricKeyDetailsSupported.js"(exports, module) {
+  "node_modules/jsonwebtoken/lib/asymmetricKeyDetailsSupported.js"(exports2, module2) {
     var semver = require_semver2();
-    module.exports = semver.satisfies(process.version, ">=15.7.0");
+    module2.exports = semver.satisfies(process.version, ">=15.7.0");
   }
 });
 
 // node_modules/jsonwebtoken/lib/rsaPssKeyDetailsSupported.js
 var require_rsaPssKeyDetailsSupported = __commonJS({
-  "node_modules/jsonwebtoken/lib/rsaPssKeyDetailsSupported.js"(exports, module) {
+  "node_modules/jsonwebtoken/lib/rsaPssKeyDetailsSupported.js"(exports2, module2) {
     var semver = require_semver2();
-    module.exports = semver.satisfies(process.version, ">=16.9.0");
+    module2.exports = semver.satisfies(process.version, ">=16.9.0");
   }
 });
 
 // node_modules/jsonwebtoken/lib/validateAsymmetricKey.js
 var require_validateAsymmetricKey = __commonJS({
-  "node_modules/jsonwebtoken/lib/validateAsymmetricKey.js"(exports, module) {
+  "node_modules/jsonwebtoken/lib/validateAsymmetricKey.js"(exports2, module2) {
     var ASYMMETRIC_KEY_DETAILS_SUPPORTED = require_asymmetricKeyDetailsSupported();
     var RSA_PSS_KEY_DETAILS_SUPPORTED = require_rsaPssKeyDetailsSupported();
     var allowedAlgorithmsForKeys = {
@@ -2973,7 +2972,7 @@ var require_validateAsymmetricKey = __commonJS({
       ES384: "secp384r1",
       ES512: "secp521r1"
     };
-    module.exports = function(algorithm, key) {
+    module2.exports = function(algorithm, key) {
       if (!algorithm || !key) return;
       const keyType = key.asymmetricKeyType;
       if (!keyType) return;
@@ -3013,15 +3012,15 @@ var require_validateAsymmetricKey = __commonJS({
 
 // node_modules/jsonwebtoken/lib/psSupported.js
 var require_psSupported = __commonJS({
-  "node_modules/jsonwebtoken/lib/psSupported.js"(exports, module) {
+  "node_modules/jsonwebtoken/lib/psSupported.js"(exports2, module2) {
     var semver = require_semver2();
-    module.exports = semver.satisfies(process.version, "^6.12.0 || >=8.0.0");
+    module2.exports = semver.satisfies(process.version, "^6.12.0 || >=8.0.0");
   }
 });
 
 // node_modules/jsonwebtoken/verify.js
 var require_verify = __commonJS({
-  "node_modules/jsonwebtoken/verify.js"(exports, module) {
+  "node_modules/jsonwebtoken/verify.js"(exports2, module2) {
     var JsonWebTokenError = require_JsonWebTokenError();
     var NotBeforeError = require_NotBeforeError();
     var TokenExpiredError = require_TokenExpiredError();
@@ -3030,7 +3029,7 @@ var require_verify = __commonJS({
     var validateAsymmetricKey = require_validateAsymmetricKey();
     var PS_SUPPORTED = require_psSupported();
     var jws = require_jws();
-    var { KeyObject, createSecretKey, createPublicKey } = __require("crypto");
+    var { KeyObject, createSecretKey, createPublicKey } = require("crypto");
     var PUB_KEY_ALGS = ["RS256", "RS384", "RS512"];
     var EC_KEY_ALGS = ["ES256", "ES384", "ES512"];
     var RSA_KEY_ALGS = ["RS256", "RS384", "RS512"];
@@ -3039,7 +3038,7 @@ var require_verify = __commonJS({
       PUB_KEY_ALGS.splice(PUB_KEY_ALGS.length, 0, "PS256", "PS384", "PS512");
       RSA_KEY_ALGS.splice(RSA_KEY_ALGS.length, 0, "PS256", "PS384", "PS512");
     }
-    module.exports = function(jwtString, secretOrPublicKey, options, callback) {
+    module2.exports = function(jwtString, secretOrPublicKey, options, callback) {
       if (typeof options === "function" && !callback) {
         callback = options;
         options = {};
@@ -3236,7 +3235,7 @@ var require_verify = __commonJS({
 
 // node_modules/lodash.includes/index.js
 var require_lodash = __commonJS({
-  "node_modules/lodash.includes/index.js"(exports, module) {
+  "node_modules/lodash.includes/index.js"(exports2, module2) {
     var INFINITY = 1 / 0;
     var MAX_SAFE_INTEGER = 9007199254740991;
     var MAX_INTEGER = 17976931348623157e292;
@@ -3414,13 +3413,13 @@ var require_lodash = __commonJS({
     function values(object) {
       return object ? baseValues(object, keys(object)) : [];
     }
-    module.exports = includes;
+    module2.exports = includes;
   }
 });
 
 // node_modules/lodash.isboolean/index.js
 var require_lodash2 = __commonJS({
-  "node_modules/lodash.isboolean/index.js"(exports, module) {
+  "node_modules/lodash.isboolean/index.js"(exports2, module2) {
     var boolTag = "[object Boolean]";
     var objectProto = Object.prototype;
     var objectToString = objectProto.toString;
@@ -3430,13 +3429,13 @@ var require_lodash2 = __commonJS({
     function isObjectLike(value) {
       return !!value && typeof value == "object";
     }
-    module.exports = isBoolean;
+    module2.exports = isBoolean;
   }
 });
 
 // node_modules/lodash.isinteger/index.js
 var require_lodash3 = __commonJS({
-  "node_modules/lodash.isinteger/index.js"(exports, module) {
+  "node_modules/lodash.isinteger/index.js"(exports2, module2) {
     var INFINITY = 1 / 0;
     var MAX_INTEGER = 17976931348623157e292;
     var NAN = 0 / 0;
@@ -3494,13 +3493,13 @@ var require_lodash3 = __commonJS({
       var isBinary = reIsBinary.test(value);
       return isBinary || reIsOctal.test(value) ? freeParseInt(value.slice(2), isBinary ? 2 : 8) : reIsBadHex.test(value) ? NAN : +value;
     }
-    module.exports = isInteger;
+    module2.exports = isInteger;
   }
 });
 
 // node_modules/lodash.isnumber/index.js
 var require_lodash4 = __commonJS({
-  "node_modules/lodash.isnumber/index.js"(exports, module) {
+  "node_modules/lodash.isnumber/index.js"(exports2, module2) {
     var numberTag = "[object Number]";
     var objectProto = Object.prototype;
     var objectToString = objectProto.toString;
@@ -3510,13 +3509,13 @@ var require_lodash4 = __commonJS({
     function isNumber(value) {
       return typeof value == "number" || isObjectLike(value) && objectToString.call(value) == numberTag;
     }
-    module.exports = isNumber;
+    module2.exports = isNumber;
   }
 });
 
 // node_modules/lodash.isplainobject/index.js
 var require_lodash5 = __commonJS({
-  "node_modules/lodash.isplainobject/index.js"(exports, module) {
+  "node_modules/lodash.isplainobject/index.js"(exports2, module2) {
     var objectTag = "[object Object]";
     function isHostObject(value) {
       var result = false;
@@ -3554,13 +3553,13 @@ var require_lodash5 = __commonJS({
       var Ctor = hasOwnProperty.call(proto, "constructor") && proto.constructor;
       return typeof Ctor == "function" && Ctor instanceof Ctor && funcToString.call(Ctor) == objectCtorString;
     }
-    module.exports = isPlainObject;
+    module2.exports = isPlainObject;
   }
 });
 
 // node_modules/lodash.isstring/index.js
 var require_lodash6 = __commonJS({
-  "node_modules/lodash.isstring/index.js"(exports, module) {
+  "node_modules/lodash.isstring/index.js"(exports2, module2) {
     var stringTag = "[object String]";
     var objectProto = Object.prototype;
     var objectToString = objectProto.toString;
@@ -3571,13 +3570,13 @@ var require_lodash6 = __commonJS({
     function isString(value) {
       return typeof value == "string" || !isArray(value) && isObjectLike(value) && objectToString.call(value) == stringTag;
     }
-    module.exports = isString;
+    module2.exports = isString;
   }
 });
 
 // node_modules/lodash.once/index.js
 var require_lodash7 = __commonJS({
-  "node_modules/lodash.once/index.js"(exports, module) {
+  "node_modules/lodash.once/index.js"(exports2, module2) {
     var FUNC_ERROR_TEXT = "Expected a function";
     var INFINITY = 1 / 0;
     var MAX_INTEGER = 17976931348623157e292;
@@ -3652,13 +3651,13 @@ var require_lodash7 = __commonJS({
       var isBinary = reIsBinary.test(value);
       return isBinary || reIsOctal.test(value) ? freeParseInt(value.slice(2), isBinary ? 2 : 8) : reIsBadHex.test(value) ? NAN : +value;
     }
-    module.exports = once;
+    module2.exports = once;
   }
 });
 
 // node_modules/jsonwebtoken/sign.js
 var require_sign = __commonJS({
-  "node_modules/jsonwebtoken/sign.js"(exports, module) {
+  "node_modules/jsonwebtoken/sign.js"(exports2, module2) {
     var timespan = require_timespan();
     var PS_SUPPORTED = require_psSupported();
     var validateAsymmetricKey = require_validateAsymmetricKey();
@@ -3670,7 +3669,7 @@ var require_sign = __commonJS({
     var isPlainObject = require_lodash5();
     var isString = require_lodash6();
     var once = require_lodash7();
-    var { KeyObject, createSecretKey, createPrivateKey } = __require("crypto");
+    var { KeyObject, createSecretKey, createPrivateKey } = require("crypto");
     var SUPPORTED_ALGS = ["RS256", "RS384", "RS512", "ES256", "ES384", "ES512", "HS256", "HS384", "HS512", "none"];
     if (PS_SUPPORTED) {
       SUPPORTED_ALGS.splice(3, 0, "PS256", "PS384", "PS512");
@@ -3740,7 +3739,7 @@ var require_sign = __commonJS({
       "subject",
       "jwtid"
     ];
-    module.exports = function(payload, secretOrPrivateKey, options, callback) {
+    module2.exports = function(payload, secretOrPrivateKey, options, callback) {
       if (typeof options === "function") {
         callback = options;
         options = {};
@@ -3883,8 +3882,8 @@ var require_sign = __commonJS({
 
 // node_modules/jsonwebtoken/index.js
 var require_jsonwebtoken = __commonJS({
-  "node_modules/jsonwebtoken/index.js"(exports, module) {
-    module.exports = {
+  "node_modules/jsonwebtoken/index.js"(exports2, module2) {
+    module2.exports = {
       decode: require_decode(),
       verify: require_verify(),
       sign: require_sign(),
@@ -3894,6 +3893,14 @@ var require_jsonwebtoken = __commonJS({
     };
   }
 });
+
+// src/functions/content.mts
+var content_exports = {};
+__export(content_exports, {
+  config: () => config,
+  default: () => content_default
+});
+module.exports = __toCommonJS(content_exports);
 
 // src/functions/lib/blobs.mjs
 var NF_ERROR = "x-nf-error";
@@ -4030,13 +4037,13 @@ var DEFAULT_RETRY_DELAY = getEnvironment().get("NODE_ENV") === "test" ? 1 : 5e3;
 var MIN_RETRY_DELAY = 1e3;
 var MAX_RETRY = 5;
 var RATE_LIMIT_HEADER = "X-RateLimit-Reset";
-var fetchAndRetry = async (fetch2, url, options, attemptsLeft = MAX_RETRY) => {
+var fetchAndRetry = async (fetch, url, options, attemptsLeft = MAX_RETRY) => {
   try {
-    const res = await fetch2(url, options);
+    const res = await fetch(url, options);
     if (attemptsLeft > 0 && (res.status === 429 || res.status >= 500)) {
       const delay = getDelay(res.headers.get(RATE_LIMIT_HEADER));
       await sleep(delay);
-      return fetchAndRetry(fetch2, url, options, attemptsLeft - 1);
+      return fetchAndRetry(fetch, url, options, attemptsLeft - 1);
     }
     return res;
   } catch (error) {
@@ -4045,7 +4052,7 @@ var fetchAndRetry = async (fetch2, url, options, attemptsLeft = MAX_RETRY) => {
     }
     const delay = getDelay();
     await sleep(delay);
-    return fetchAndRetry(fetch2, url, options, attemptsLeft - 1);
+    return fetchAndRetry(fetch, url, options, attemptsLeft - 1);
   }
 };
 var getDelay = (rateLimitReset) => {
@@ -4059,11 +4066,11 @@ var sleep = (ms) => new Promise((resolve) => {
 });
 var SIGNED_URL_ACCEPT_HEADER = "application/json;type=signed-url";
 var Client = class {
-  constructor({ apiURL, consistency, edgeURL, fetch: fetch2, region, siteID, token, uncachedEdgeURL }) {
+  constructor({ apiURL, consistency, edgeURL, fetch, region, siteID, token, uncachedEdgeURL }) {
     this.apiURL = apiURL;
     this.consistency = consistency ?? "eventual";
     this.edgeURL = edgeURL;
-    this.fetch = fetch2 ?? globalThis.fetch;
+    this.fetch = fetch ?? globalThis.fetch;
     this.region = region;
     this.siteID = siteID;
     this.token = token;
@@ -4498,7 +4505,7 @@ var getStore = (input) => {
   );
 };
 
-// src/functions/telegram-bot.mts
+// src/functions/content.mts
 var import_jsonwebtoken = __toESM(require_jsonwebtoken(), 1);
 var CORS = {
   "Content-Type": "application/json",
@@ -4509,1009 +4516,222 @@ var CORS = {
 function getSecret() {
   return process.env.JWT_SECRET || "inkedmayhem-dev-secret-change-me";
 }
-function getCreatorBotToken() {
-  return process.env.TELEGRAM_CREATOR_BOT_TOKEN || "";
-}
-function getFanBotToken() {
-  return process.env.TELEGRAM_FAN_BOT_TOKEN || "";
-}
-function getCreatorChatId() {
-  return process.env.TELEGRAM_CREATOR_CHAT_ID || "";
-}
-function getAdminChatId() {
-  return process.env.TELEGRAM_ADMIN_CHAT_ID || "";
-}
-async function sendTelegramMessage(botToken, chatId, text, parseMode = "HTML") {
-  if (!botToken || !chatId) return false;
+function verifyAdmin(req) {
+  const auth = req.headers.get("authorization");
+  if (!auth) return false;
   try {
-    const res = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        chat_id: chatId,
-        text,
-        parse_mode: parseMode
-      })
-    });
-    const data = await res.json();
-    return data.ok;
-  } catch (err) {
-    console.error("[TELEGRAM] Send failed:", err);
+    const d = import_jsonwebtoken.default.verify(auth.replace("Bearer ", ""), getSecret());
+    return d.isAdmin === true;
+  } catch {
     return false;
   }
 }
-async function getFileFromTelegram(botToken, fileId) {
+function verifyUser(req) {
+  const auth = req.headers.get("authorization");
+  if (!auth) return null;
   try {
-    const res = await fetch(`https://api.telegram.org/bot${botToken}/getFile`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ file_id: fileId })
-    });
-    const data = await res.json();
-    if (data.ok && data.result.file_path) {
-      return `https://api.telegram.org/file/bot${botToken}/${data.result.file_path}`;
-    }
-  } catch (err) {
-    console.error("[TELEGRAM] Get file failed:", err);
-  }
-  return null;
-}
-async function checkRateLimit(userId, maxRequests = 10, windowSeconds = 60) {
-  try {
-    const store = getStore("telegram-ratelimits");
-    const key = `rate-${userId}`;
-    const existing = await store.get(key, { type: "json" });
-    const now = Date.now();
-    if (!existing) {
-      await store.setJSON(key, { requests: [now] });
-      return true;
-    }
-    const windowStart = now - windowSeconds * 1e3;
-    const recentRequests = (existing.requests || []).filter((t) => t > windowStart);
-    if (recentRequests.length >= maxRequests) {
-      return false;
-    }
-    recentRequests.push(now);
-    await store.setJSON(key, { requests: recentRequests });
-    return true;
+    return import_jsonwebtoken.default.verify(auth.replace("Bearer ", ""), getSecret());
   } catch {
-    return true;
+    return null;
   }
 }
-function loadFaqTemplates() {
-  return [
-    {
-      category: "subscribe",
-      patterns: ["how do i subscribe", "where do i subscribe", "membership", "join", "sign up", "how to join"],
-      response: "Head to the main site and check out the membership tiers \u2014 pick the level that vibes with you and you're in.",
-      escalate: false
-    },
-    {
-      category: "content",
-      patterns: ["what do you post", "what kind of content", "what content", "type of content", "what's on the site"],
-      response: "Tattoo lifestyle, ink culture, behind-the-scenes shoots, and exclusive photo sets. Members get the good stuff.",
-      escalate: false
-    },
-    {
-      category: "schedule",
-      patterns: ["when do you post", "posting schedule", "how often", "next post", "new content"],
-      response: "New drops hit Tuesdays and Thursdays at 8pm ET. Members always get first access.",
-      escalate: false
-    },
-    {
-      category: "customs",
-      patterns: ["custom", "request", "commission", "personal", "special order"],
-      response: "Custom requests are available for Elite tier members. Check out the Mayhem Circle membership for details.",
-      escalate: false
-    },
-    {
-      category: "refund",
-      patterns: ["refund", "money back", "cancel subscription", "chargeback", "dispute"],
-      response: "I'm connecting you with support for this. Someone will get back to you shortly.",
-      escalate: true
-    },
-    {
-      category: "contact",
-      patterns: ["contact", "email", "reach you", "message you", "talk to you", "dm"],
-      response: "Best way to reach out is through the contact form on the site, or DM through the members area if you're subscribed.",
-      escalate: false
-    },
-    {
-      category: "pricing",
-      patterns: ["how much", "price", "cost", "pricing", "what does it cost"],
-      response: "Free access gets you the public gallery. VIP (Ink Insider) is $9.99/mo for exclusive sets. Elite (Mayhem Circle) is $24.99/mo for everything + premium drops and custom requests.",
-      escalate: false
-    }
-  ];
-}
-var HARD_ESCALATION_KEYWORDS = [
-  "address",
-  "where do you live",
-  "phone number",
-  "meet up",
-  "meet me",
-  "underage",
-  "minor",
-  "kid",
-  "child",
-  "kill",
-  "threat",
-  "hurt",
-  "stalk",
-  "i know where you"
-];
-function matchFaq(message) {
-  const lower = message.toLowerCase().trim();
-  for (const keyword of HARD_ESCALATION_KEYWORDS) {
-    if (lower.includes(keyword)) {
-      return {
-        matched: true,
-        category: "safety_escalation",
-        response: null,
-        // No response, just escalate
-        escalate: true,
-        hardEscalation: true
-      };
-    }
-  }
-  const templates = loadFaqTemplates();
-  for (const template of templates) {
-    for (const pattern of template.patterns) {
-      if (lower.includes(pattern)) {
-        return {
-          matched: true,
-          category: template.category,
-          response: template.response,
-          escalate: template.escalate,
-          hardEscalation: false
-        };
-      }
-    }
-  }
-  return { matched: false, category: null, response: null, escalate: false, hardEscalation: false };
-}
-async function logBotEvent(botType, userId, action, details = {}) {
-  try {
-    const store = getStore("telegram-logs");
-    const logKey = `tg-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`;
-    await store.setJSON(logKey, {
-      botType,
-      userId: String(userId),
-      action,
-      details,
-      timestamp: (/* @__PURE__ */ new Date()).toISOString()
-    });
-  } catch (err) {
-    console.error("[TELEGRAM] Log failed:", err);
-  }
-}
-var telegram_bot_default = async (req, context) => {
-  if (req.method === "OPTIONS") {
-    return new Response("", { headers: CORS });
-  }
+var content_default = async (req, context) => {
+  if (req.method === "OPTIONS") return new Response("", { headers: CORS });
   const url = new URL(req.url);
-  const path = url.pathname.replace("/api/telegram", "").replace(/\/$/, "") || "";
-  if (path === "/creator-webhook" && req.method === "POST") {
+  const path = url.pathname.replace("/api/content", "").replace(/\/$/, "") || "";
+  const store = getStore("content");
+  if (path === "" && req.method === "GET") {
+    const search = (url.searchParams.get("search") || "").toLowerCase().trim();
+    const category = (url.searchParams.get("category") || "").toLowerCase().trim();
+    const sort = url.searchParams.get("sort") || "newest";
+    const jwtUser = verifyUser(req);
+    let userTier = "free";
+    let userPurchases = [];
+    if (jwtUser?.email) {
+      try {
+        const userStore = getStore("users");
+        const userKey = jwtUser.email.toLowerCase().replace(/[^a-z0-9@._-]/g, "");
+        const freshUser = await userStore.get(userKey, { type: "json" });
+        if (freshUser) {
+          userTier = freshUser.tier || "free";
+          userPurchases = (freshUser.purchases || []).map((p) => p.postId);
+        }
+      } catch (err) {
+        console.error("User lookup for content access:", err);
+      }
+    }
     try {
-      const update = await req.json();
-      const botToken = getCreatorBotToken();
-      const creatorChatId = getCreatorChatId();
-      if (!botToken) {
-        return new Response(JSON.stringify({ error: "Bot not configured" }), { status: 503, headers: CORS });
-      }
-      const message = update.message;
-      if (!message) {
-        return new Response(JSON.stringify({ ok: true }), { headers: CORS });
-      }
-      const chatId = String(message.chat.id);
-      const userId = String(message.from.id);
-      const username = message.from.username || message.from.first_name || "Unknown";
-      if (creatorChatId && chatId !== creatorChatId) {
-        await sendTelegramMessage(
-          botToken,
-          chatId,
-          "This bot is for the creator only. If you're a fan, use the fan bot instead."
-        );
-        return new Response(JSON.stringify({ ok: true }), { headers: CORS });
-      }
-      if (message.text === "/start") {
-        await sendTelegramMessage(
-          botToken,
-          chatId,
-          `<b>Welcome to your Creator Bot!</b>
-
-<b>Upload content:</b> Send a photo or video directly
-<b>Add caption:</b> Send text starting with "caption:" after uploading
-
-<b>Commands:</b>
-/status \u2014 Pipeline overview
-/inbox \u2014 Items awaiting review
-/queue \u2014 See queued items
-/approve &lt;id&gt; \u2014 Approve + queue
-/reject &lt;id&gt; \u2014 Reject content
-/publish &lt;id&gt; \u2014 Publish now
-/schedule \u2014 View posting schedule
-/help \u2014 Show all commands`
-        );
-        await logBotEvent("creator", userId, "start", {});
-        return new Response(JSON.stringify({ ok: true }), { headers: CORS });
-      }
-      if (message.text === "/help") {
-        await sendTelegramMessage(
-          botToken,
-          chatId,
-          `<b>Creator Bot Commands</b>
-
-<b>Content Upload:</b>
-\u2022 Send a photo/video to upload
-\u2022 Include caption in the message
-\u2022 "caption: your text" to update last upload
-\u2022 "category: selfies" to set category
-\u2022 "tier: vip" to set access tier
-
-<b>Review:</b>
-/inbox \u2014 Items awaiting review
-/approve &lt;id&gt; \u2014 Approve and queue
-/reject &lt;id&gt; [reason] \u2014 Reject with reason
-/publish &lt;id&gt; \u2014 Publish immediately
-/tier &lt;id&gt; &lt;free|vip|elite&gt; \u2014 Set access tier
-
-<b>Overview:</b>
-/status \u2014 Pipeline stats
-/queue \u2014 Items waiting to publish
-/schedule \u2014 Next scheduled posts
-/recent \u2014 Last 5 published items`
-        );
-        return new Response(JSON.stringify({ ok: true }), { headers: CORS });
-      }
-      if (message.text === "/status") {
-        const pipeStore = getStore("pipeline");
-        const { blobs } = await pipeStore.list();
-        const counts = { inbox: 0, processed: 0, queued: 0, published: 0, rejected: 0 };
-        for (const blob of blobs) {
-          try {
-            const item = await pipeStore.get(blob.key, { type: "json" });
-            if (item?.status && counts.hasOwnProperty(item.status)) {
-              counts[item.status]++;
-            }
-          } catch {
-          }
-        }
-        await sendTelegramMessage(
-          botToken,
-          chatId,
-          `<b>Pipeline Status</b>
-
-\u{1F4E5} Inbox: ${counts.inbox}
-\u2699\uFE0F Processed: ${counts.processed}
-\u{1F4CB} Queued: ${counts.queued}
-\u2705 Published: ${counts.published}
-\u274C Rejected: ${counts.rejected}`
-        );
-        return new Response(JSON.stringify({ ok: true }), { headers: CORS });
-      }
-      if (message.text === "/queue") {
-        const pipeStore = getStore("pipeline");
-        const { blobs } = await pipeStore.list();
-        const queued = [];
-        for (const blob of blobs) {
-          try {
-            const item = await pipeStore.get(blob.key, { type: "json" });
-            if (item?.status === "queued") queued.push(item);
-          } catch {
-          }
-        }
-        if (queued.length === 0) {
-          await sendTelegramMessage(botToken, chatId, "Queue is empty. Upload some content!");
-        } else {
-          const list = queued.slice(0, 10).map(
-            (item, i) => `${i + 1}. <b>${item.caption || item.filename}</b> [${item.tier}]${item.scheduledAt ? `
-   \u{1F4C5} ${item.scheduledAt}` : ""}`
-          ).join("\n");
-          await sendTelegramMessage(
-            botToken,
-            chatId,
-            `<b>Queued Items (${queued.length})</b>
-
-${list}`
-          );
-        }
-        return new Response(JSON.stringify({ ok: true }), { headers: CORS });
-      }
-      if (message.text === "/schedule") {
-        const pipeStore = getStore("pipeline");
-        const { blobs } = await pipeStore.list();
-        const scheduled = [];
-        for (const blob of blobs) {
-          try {
-            const item = await pipeStore.get(blob.key, { type: "json" });
-            if (item?.status === "queued" && item.scheduledAt) scheduled.push(item);
-          } catch {
-          }
-        }
-        scheduled.sort((a, b) => (a.scheduledAt || "").localeCompare(b.scheduledAt || ""));
-        if (scheduled.length === 0) {
-          await sendTelegramMessage(botToken, chatId, "No scheduled posts. Queue items with a scheduled time to see them here.");
-        } else {
-          const list = scheduled.slice(0, 10).map(
-            (item, i) => `${i + 1}. \u{1F4C5} <b>${item.scheduledAt}</b>
-   ${item.caption || item.filename} [${item.tier}]`
-          ).join("\n\n");
-          await sendTelegramMessage(
-            botToken,
-            chatId,
-            `<b>Scheduled Posts (${scheduled.length})</b>
-
-${list}`
-          );
-        }
-        return new Response(JSON.stringify({ ok: true }), { headers: CORS });
-      }
-      if (message.text === "/inbox") {
-        const pipeStore = getStore("pipeline");
-        const { blobs } = await pipeStore.list();
-        const inbox = [];
-        for (const blob of blobs) {
-          try {
-            const item = await pipeStore.get(blob.key, { type: "json" });
-            if (item?.status === "inbox") inbox.push(item);
-          } catch {
-          }
-        }
-        if (inbox.length === 0) {
-          await sendTelegramMessage(botToken, chatId, "Inbox is empty. All caught up!");
-        } else {
-          const list = inbox.slice(0, 10).map(
-            (item, i) => `${i + 1}. <b>${item.caption || item.filename}</b>
-   ID: <code>${item.id}</code> [${item.tier}]`
-          ).join("\n\n");
-          await sendTelegramMessage(
-            botToken,
-            chatId,
-            `<b>Inbox (${inbox.length})</b>
-
-${list}
-
-Use /approve &lt;id&gt; or /reject &lt;id&gt; to manage`
-          );
-        }
-        return new Response(JSON.stringify({ ok: true }), { headers: CORS });
-      }
-      if (message.text?.startsWith("/approve")) {
-        const parts = message.text.split(/\s+/);
-        const targetId = parts[1];
-        if (!targetId) {
-          await sendTelegramMessage(
-            botToken,
-            chatId,
-            "Usage: /approve &lt;pipeline-id&gt;\n\nUse /inbox to see item IDs."
-          );
-          return new Response(JSON.stringify({ ok: true }), { headers: CORS });
-        }
-        const pipeStore = getStore("pipeline");
-        const item = await pipeStore.get(targetId, { type: "json" });
-        if (!item) {
-          await sendTelegramMessage(botToken, chatId, `Item not found: ${targetId}`);
-          return new Response(JSON.stringify({ ok: true }), { headers: CORS });
-        }
-        if (item.status !== "inbox" && item.status !== "processed") {
-          await sendTelegramMessage(botToken, chatId, `Cannot approve \u2014 item is "${item.status}"`);
-          return new Response(JSON.stringify({ ok: true }), { headers: CORS });
-        }
-        item.status = "queued";
-        item.queuedAt = (/* @__PURE__ */ new Date()).toISOString();
-        if (!item.processedAt) {
-          item.processedAt = (/* @__PURE__ */ new Date()).toISOString();
-          item.checks = { ...item.checks, exifStripped: true, compressed: true, thumbnailGenerated: true };
-        }
-        await pipeStore.setJSON(targetId, item);
-        const logStore = getStore("pipeline-logs");
-        await logStore.setJSON(`log-${Date.now()}-tg`, {
-          action: "telegram-approve",
-          itemId: targetId,
-          details: { approvedBy: username },
-          timestamp: (/* @__PURE__ */ new Date()).toISOString()
-        });
-        await sendTelegramMessage(
-          botToken,
-          chatId,
-          `\u2705 <b>Approved!</b>
-
-${item.caption || item.filename}
-Status: <b>QUEUED</b>${item.scheduledAt ? `
-Scheduled: ${item.scheduledAt}` : ""}`
-        );
-        return new Response(JSON.stringify({ ok: true }), { headers: CORS });
-      }
-      if (message.text?.startsWith("/reject")) {
-        const parts = message.text.split(/\s+/);
-        const targetId = parts[1];
-        const reason = parts.slice(2).join(" ") || "Rejected via Telegram";
-        if (!targetId) {
-          await sendTelegramMessage(
-            botToken,
-            chatId,
-            "Usage: /reject &lt;pipeline-id&gt; [reason]\n\nUse /inbox to see item IDs."
-          );
-          return new Response(JSON.stringify({ ok: true }), { headers: CORS });
-        }
-        const pipeStore = getStore("pipeline");
-        const item = await pipeStore.get(targetId, { type: "json" });
-        if (!item) {
-          await sendTelegramMessage(botToken, chatId, `Item not found: ${targetId}`);
-          return new Response(JSON.stringify({ ok: true }), { headers: CORS });
-        }
-        item.status = "rejected";
-        item.rejectReason = reason;
-        await pipeStore.setJSON(targetId, item);
-        const logStore = getStore("pipeline-logs");
-        await logStore.setJSON(`log-${Date.now()}-tg`, {
-          action: "telegram-reject",
-          itemId: targetId,
-          details: { rejectedBy: username, reason },
-          timestamp: (/* @__PURE__ */ new Date()).toISOString()
-        });
-        await sendTelegramMessage(
-          botToken,
-          chatId,
-          `\u274C <b>Rejected</b>
-
-${item.caption || item.filename}
-Reason: ${reason}`
-        );
-        return new Response(JSON.stringify({ ok: true }), { headers: CORS });
-      }
-      if (message.text?.startsWith("/publish")) {
-        const parts = message.text.split(/\s+/);
-        const targetId = parts[1];
-        if (!targetId) {
-          await sendTelegramMessage(
-            botToken,
-            chatId,
-            "Usage: /publish &lt;pipeline-id&gt;\n\nUse /queue to see queued items."
-          );
-          return new Response(JSON.stringify({ ok: true }), { headers: CORS });
-        }
-        const pipeStore = getStore("pipeline");
-        const contentStore = getStore("content");
-        const item = await pipeStore.get(targetId, { type: "json" });
-        if (!item) {
-          await sendTelegramMessage(botToken, chatId, `Item not found: ${targetId}`);
-          return new Response(JSON.stringify({ ok: true }), { headers: CORS });
-        }
-        if (item.status === "published") {
-          await sendTelegramMessage(botToken, chatId, "Already published!");
-          return new Response(JSON.stringify({ ok: true }), { headers: CORS });
-        }
-        if (item.status === "rejected") {
-          await sendTelegramMessage(botToken, chatId, "Cannot publish rejected item. Approve it first.");
-          return new Response(JSON.stringify({ ok: true }), { headers: CORS });
-        }
-        if (item.status !== "queued") {
-          item.status = "queued";
-          item.queuedAt = (/* @__PURE__ */ new Date()).toISOString();
-          if (!item.processedAt) {
-            item.processedAt = (/* @__PURE__ */ new Date()).toISOString();
-            item.checks = { ...item.checks, exifStripped: true, compressed: true, thumbnailGenerated: true };
-          }
-        }
-        const contentKey = `content-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`;
-        const contentItem = {
-          title: item.caption || item.filename,
-          body: item.caption || "",
-          tier: item.tier || "free",
-          type: item.mediaType === "video" ? "video" : "gallery",
-          imageUrl: `/api/pipeline/asset/${item.storedAs}`,
-          draft: false,
-          tags: item.tags || [],
-          category: item.category || "photos",
-          source: item.source,
-          pipelineId: item.id,
-          createdAt: (/* @__PURE__ */ new Date()).toISOString(),
-          updatedAt: (/* @__PURE__ */ new Date()).toISOString()
-        };
-        await contentStore.setJSON(contentKey, contentItem);
-        item.status = "published";
-        item.publishedAt = (/* @__PURE__ */ new Date()).toISOString();
-        item.contentKey = contentKey;
-        await pipeStore.setJSON(targetId, item);
-        const logStore = getStore("pipeline-logs");
-        await logStore.setJSON(`log-${Date.now()}-tg`, {
-          action: "telegram-publish",
-          itemId: targetId,
-          details: { publishedBy: username, contentKey },
-          timestamp: (/* @__PURE__ */ new Date()).toISOString()
-        });
-        await sendTelegramMessage(
-          botToken,
-          chatId,
-          `\u{1F680} <b>Published!</b>
-
-${item.caption || item.filename}
-Tier: ${item.tier}
-Content: ${contentKey}`
-        );
-        return new Response(JSON.stringify({ ok: true }), { headers: CORS });
-      }
-      if (message.text?.startsWith("/tier")) {
-        const parts = message.text.split(/\s+/);
-        const targetId = parts[1];
-        const newTier = (parts[2] || "").toLowerCase();
-        if (!targetId || !["free", "vip", "elite"].includes(newTier)) {
-          await sendTelegramMessage(
-            botToken,
-            chatId,
-            "Usage: /tier &lt;pipeline-id&gt; &lt;free|vip|elite&gt;"
-          );
-          return new Response(JSON.stringify({ ok: true }), { headers: CORS });
-        }
-        const pipeStore = getStore("pipeline");
-        const item = await pipeStore.get(targetId, { type: "json" });
-        if (!item) {
-          await sendTelegramMessage(botToken, chatId, `Item not found: ${targetId}`);
-          return new Response(JSON.stringify({ ok: true }), { headers: CORS });
-        }
-        item.tier = newTier;
-        await pipeStore.setJSON(targetId, item);
-        await sendTelegramMessage(
-          botToken,
-          chatId,
-          `\u{1F512} <b>Tier updated!</b>
-
-${item.caption || item.filename}
-New tier: <b>${newTier.toUpperCase()}</b>`
-        );
-        return new Response(JSON.stringify({ ok: true }), { headers: CORS });
-      }
-      if (message.text === "/recent") {
-        const pipeStore = getStore("pipeline");
-        const { blobs } = await pipeStore.list();
-        const published = [];
-        for (const blob of blobs) {
-          try {
-            const item = await pipeStore.get(blob.key, { type: "json" });
-            if (item?.status === "published") published.push(item);
-          } catch {
-          }
-        }
-        published.sort((a, b) => (b.publishedAt || "").localeCompare(a.publishedAt || ""));
-        if (published.length === 0) {
-          await sendTelegramMessage(botToken, chatId, "Nothing published yet.");
-        } else {
-          const list = published.slice(0, 5).map(
-            (item, i) => `${i + 1}. <b>${item.caption || item.filename}</b>
-   \u2705 Published ${item.publishedAt?.split("T")[0] || ""} [${item.tier}]`
-          ).join("\n\n");
-          await sendTelegramMessage(
-            botToken,
-            chatId,
-            `<b>Recent Publications</b>
-
-${list}`
-          );
-        }
-        return new Response(JSON.stringify({ ok: true }), { headers: CORS });
-      }
-      if (message.photo || message.video || message.document) {
-        let fileId = "";
-        let fileName = "";
-        let fileSize = 0;
-        if (message.photo) {
-          const photo = message.photo[message.photo.length - 1];
-          fileId = photo.file_id;
-          fileName = `photo-${Date.now()}.jpg`;
-          fileSize = photo.file_size || 0;
-        } else if (message.video) {
-          fileId = message.video.file_id;
-          fileName = message.video.file_name || `video-${Date.now()}.mp4`;
-          fileSize = message.video.file_size || 0;
-        } else if (message.document) {
-          fileId = message.document.file_id;
-          fileName = message.document.file_name || `file-${Date.now()}`;
-          fileSize = message.document.file_size || 0;
-        }
-        const fileUrl = await getFileFromTelegram(botToken, fileId);
-        if (!fileUrl) {
-          await sendTelegramMessage(botToken, chatId, "Failed to get file. Try again or send a smaller file.");
-          return new Response(JSON.stringify({ ok: true }), { headers: CORS });
-        }
+      const { blobs } = await store.list();
+      const items = [];
+      for (const blob of blobs) {
         try {
-          const fileRes = await fetch(fileUrl);
-          const fileBuffer = await fileRes.arrayBuffer();
-          const fileData = Buffer.from(fileBuffer).toString("base64");
-          const ext = fileName.split(".").pop()?.toLowerCase() || "jpg";
-          const pipelineId = `pipe-${Date.now()}-${Math.random().toString(36).substr(2, 8)}`;
-          const assetStore = getStore("pipeline-assets");
-          await assetStore.set(`${pipelineId}.${ext}`, fileData);
-          const pipeStore = getStore("pipeline");
-          const caption = message.caption || "";
-          let category = "photos";
-          let tier = "free";
-          let cleanCaption = caption;
-          const categoryMatch = caption.match(/category:\s*(\w+)/i);
-          if (categoryMatch) {
-            category = categoryMatch[1].toLowerCase();
-            cleanCaption = cleanCaption.replace(categoryMatch[0], "").trim();
-          }
-          const tierMatch = caption.match(/tier:\s*(\w+)/i);
-          if (tierMatch) {
-            tier = tierMatch[1].toLowerCase();
-            cleanCaption = cleanCaption.replace(tierMatch[0], "").trim();
-          }
-          const IMAGE_TYPES_CHECK = ["jpg", "jpeg", "png", "webp", "gif"];
-          const mediaType = IMAGE_TYPES_CHECK.includes(ext) ? "image" : "video";
-          const item = {
-            id: pipelineId,
-            creatorId: "inkedmayhem",
-            status: "inbox",
-            filename: fileName,
-            storedAs: `${pipelineId}.${ext}`,
-            mediaType,
-            fileExtension: ext,
-            fileSize,
-            fileSizeMB: (fileSize / (1024 * 1024)).toFixed(2),
-            caption: cleanCaption,
-            tags: [],
-            category,
-            tier,
-            source: "telegram",
-            checks: {
-              fileTypeValid: true,
-              fileSizeValid: true,
-              exifStripped: false,
-              compressed: false,
-              thumbnailGenerated: false
-            },
-            rejectReason: "",
-            scheduledAt: null,
-            publishedAt: null,
-            createdAt: (/* @__PURE__ */ new Date()).toISOString(),
-            processedAt: null,
-            queuedAt: null,
-            telegramFileId: fileId,
-            telegramFrom: username
-          };
-          await pipeStore.setJSON(pipelineId, item);
-          const logStore = getStore("pipeline-logs");
-          await logStore.setJSON(`log-${Date.now()}`, {
-            action: "telegram-upload",
-            itemId: pipelineId,
-            details: { filename: fileName, source: "telegram", from: username },
-            timestamp: (/* @__PURE__ */ new Date()).toISOString()
-          });
-          await sendTelegramMessage(
-            botToken,
-            chatId,
-            `\u2705 <b>Received!</b>
-
-\u{1F4C1} ${fileName}
-\u{1F4C2} Category: ${category}
-\u{1F512} Tier: ${tier}
-${cleanCaption ? `\u{1F4AC} Caption: ${cleanCaption}
-` : ""}
-Status: <b>INBOX</b> \u2014 waiting for review`
-          );
+          const item = await store.get(blob.key, { type: "json" });
+          if (item && !item.draft) items.push({ ...item, key: blob.key });
         } catch (err) {
-          console.error("[TELEGRAM] Upload error:", err);
-          await sendTelegramMessage(botToken, chatId, "Upload failed. Try again.");
+          console.error("Content item read error:", err);
         }
-        return new Response(JSON.stringify({ ok: true }), { headers: CORS });
       }
-      if (message.text) {
-        const text = message.text.trim();
-        if (text.toLowerCase().startsWith("caption:")) {
-          const newCaption = text.substring(8).trim();
-          const pipeStore = getStore("pipeline");
-          const { blobs } = await pipeStore.list();
-          let lastItem = null;
-          let lastKey = "";
-          for (const blob of blobs) {
-            const item = await pipeStore.get(blob.key, { type: "json" });
-            if (item && item.source === "telegram" && (item.status === "inbox" || item.status === "processed")) {
-              if (!lastItem || item.createdAt > lastItem.createdAt) {
-                lastItem = item;
-                lastKey = blob.key;
-              }
-            }
-          }
-          if (lastItem) {
-            lastItem.caption = newCaption;
-            await pipeStore.setJSON(lastKey, lastItem);
-            await sendTelegramMessage(
-              botToken,
-              chatId,
-              `\u270F\uFE0F Caption updated for <b>${lastItem.filename}</b>:
-"${newCaption}"`
-            );
-          } else {
-            await sendTelegramMessage(botToken, chatId, "No recent upload found to update.");
-          }
-          return new Response(JSON.stringify({ ok: true }), { headers: CORS });
-        }
-        await sendTelegramMessage(
-          botToken,
-          chatId,
-          "Send a photo/video to upload, or use /help to see commands."
-        );
-      }
-      return new Response(JSON.stringify({ ok: true }), { headers: CORS });
-    } catch (err) {
-      console.error("[TELEGRAM] Creator webhook error:", err);
-      return new Response(JSON.stringify({ ok: true }), { headers: CORS });
-    }
-  }
-  if (path === "/fan-webhook" && req.method === "POST") {
-    try {
-      const update = await req.json();
-      const botToken = getFanBotToken();
-      if (!botToken) {
-        return new Response(JSON.stringify({ error: "Bot not configured" }), { status: 503, headers: CORS });
-      }
-      const message = update.message;
-      if (!message) {
-        return new Response(JSON.stringify({ ok: true }), { headers: CORS });
-      }
-      const chatId = String(message.chat.id);
-      const userId = String(message.from.id);
-      const username = message.from.username || message.from.first_name || "Unknown";
-      const allowed = await checkRateLimit(userId, 15, 60);
-      if (!allowed) {
-        await sendTelegramMessage(
-          botToken,
-          chatId,
-          "Slow down \u2014 too many messages. Try again in a minute."
-        );
-        return new Response(JSON.stringify({ ok: true }), { headers: CORS });
-      }
-      if (message.text === "/start") {
-        await sendTelegramMessage(
-          botToken,
-          chatId,
-          `<b>Hey! Welcome to InkedMayhem.</b>
-
-Ask me anything \u2014 membership info, content schedule, pricing, whatever.
-
-Type your question or try:
-\u2022 "How do I subscribe?"
-\u2022 "What kind of content?"
-\u2022 "When do you post?"
-\u2022 "How much does it cost?"`
-        );
-        await logBotEvent("fan", userId, "start", { username });
-        return new Response(JSON.stringify({ ok: true }), { headers: CORS });
-      }
-      if (message.text) {
-        const text = message.text.trim();
-        const match = matchFaq(text);
-        await logBotEvent("fan", userId, "question", {
-          username,
-          message: text.substring(0, 200),
-          matched: match.matched,
-          category: match.category,
-          escalated: match.escalate
-        });
-        if (match.hardEscalation) {
-          await sendTelegramMessage(
-            botToken,
-            chatId,
-            "I can't help with that. If you need assistance, please use the contact form on the website."
-          );
-          const adminChatId = getAdminChatId() || getCreatorChatId();
-          const creatorBotToken = getCreatorBotToken();
-          if (adminChatId && creatorBotToken) {
-            await sendTelegramMessage(
-              creatorBotToken,
-              adminChatId,
-              `\u{1F6A8} <b>SAFETY ALERT</b>
-
-User: @${username} (ID: ${userId})
-Message: "${text.substring(0, 300)}"
-
-This message triggered a hard escalation. Review immediately.`
-            );
-          }
-          const escStore = getStore("telegram-escalations");
-          await escStore.setJSON(`esc-${Date.now()}`, {
-            userId,
-            username,
-            message: text,
-            type: "hard_escalation",
-            timestamp: (/* @__PURE__ */ new Date()).toISOString()
-          });
-          return new Response(JSON.stringify({ ok: true }), { headers: CORS });
-        }
-        if (match.escalate && match.response) {
-          await sendTelegramMessage(botToken, chatId, match.response);
-          const adminChatId = getAdminChatId() || getCreatorChatId();
-          const creatorBotToken = getCreatorBotToken();
-          if (adminChatId && creatorBotToken) {
-            await sendTelegramMessage(
-              creatorBotToken,
-              adminChatId,
-              `\u26A0\uFE0F <b>Escalation</b>
-
-User: @${username}
-Category: ${match.category}
-Message: "${text.substring(0, 300)}"
-
-Auto-response sent. May need follow-up.`
-            );
-          }
-          return new Response(JSON.stringify({ ok: true }), { headers: CORS });
-        }
-        if (match.matched && match.response) {
-          await sendTelegramMessage(botToken, chatId, match.response);
-          const faqStore2 = getStore("telegram-faq-stats");
-          try {
-            const stats = await faqStore2.get("faq-hits", { type: "json" }) || {};
-            stats[match.category || "unknown"] = (stats[match.category || "unknown"] || 0) + 1;
-            stats._total = (stats._total || 0) + 1;
-            stats._lastUpdated = (/* @__PURE__ */ new Date()).toISOString();
-            await faqStore2.setJSON("faq-hits", stats);
-          } catch {
-          }
-          return new Response(JSON.stringify({ ok: true }), { headers: CORS });
-        }
-        const faqStore = getStore("telegram-faq-stats");
-        try {
-          const unanswered = await faqStore.get("unanswered", { type: "json" }) || { questions: [] };
-          unanswered.questions.push({
-            question: text.substring(0, 300),
-            username,
-            userId,
-            timestamp: (/* @__PURE__ */ new Date()).toISOString()
-          });
-          if (unanswered.questions.length > 100) {
-            unanswered.questions = unanswered.questions.slice(-100);
-          }
-          await faqStore.setJSON("unanswered", unanswered);
-        } catch {
-        }
-        await sendTelegramMessage(
-          botToken,
-          chatId,
-          "I don't have a specific answer for that, but you can reach out through the contact form on the site and someone will get back to you.\n\nOr try asking about: membership, content, schedule, or pricing."
-        );
-        return new Response(JSON.stringify({ ok: true }), { headers: CORS });
-      }
-      return new Response(JSON.stringify({ ok: true }), { headers: CORS });
-    } catch (err) {
-      console.error("[TELEGRAM] Fan webhook error:", err);
-      return new Response(JSON.stringify({ ok: true }), { headers: CORS });
-    }
-  }
-  if (path === "/setup" && req.method === "POST") {
-    const apiKey = req.headers.get("x-api-key");
-    const expectedApiKey = process.env.PIPELINE_API_KEY || getSecret();
-    const auth = req.headers.get("authorization");
-    let isAdmin = false;
-    if (apiKey === expectedApiKey) isAdmin = true;
-    if (auth) {
-      try {
-        const decoded = import_jsonwebtoken.default.verify(auth.replace("Bearer ", ""), getSecret());
-        if (decoded.isAdmin) isAdmin = true;
-      } catch {
-      }
-    }
-    if (!isAdmin) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: CORS });
-    }
-    try {
-      const { botType } = await req.json();
-      const siteUrl = process.env.URL || "";
-      if (!siteUrl) {
-        return new Response(JSON.stringify({ error: "URL env var not set" }), { status: 500, headers: CORS });
-      }
-      let token = "";
-      let webhookPath = "";
-      if (botType === "creator") {
-        token = getCreatorBotToken();
-        webhookPath = "/api/telegram/creator-webhook";
-      } else if (botType === "fan") {
-        token = getFanBotToken();
-        webhookPath = "/api/telegram/fan-webhook";
-      } else {
-        return new Response(JSON.stringify({ error: "botType must be 'creator' or 'fan'" }), { status: 400, headers: CORS });
-      }
-      if (!token) {
-        return new Response(JSON.stringify({ error: `${botType} bot token not configured` }), { status: 400, headers: CORS });
-      }
-      const webhookUrl = `${siteUrl}${webhookPath}`;
-      const res = await fetch(`https://api.telegram.org/bot${token}/setWebhook`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: webhookUrl })
+      const tierOrder = { free: 0, vip: 1, elite: 2 };
+      const userLevel = tierOrder[userTier] || 0;
+      let filtered = items.map((i) => {
+        const itemLevel = tierOrder[i.tier] || 0;
+        if (userLevel >= itemLevel || userPurchases.includes(i.key)) return i;
+        return { key: i.key, title: i.title, tier: i.tier, type: i.type, createdAt: i.createdAt, price: i.price, category: i.category, locked: true };
       });
-      const data = await res.json();
-      return new Response(JSON.stringify({ success: true, webhookUrl, telegram: data }), { headers: CORS });
-    } catch (err) {
-      return new Response(JSON.stringify({ error: "Setup failed" }), { status: 500, headers: CORS });
-    }
-  }
-  if (path === "/notify" && req.method === "POST") {
-    const internalKey = req.headers.get("x-internal-key");
-    const expectedKey = getSecret();
-    if (internalKey !== expectedKey) {
-      return new Response(JSON.stringify({ error: "Forbidden" }), { status: 403, headers: CORS });
-    }
-    try {
-      const { message, chatId, botType } = await req.json();
-      const token = botType === "fan" ? getFanBotToken() : getCreatorBotToken();
-      const targetChat = chatId || getAdminChatId() || getCreatorChatId();
-      if (!token || !targetChat) {
-        return new Response(JSON.stringify({ skipped: true, reason: "Bot not configured" }), { headers: CORS });
+      if (search) {
+        filtered = filtered.filter(
+          (i) => (i.title || "").toLowerCase().includes(search) || (i.body || "").toLowerCase().includes(search) || (i.category || "").toLowerCase().includes(search)
+        );
       }
-      const sent = await sendTelegramMessage(token, targetChat, message);
-      return new Response(JSON.stringify({ success: true, sent }), { headers: CORS });
-    } catch (err) {
-      return new Response(JSON.stringify({ error: "Notify failed" }), { status: 500, headers: CORS });
-    }
-  }
-  if (path === "/stats" && req.method === "GET") {
-    const auth = req.headers.get("authorization");
-    let isAdmin = false;
-    if (auth) {
-      try {
-        const decoded = import_jsonwebtoken.default.verify(auth.replace("Bearer ", ""), getSecret());
-        if (decoded.isAdmin) isAdmin = true;
-      } catch {
+      if (category) {
+        filtered = filtered.filter((i) => (i.category || "").toLowerCase() === category);
       }
-    }
-    if (!isAdmin) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: CORS });
-    }
-    try {
-      const logStore = getStore("telegram-logs");
-      const escStore = getStore("telegram-escalations");
-      const [logBlobs, escBlobs] = await Promise.all([logStore.list(), escStore.list()]);
-      const recentLogs = [];
-      for (const blob of logBlobs.blobs.slice(-20)) {
-        try {
-          const log = await logStore.get(blob.key, { type: "json" });
-          if (log) recentLogs.push(log);
-        } catch {
-        }
+      if (sort === "oldest") {
+        filtered.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+      } else if (sort === "title") {
+        filtered.sort((a, b) => (a.title || "").localeCompare(b.title || ""));
+      } else {
+        filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
       }
-      recentLogs.sort((a, b) => (b.timestamp || "").localeCompare(a.timestamp || ""));
-      let faqHits = {};
-      let unanswered = [];
-      try {
-        const faqStore = getStore("telegram-faq-stats");
-        const hits = await faqStore.get("faq-hits", { type: "json" });
-        if (hits) faqHits = hits;
-        const unans = await faqStore.get("unanswered", { type: "json" });
-        if (unans?.questions) unanswered = unans.questions.slice(-20);
-      } catch {
-      }
+      const page = Math.max(1, parseInt(url.searchParams.get("page") || "1"));
+      const limit = Math.min(100, Math.max(1, parseInt(url.searchParams.get("limit") || "50")));
+      const total = filtered.length;
+      const paginated = filtered.slice((page - 1) * limit, page * limit);
       return new Response(JSON.stringify({
         success: true,
-        totalInteractions: logBlobs.blobs.length,
-        totalEscalations: escBlobs.blobs.length,
-        recentActivity: recentLogs.slice(0, 10),
-        faq: {
-          hits: faqHits,
-          unansweredQuestions: unanswered
-        },
-        botsConfigured: {
-          creator: !!getCreatorBotToken(),
-          fan: !!getFanBotToken()
-        }
+        content: paginated,
+        total,
+        page,
+        limit,
+        pages: Math.ceil(total / limit)
       }), { headers: CORS });
     } catch (err) {
-      return new Response(JSON.stringify({ error: "Stats failed" }), { status: 500, headers: CORS });
+      return new Response(JSON.stringify({ error: "Failed to load content" }), { status: 500, headers: CORS });
+    }
+  }
+  if (path.startsWith("/view/") && req.method === "GET") {
+    const key = path.replace("/view/", "");
+    try {
+      const item = await store.get(key, { type: "json" });
+      if (!item) return new Response(JSON.stringify({ error: "Not found" }), { status: 404, headers: CORS });
+      const jwtUser = verifyUser(req);
+      let userTier = "free";
+      let purchased = false;
+      if (jwtUser?.email) {
+        try {
+          const userStore = getStore("users");
+          const userKey = jwtUser.email.toLowerCase().replace(/[^a-z0-9@._-]/g, "");
+          const freshUser = await userStore.get(userKey, { type: "json" });
+          if (freshUser) {
+            userTier = freshUser.tier || "free";
+            purchased = (freshUser.purchases || []).some((p) => p.postId === key);
+          }
+        } catch (err) {
+          console.error("User lookup for view access:", err);
+        }
+      }
+      if (!purchased) {
+        if (item.tier === "vip" && userTier === "free") {
+          return new Response(JSON.stringify({ error: "VIP content", locked: true, tier: "vip" }), { status: 403, headers: CORS });
+        }
+        if (item.tier === "elite" && userTier !== "elite") {
+          return new Response(JSON.stringify({ error: "Elite content", locked: true, tier: "elite" }), { status: 403, headers: CORS });
+        }
+      }
+      return new Response(JSON.stringify({ success: true, content: item }), { headers: CORS });
+    } catch (err) {
+      return new Response(JSON.stringify({ error: "Failed" }), { status: 500, headers: CORS });
+    }
+  }
+  if (path === "/save" && req.method === "POST") {
+    if (!verifyAdmin(req)) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: CORS });
+    try {
+      const { key, title, body, tier, type, imageUrl, draft, price } = await req.json();
+      if (!title || !body) return new Response(JSON.stringify({ error: "Title and body required" }), { status: 400, headers: CORS });
+      const contentKey = key || `content-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`;
+      let existing = null;
+      try {
+        existing = await store.get(contentKey, { type: "json" });
+      } catch (err) {
+        console.error("Content lookup:", err);
+      }
+      const item = {
+        title,
+        body,
+        tier: tier || "free",
+        type: type || "post",
+        // post, gallery, announcement
+        imageUrl: imageUrl || "",
+        price: price ? parseFloat(price) : null,
+        draft: draft || false,
+        createdAt: existing?.createdAt || (/* @__PURE__ */ new Date()).toISOString(),
+        updatedAt: (/* @__PURE__ */ new Date()).toISOString()
+      };
+      await store.setJSON(contentKey, item);
+      return new Response(JSON.stringify({ success: true, key: contentKey }), { headers: CORS });
+    } catch (err) {
+      return new Response(JSON.stringify({ error: "Save failed" }), { status: 500, headers: CORS });
+    }
+  }
+  if (path === "/delete" && req.method === "POST") {
+    if (!verifyAdmin(req)) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: CORS });
+    try {
+      const { key } = await req.json();
+      await store.delete(key);
+      return new Response(JSON.stringify({ success: true }), { headers: CORS });
+    } catch (err) {
+      return new Response(JSON.stringify({ error: "Delete failed" }), { status: 500, headers: CORS });
+    }
+  }
+  if (path === "/admin-list" && req.method === "GET") {
+    if (!verifyAdmin(req)) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: CORS });
+    try {
+      const { blobs } = await store.list();
+      const items = [];
+      for (const blob of blobs) {
+        try {
+          const item = await store.get(blob.key, { type: "json" });
+          if (item) items.push({ ...item, key: blob.key });
+        } catch (err) {
+          console.error("Admin content read error:", err);
+        }
+      }
+      items.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      return new Response(JSON.stringify({ success: true, content: items }), { headers: CORS });
+    } catch (err) {
+      return new Response(JSON.stringify({ error: "Failed" }), { status: 500, headers: CORS });
     }
   }
   return new Response(JSON.stringify({ error: "Not found" }), { status: 404, headers: CORS });
 };
 var config = {
-  path: ["/api/telegram", "/api/telegram/*"]
+  path: ["/api/content", "/api/content/*"]
 };
-export {
-  config,
-  telegram_bot_default as default
-};
+// Annotate the CommonJS export names for ESM import in node:
+0 && (module.exports = {
+  config
+});
 /*! Bundled license information:
 
 safe-buffer/index.js:
   (*! safe-buffer. MIT License. Feross Aboukhadijeh <https://feross.org/opensource> *)
 */
+
+;(function() {
+  var _orig = module.exports.default;
+  if (typeof _orig !== 'function') return;
+  module.exports.handler = async function(event, context) {
+    var url = event.rawUrl || ('https://' + ((event.headers && event.headers.host) || 'localhost') + (event.path || '/'));
+    var init = { method: event.httpMethod || 'GET', headers: event.headers || {} };
+    if (event.body) {
+      init.body = event.isBase64Encoded ? Buffer.from(event.body, 'base64').toString() : event.body;
+    }
+    var req = new Request(url, init);
+    var res = await _orig(req, context);
+    var body = await res.text();
+    var responseHeaders = {};
+    res.headers.forEach(function(v, k) { responseHeaders[k] = v; });
+    return { statusCode: res.status, headers: responseHeaders, body: body };
+  };
+})();
+
