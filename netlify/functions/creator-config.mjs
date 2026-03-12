@@ -4,12 +4,14 @@ var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __getOwnPropNames = Object.getOwnPropertyNames;
 var __getProtoOf = Object.getPrototypeOf;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
-var __commonJS = (cb, mod) => function __require() {
+var __require = /* @__PURE__ */ ((x) => typeof require !== "undefined" ? require : typeof Proxy !== "undefined" ? new Proxy(x, {
+  get: (a, b) => (typeof require !== "undefined" ? require : a)[b]
+}) : x)(function(x) {
+  if (typeof require !== "undefined") return require.apply(this, arguments);
+  throw Error('Dynamic require of "' + x + '" is not supported');
+});
+var __commonJS = (cb, mod) => function __require2() {
   return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
-};
-var __export = (target, all) => {
-  for (var name in all)
-    __defProp(target, name, { get: all[name], enumerable: true });
 };
 var __copyProps = (to, from, except, desc) => {
   if (from && typeof from === "object" || typeof from === "function") {
@@ -27,12 +29,11 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
   isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
   mod
 ));
-var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
 // node_modules/safe-buffer/index.js
 var require_safe_buffer = __commonJS({
-  "node_modules/safe-buffer/index.js"(exports2, module2) {
-    var buffer = require("buffer");
+  "node_modules/safe-buffer/index.js"(exports, module) {
+    var buffer = __require("buffer");
     var Buffer2 = buffer.Buffer;
     function copyProps(src, dst) {
       for (var key in src) {
@@ -40,10 +41,10 @@ var require_safe_buffer = __commonJS({
       }
     }
     if (Buffer2.from && Buffer2.alloc && Buffer2.allocUnsafe && Buffer2.allocUnsafeSlow) {
-      module2.exports = buffer;
+      module.exports = buffer;
     } else {
-      copyProps(buffer, exports2);
-      exports2.Buffer = SafeBuffer;
+      copyProps(buffer, exports);
+      exports.Buffer = SafeBuffer;
     }
     function SafeBuffer(arg, encodingOrOffset, length) {
       return Buffer2(arg, encodingOrOffset, length);
@@ -89,10 +90,10 @@ var require_safe_buffer = __commonJS({
 
 // node_modules/jws/lib/data-stream.js
 var require_data_stream = __commonJS({
-  "node_modules/jws/lib/data-stream.js"(exports2, module2) {
+  "node_modules/jws/lib/data-stream.js"(exports, module) {
     var Buffer2 = require_safe_buffer().Buffer;
-    var Stream = require("stream");
-    var util = require("util");
+    var Stream = __require("stream");
+    var util = __require("util");
     function DataStream(data) {
       this.buffer = null;
       this.writable = true;
@@ -131,13 +132,13 @@ var require_data_stream = __commonJS({
       this.writable = false;
       this.readable = false;
     };
-    module2.exports = DataStream;
+    module.exports = DataStream;
   }
 });
 
 // node_modules/ecdsa-sig-formatter/src/param-bytes-for-alg.js
 var require_param_bytes_for_alg = __commonJS({
-  "node_modules/ecdsa-sig-formatter/src/param-bytes-for-alg.js"(exports2, module2) {
+  "node_modules/ecdsa-sig-formatter/src/param-bytes-for-alg.js"(exports, module) {
     "use strict";
     function getParamSize(keySize) {
       var result = (keySize / 8 | 0) + (keySize % 8 === 0 ? 0 : 1);
@@ -155,13 +156,13 @@ var require_param_bytes_for_alg = __commonJS({
       }
       throw new Error('Unknown algorithm "' + alg + '"');
     }
-    module2.exports = getParamBytesForAlg;
+    module.exports = getParamBytesForAlg;
   }
 });
 
 // node_modules/ecdsa-sig-formatter/src/ecdsa-sig-formatter.js
 var require_ecdsa_sig_formatter = __commonJS({
-  "node_modules/ecdsa-sig-formatter/src/ecdsa-sig-formatter.js"(exports2, module2) {
+  "node_modules/ecdsa-sig-formatter/src/ecdsa-sig-formatter.js"(exports, module) {
     "use strict";
     var Buffer2 = require_safe_buffer().Buffer;
     var getParamBytesForAlg = require_param_bytes_for_alg();
@@ -292,7 +293,7 @@ var require_ecdsa_sig_formatter = __commonJS({
       }
       return dst;
     }
-    module2.exports = {
+    module.exports = {
       derToJose,
       joseToDer
     };
@@ -301,11 +302,11 @@ var require_ecdsa_sig_formatter = __commonJS({
 
 // node_modules/buffer-equal-constant-time/index.js
 var require_buffer_equal_constant_time = __commonJS({
-  "node_modules/buffer-equal-constant-time/index.js"(exports2, module2) {
+  "node_modules/buffer-equal-constant-time/index.js"(exports, module) {
     "use strict";
-    var Buffer2 = require("buffer").Buffer;
-    var SlowBuffer = require("buffer").SlowBuffer;
-    module2.exports = bufferEq;
+    var Buffer2 = __require("buffer").Buffer;
+    var SlowBuffer = __require("buffer").SlowBuffer;
+    module.exports = bufferEq;
     function bufferEq(a, b) {
       if (!Buffer2.isBuffer(a) || !Buffer2.isBuffer(b)) {
         return false;
@@ -335,11 +336,11 @@ var require_buffer_equal_constant_time = __commonJS({
 
 // node_modules/jwa/index.js
 var require_jwa = __commonJS({
-  "node_modules/jwa/index.js"(exports2, module2) {
+  "node_modules/jwa/index.js"(exports, module) {
     var Buffer2 = require_safe_buffer().Buffer;
-    var crypto = require("crypto");
+    var crypto = __require("crypto");
     var formatEcdsa = require_ecdsa_sig_formatter();
-    var util = require("util");
+    var util = __require("util");
     var MSG_INVALID_ALGORITHM = '"%s" is not a valid algorithm.\n  Supported algorithms are:\n  "HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "PS256", "PS384", "PS512", "ES256", "ES384", "ES512" and "none".';
     var MSG_INVALID_SECRET = "secret must be a string or buffer";
     var MSG_INVALID_VERIFIER_KEY = "key must be a string or a buffer";
@@ -529,7 +530,7 @@ var require_jwa = __commonJS({
         return signature === "";
       };
     }
-    module2.exports = function jwa(algorithm) {
+    module.exports = function jwa(algorithm) {
       var signerFactories = {
         hs: createHmacSigner,
         rs: createKeySigner,
@@ -559,9 +560,9 @@ var require_jwa = __commonJS({
 
 // node_modules/jws/lib/tostring.js
 var require_tostring = __commonJS({
-  "node_modules/jws/lib/tostring.js"(exports2, module2) {
-    var Buffer2 = require("buffer").Buffer;
-    module2.exports = function toString(obj) {
+  "node_modules/jws/lib/tostring.js"(exports, module) {
+    var Buffer2 = __require("buffer").Buffer;
+    module.exports = function toString(obj) {
       if (typeof obj === "string")
         return obj;
       if (typeof obj === "number" || Buffer2.isBuffer(obj))
@@ -573,13 +574,13 @@ var require_tostring = __commonJS({
 
 // node_modules/jws/lib/sign-stream.js
 var require_sign_stream = __commonJS({
-  "node_modules/jws/lib/sign-stream.js"(exports2, module2) {
+  "node_modules/jws/lib/sign-stream.js"(exports, module) {
     var Buffer2 = require_safe_buffer().Buffer;
     var DataStream = require_data_stream();
     var jwa = require_jwa();
-    var Stream = require("stream");
+    var Stream = __require("stream");
     var toString = require_tostring();
-    var util = require("util");
+    var util = __require("util");
     function base64url(string, encoding) {
       return Buffer2.from(string, encoding).toString("base64").replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_");
     }
@@ -642,19 +643,19 @@ var require_sign_stream = __commonJS({
       }
     };
     SignStream.sign = jwsSign;
-    module2.exports = SignStream;
+    module.exports = SignStream;
   }
 });
 
 // node_modules/jws/lib/verify-stream.js
 var require_verify_stream = __commonJS({
-  "node_modules/jws/lib/verify-stream.js"(exports2, module2) {
+  "node_modules/jws/lib/verify-stream.js"(exports, module) {
     var Buffer2 = require_safe_buffer().Buffer;
     var DataStream = require_data_stream();
     var jwa = require_jwa();
-    var Stream = require("stream");
+    var Stream = __require("stream");
     var toString = require_tostring();
-    var util = require("util");
+    var util = __require("util");
     var JWS_REGEX = /^[a-zA-Z0-9\-_]+?\.[a-zA-Z0-9\-_]+?\.([a-zA-Z0-9\-_]+)?$/;
     function isObject(thing) {
       return Object.prototype.toString.call(thing) === "[object Object]";
@@ -757,13 +758,13 @@ var require_verify_stream = __commonJS({
     VerifyStream.decode = jwsDecode;
     VerifyStream.isValid = isValidJws;
     VerifyStream.verify = jwsVerify;
-    module2.exports = VerifyStream;
+    module.exports = VerifyStream;
   }
 });
 
 // node_modules/jws/index.js
 var require_jws = __commonJS({
-  "node_modules/jws/index.js"(exports2) {
+  "node_modules/jws/index.js"(exports) {
     var SignStream = require_sign_stream();
     var VerifyStream = require_verify_stream();
     var ALGORITHMS = [
@@ -780,15 +781,15 @@ var require_jws = __commonJS({
       "ES384",
       "ES512"
     ];
-    exports2.ALGORITHMS = ALGORITHMS;
-    exports2.sign = SignStream.sign;
-    exports2.verify = VerifyStream.verify;
-    exports2.decode = VerifyStream.decode;
-    exports2.isValid = VerifyStream.isValid;
-    exports2.createSign = function createSign(opts) {
+    exports.ALGORITHMS = ALGORITHMS;
+    exports.sign = SignStream.sign;
+    exports.verify = VerifyStream.verify;
+    exports.decode = VerifyStream.decode;
+    exports.isValid = VerifyStream.isValid;
+    exports.createSign = function createSign(opts) {
       return new SignStream(opts);
     };
-    exports2.createVerify = function createVerify(opts) {
+    exports.createVerify = function createVerify(opts) {
       return new VerifyStream(opts);
     };
   }
@@ -796,9 +797,9 @@ var require_jws = __commonJS({
 
 // node_modules/jsonwebtoken/decode.js
 var require_decode = __commonJS({
-  "node_modules/jsonwebtoken/decode.js"(exports2, module2) {
+  "node_modules/jsonwebtoken/decode.js"(exports, module) {
     var jws = require_jws();
-    module2.exports = function(jwt2, options) {
+    module.exports = function(jwt2, options) {
       options = options || {};
       var decoded = jws.decode(jwt2, options);
       if (!decoded) {
@@ -828,7 +829,7 @@ var require_decode = __commonJS({
 
 // node_modules/jsonwebtoken/lib/JsonWebTokenError.js
 var require_JsonWebTokenError = __commonJS({
-  "node_modules/jsonwebtoken/lib/JsonWebTokenError.js"(exports2, module2) {
+  "node_modules/jsonwebtoken/lib/JsonWebTokenError.js"(exports, module) {
     var JsonWebTokenError = function(message, error) {
       Error.call(this, message);
       if (Error.captureStackTrace) {
@@ -840,13 +841,13 @@ var require_JsonWebTokenError = __commonJS({
     };
     JsonWebTokenError.prototype = Object.create(Error.prototype);
     JsonWebTokenError.prototype.constructor = JsonWebTokenError;
-    module2.exports = JsonWebTokenError;
+    module.exports = JsonWebTokenError;
   }
 });
 
 // node_modules/jsonwebtoken/lib/NotBeforeError.js
 var require_NotBeforeError = __commonJS({
-  "node_modules/jsonwebtoken/lib/NotBeforeError.js"(exports2, module2) {
+  "node_modules/jsonwebtoken/lib/NotBeforeError.js"(exports, module) {
     var JsonWebTokenError = require_JsonWebTokenError();
     var NotBeforeError = function(message, date) {
       JsonWebTokenError.call(this, message);
@@ -855,13 +856,13 @@ var require_NotBeforeError = __commonJS({
     };
     NotBeforeError.prototype = Object.create(JsonWebTokenError.prototype);
     NotBeforeError.prototype.constructor = NotBeforeError;
-    module2.exports = NotBeforeError;
+    module.exports = NotBeforeError;
   }
 });
 
 // node_modules/jsonwebtoken/lib/TokenExpiredError.js
 var require_TokenExpiredError = __commonJS({
-  "node_modules/jsonwebtoken/lib/TokenExpiredError.js"(exports2, module2) {
+  "node_modules/jsonwebtoken/lib/TokenExpiredError.js"(exports, module) {
     var JsonWebTokenError = require_JsonWebTokenError();
     var TokenExpiredError = function(message, expiredAt) {
       JsonWebTokenError.call(this, message);
@@ -870,20 +871,20 @@ var require_TokenExpiredError = __commonJS({
     };
     TokenExpiredError.prototype = Object.create(JsonWebTokenError.prototype);
     TokenExpiredError.prototype.constructor = TokenExpiredError;
-    module2.exports = TokenExpiredError;
+    module.exports = TokenExpiredError;
   }
 });
 
 // node_modules/ms/index.js
 var require_ms = __commonJS({
-  "node_modules/ms/index.js"(exports2, module2) {
+  "node_modules/ms/index.js"(exports, module) {
     var s = 1e3;
     var m = s * 60;
     var h = m * 60;
     var d = h * 24;
     var w = d * 7;
     var y = d * 365.25;
-    module2.exports = function(val, options) {
+    module.exports = function(val, options) {
       options = options || {};
       var type = typeof val;
       if (type === "string" && val.length > 0) {
@@ -992,9 +993,9 @@ var require_ms = __commonJS({
 
 // node_modules/jsonwebtoken/lib/timespan.js
 var require_timespan = __commonJS({
-  "node_modules/jsonwebtoken/lib/timespan.js"(exports2, module2) {
+  "node_modules/jsonwebtoken/lib/timespan.js"(exports, module) {
     var ms = require_ms();
-    module2.exports = function(time, iat) {
+    module.exports = function(time, iat) {
       var timestamp = iat || Math.floor(Date.now() / 1e3);
       if (typeof time === "string") {
         var milliseconds = ms(time);
@@ -1013,7 +1014,7 @@ var require_timespan = __commonJS({
 
 // node_modules/semver/internal/constants.js
 var require_constants = __commonJS({
-  "node_modules/semver/internal/constants.js"(exports2, module2) {
+  "node_modules/semver/internal/constants.js"(exports, module) {
     "use strict";
     var SEMVER_SPEC_VERSION = "2.0.0";
     var MAX_LENGTH = 256;
@@ -1030,7 +1031,7 @@ var require_constants = __commonJS({
       "prepatch",
       "prerelease"
     ];
-    module2.exports = {
+    module.exports = {
       MAX_LENGTH,
       MAX_SAFE_COMPONENT_LENGTH,
       MAX_SAFE_BUILD_LENGTH,
@@ -1045,17 +1046,17 @@ var require_constants = __commonJS({
 
 // node_modules/semver/internal/debug.js
 var require_debug = __commonJS({
-  "node_modules/semver/internal/debug.js"(exports2, module2) {
+  "node_modules/semver/internal/debug.js"(exports, module) {
     "use strict";
     var debug = typeof process === "object" && process.env && process.env.NODE_DEBUG && /\bsemver\b/i.test(process.env.NODE_DEBUG) ? (...args) => console.error("SEMVER", ...args) : () => {
     };
-    module2.exports = debug;
+    module.exports = debug;
   }
 });
 
 // node_modules/semver/internal/re.js
 var require_re = __commonJS({
-  "node_modules/semver/internal/re.js"(exports2, module2) {
+  "node_modules/semver/internal/re.js"(exports, module) {
     "use strict";
     var {
       MAX_SAFE_COMPONENT_LENGTH,
@@ -1063,12 +1064,12 @@ var require_re = __commonJS({
       MAX_LENGTH
     } = require_constants();
     var debug = require_debug();
-    exports2 = module2.exports = {};
-    var re = exports2.re = [];
-    var safeRe = exports2.safeRe = [];
-    var src = exports2.src = [];
-    var safeSrc = exports2.safeSrc = [];
-    var t = exports2.t = {};
+    exports = module.exports = {};
+    var re = exports.re = [];
+    var safeRe = exports.safeRe = [];
+    var src = exports.src = [];
+    var safeSrc = exports.safeSrc = [];
+    var t = exports.t = {};
     var R = 0;
     var LETTERDASHNUMBER = "[a-zA-Z0-9-]";
     var safeRegexReplacements = [
@@ -1121,18 +1122,18 @@ var require_re = __commonJS({
     createToken("COERCERTLFULL", src[t.COERCEFULL], true);
     createToken("LONETILDE", "(?:~>?)");
     createToken("TILDETRIM", `(\\s*)${src[t.LONETILDE]}\\s+`, true);
-    exports2.tildeTrimReplace = "$1~";
+    exports.tildeTrimReplace = "$1~";
     createToken("TILDE", `^${src[t.LONETILDE]}${src[t.XRANGEPLAIN]}$`);
     createToken("TILDELOOSE", `^${src[t.LONETILDE]}${src[t.XRANGEPLAINLOOSE]}$`);
     createToken("LONECARET", "(?:\\^)");
     createToken("CARETTRIM", `(\\s*)${src[t.LONECARET]}\\s+`, true);
-    exports2.caretTrimReplace = "$1^";
+    exports.caretTrimReplace = "$1^";
     createToken("CARET", `^${src[t.LONECARET]}${src[t.XRANGEPLAIN]}$`);
     createToken("CARETLOOSE", `^${src[t.LONECARET]}${src[t.XRANGEPLAINLOOSE]}$`);
     createToken("COMPARATORLOOSE", `^${src[t.GTLT]}\\s*(${src[t.LOOSEPLAIN]})$|^$`);
     createToken("COMPARATOR", `^${src[t.GTLT]}\\s*(${src[t.FULLPLAIN]})$|^$`);
     createToken("COMPARATORTRIM", `(\\s*)${src[t.GTLT]}\\s*(${src[t.LOOSEPLAIN]}|${src[t.XRANGEPLAIN]})`, true);
-    exports2.comparatorTrimReplace = "$1$2$3";
+    exports.comparatorTrimReplace = "$1$2$3";
     createToken("HYPHENRANGE", `^\\s*(${src[t.XRANGEPLAIN]})\\s+-\\s+(${src[t.XRANGEPLAIN]})\\s*$`);
     createToken("HYPHENRANGELOOSE", `^\\s*(${src[t.XRANGEPLAINLOOSE]})\\s+-\\s+(${src[t.XRANGEPLAINLOOSE]})\\s*$`);
     createToken("STAR", "(<|>)?=?\\s*\\*");
@@ -1143,7 +1144,7 @@ var require_re = __commonJS({
 
 // node_modules/semver/internal/parse-options.js
 var require_parse_options = __commonJS({
-  "node_modules/semver/internal/parse-options.js"(exports2, module2) {
+  "node_modules/semver/internal/parse-options.js"(exports, module) {
     "use strict";
     var looseOption = Object.freeze({ loose: true });
     var emptyOpts = Object.freeze({});
@@ -1156,13 +1157,13 @@ var require_parse_options = __commonJS({
       }
       return options;
     };
-    module2.exports = parseOptions;
+    module.exports = parseOptions;
   }
 });
 
 // node_modules/semver/internal/identifiers.js
 var require_identifiers = __commonJS({
-  "node_modules/semver/internal/identifiers.js"(exports2, module2) {
+  "node_modules/semver/internal/identifiers.js"(exports, module) {
     "use strict";
     var numeric = /^[0-9]+$/;
     var compareIdentifiers = (a, b) => {
@@ -1178,7 +1179,7 @@ var require_identifiers = __commonJS({
       return a === b ? 0 : anum && !bnum ? -1 : bnum && !anum ? 1 : a < b ? -1 : 1;
     };
     var rcompareIdentifiers = (a, b) => compareIdentifiers(b, a);
-    module2.exports = {
+    module.exports = {
       compareIdentifiers,
       rcompareIdentifiers
     };
@@ -1187,7 +1188,7 @@ var require_identifiers = __commonJS({
 
 // node_modules/semver/classes/semver.js
 var require_semver = __commonJS({
-  "node_modules/semver/classes/semver.js"(exports2, module2) {
+  "node_modules/semver/classes/semver.js"(exports, module) {
     "use strict";
     var debug = require_debug();
     var { MAX_LENGTH, MAX_SAFE_INTEGER } = require_constants();
@@ -1460,13 +1461,13 @@ var require_semver = __commonJS({
         return this;
       }
     };
-    module2.exports = SemVer;
+    module.exports = SemVer;
   }
 });
 
 // node_modules/semver/functions/parse.js
 var require_parse = __commonJS({
-  "node_modules/semver/functions/parse.js"(exports2, module2) {
+  "node_modules/semver/functions/parse.js"(exports, module) {
     "use strict";
     var SemVer = require_semver();
     var parse = (version, options, throwErrors = false) => {
@@ -1482,39 +1483,39 @@ var require_parse = __commonJS({
         throw er;
       }
     };
-    module2.exports = parse;
+    module.exports = parse;
   }
 });
 
 // node_modules/semver/functions/valid.js
 var require_valid = __commonJS({
-  "node_modules/semver/functions/valid.js"(exports2, module2) {
+  "node_modules/semver/functions/valid.js"(exports, module) {
     "use strict";
     var parse = require_parse();
     var valid = (version, options) => {
       const v = parse(version, options);
       return v ? v.version : null;
     };
-    module2.exports = valid;
+    module.exports = valid;
   }
 });
 
 // node_modules/semver/functions/clean.js
 var require_clean = __commonJS({
-  "node_modules/semver/functions/clean.js"(exports2, module2) {
+  "node_modules/semver/functions/clean.js"(exports, module) {
     "use strict";
     var parse = require_parse();
     var clean = (version, options) => {
       const s = parse(version.trim().replace(/^[=v]+/, ""), options);
       return s ? s.version : null;
     };
-    module2.exports = clean;
+    module.exports = clean;
   }
 });
 
 // node_modules/semver/functions/inc.js
 var require_inc = __commonJS({
-  "node_modules/semver/functions/inc.js"(exports2, module2) {
+  "node_modules/semver/functions/inc.js"(exports, module) {
     "use strict";
     var SemVer = require_semver();
     var inc = (version, release, options, identifier, identifierBase) => {
@@ -1532,13 +1533,13 @@ var require_inc = __commonJS({
         return null;
       }
     };
-    module2.exports = inc;
+    module.exports = inc;
   }
 });
 
 // node_modules/semver/functions/diff.js
 var require_diff = __commonJS({
-  "node_modules/semver/functions/diff.js"(exports2, module2) {
+  "node_modules/semver/functions/diff.js"(exports, module) {
     "use strict";
     var parse = require_parse();
     var diff = (version1, version2) => {
@@ -1576,86 +1577,86 @@ var require_diff = __commonJS({
       }
       return "prerelease";
     };
-    module2.exports = diff;
+    module.exports = diff;
   }
 });
 
 // node_modules/semver/functions/major.js
 var require_major = __commonJS({
-  "node_modules/semver/functions/major.js"(exports2, module2) {
+  "node_modules/semver/functions/major.js"(exports, module) {
     "use strict";
     var SemVer = require_semver();
     var major = (a, loose) => new SemVer(a, loose).major;
-    module2.exports = major;
+    module.exports = major;
   }
 });
 
 // node_modules/semver/functions/minor.js
 var require_minor = __commonJS({
-  "node_modules/semver/functions/minor.js"(exports2, module2) {
+  "node_modules/semver/functions/minor.js"(exports, module) {
     "use strict";
     var SemVer = require_semver();
     var minor = (a, loose) => new SemVer(a, loose).minor;
-    module2.exports = minor;
+    module.exports = minor;
   }
 });
 
 // node_modules/semver/functions/patch.js
 var require_patch = __commonJS({
-  "node_modules/semver/functions/patch.js"(exports2, module2) {
+  "node_modules/semver/functions/patch.js"(exports, module) {
     "use strict";
     var SemVer = require_semver();
     var patch = (a, loose) => new SemVer(a, loose).patch;
-    module2.exports = patch;
+    module.exports = patch;
   }
 });
 
 // node_modules/semver/functions/prerelease.js
 var require_prerelease = __commonJS({
-  "node_modules/semver/functions/prerelease.js"(exports2, module2) {
+  "node_modules/semver/functions/prerelease.js"(exports, module) {
     "use strict";
     var parse = require_parse();
     var prerelease = (version, options) => {
       const parsed = parse(version, options);
       return parsed && parsed.prerelease.length ? parsed.prerelease : null;
     };
-    module2.exports = prerelease;
+    module.exports = prerelease;
   }
 });
 
 // node_modules/semver/functions/compare.js
 var require_compare = __commonJS({
-  "node_modules/semver/functions/compare.js"(exports2, module2) {
+  "node_modules/semver/functions/compare.js"(exports, module) {
     "use strict";
     var SemVer = require_semver();
     var compare = (a, b, loose) => new SemVer(a, loose).compare(new SemVer(b, loose));
-    module2.exports = compare;
+    module.exports = compare;
   }
 });
 
 // node_modules/semver/functions/rcompare.js
 var require_rcompare = __commonJS({
-  "node_modules/semver/functions/rcompare.js"(exports2, module2) {
+  "node_modules/semver/functions/rcompare.js"(exports, module) {
     "use strict";
     var compare = require_compare();
     var rcompare = (a, b, loose) => compare(b, a, loose);
-    module2.exports = rcompare;
+    module.exports = rcompare;
   }
 });
 
 // node_modules/semver/functions/compare-loose.js
 var require_compare_loose = __commonJS({
-  "node_modules/semver/functions/compare-loose.js"(exports2, module2) {
+  "node_modules/semver/functions/compare-loose.js"(exports, module) {
     "use strict";
     var compare = require_compare();
     var compareLoose = (a, b) => compare(a, b, true);
-    module2.exports = compareLoose;
+    module.exports = compareLoose;
   }
 });
 
 // node_modules/semver/functions/compare-build.js
 var require_compare_build = __commonJS({
-  "node_modules/semver/functions/compare-build.js"(exports2, module2) {
+  "node_modules/semver/functions/compare-build.js"(exports, module) {
     "use strict";
     var SemVer = require_semver();
     var compareBuild = (a, b, loose) => {
@@ -1663,93 +1664,93 @@ var require_compare_build = __commonJS({
       const versionB = new SemVer(b, loose);
       return versionA.compare(versionB) || versionA.compareBuild(versionB);
     };
-    module2.exports = compareBuild;
+    module.exports = compareBuild;
   }
 });
 
 // node_modules/semver/functions/sort.js
 var require_sort = __commonJS({
-  "node_modules/semver/functions/sort.js"(exports2, module2) {
+  "node_modules/semver/functions/sort.js"(exports, module) {
     "use strict";
     var compareBuild = require_compare_build();
     var sort = (list, loose) => list.sort((a, b) => compareBuild(a, b, loose));
-    module2.exports = sort;
+    module.exports = sort;
   }
 });
 
 // node_modules/semver/functions/rsort.js
 var require_rsort = __commonJS({
-  "node_modules/semver/functions/rsort.js"(exports2, module2) {
+  "node_modules/semver/functions/rsort.js"(exports, module) {
     "use strict";
     var compareBuild = require_compare_build();
     var rsort = (list, loose) => list.sort((a, b) => compareBuild(b, a, loose));
-    module2.exports = rsort;
+    module.exports = rsort;
   }
 });
 
 // node_modules/semver/functions/gt.js
 var require_gt = __commonJS({
-  "node_modules/semver/functions/gt.js"(exports2, module2) {
+  "node_modules/semver/functions/gt.js"(exports, module) {
     "use strict";
     var compare = require_compare();
     var gt = (a, b, loose) => compare(a, b, loose) > 0;
-    module2.exports = gt;
+    module.exports = gt;
   }
 });
 
 // node_modules/semver/functions/lt.js
 var require_lt = __commonJS({
-  "node_modules/semver/functions/lt.js"(exports2, module2) {
+  "node_modules/semver/functions/lt.js"(exports, module) {
     "use strict";
     var compare = require_compare();
     var lt = (a, b, loose) => compare(a, b, loose) < 0;
-    module2.exports = lt;
+    module.exports = lt;
   }
 });
 
 // node_modules/semver/functions/eq.js
 var require_eq = __commonJS({
-  "node_modules/semver/functions/eq.js"(exports2, module2) {
+  "node_modules/semver/functions/eq.js"(exports, module) {
     "use strict";
     var compare = require_compare();
     var eq = (a, b, loose) => compare(a, b, loose) === 0;
-    module2.exports = eq;
+    module.exports = eq;
   }
 });
 
 // node_modules/semver/functions/neq.js
 var require_neq = __commonJS({
-  "node_modules/semver/functions/neq.js"(exports2, module2) {
+  "node_modules/semver/functions/neq.js"(exports, module) {
     "use strict";
     var compare = require_compare();
     var neq = (a, b, loose) => compare(a, b, loose) !== 0;
-    module2.exports = neq;
+    module.exports = neq;
   }
 });
 
 // node_modules/semver/functions/gte.js
 var require_gte = __commonJS({
-  "node_modules/semver/functions/gte.js"(exports2, module2) {
+  "node_modules/semver/functions/gte.js"(exports, module) {
     "use strict";
     var compare = require_compare();
     var gte = (a, b, loose) => compare(a, b, loose) >= 0;
-    module2.exports = gte;
+    module.exports = gte;
   }
 });
 
 // node_modules/semver/functions/lte.js
 var require_lte = __commonJS({
-  "node_modules/semver/functions/lte.js"(exports2, module2) {
+  "node_modules/semver/functions/lte.js"(exports, module) {
     "use strict";
     var compare = require_compare();
     var lte = (a, b, loose) => compare(a, b, loose) <= 0;
-    module2.exports = lte;
+    module.exports = lte;
   }
 });
 
 // node_modules/semver/functions/cmp.js
 var require_cmp = __commonJS({
-  "node_modules/semver/functions/cmp.js"(exports2, module2) {
+  "node_modules/semver/functions/cmp.js"(exports, module) {
     "use strict";
     var eq = require_eq();
     var neq = require_neq();
@@ -1793,13 +1794,13 @@ var require_cmp = __commonJS({
           throw new TypeError(`Invalid operator: ${op}`);
       }
     };
-    module2.exports = cmp;
+    module.exports = cmp;
   }
 });
 
 // node_modules/semver/functions/coerce.js
 var require_coerce = __commonJS({
-  "node_modules/semver/functions/coerce.js"(exports2, module2) {
+  "node_modules/semver/functions/coerce.js"(exports, module) {
     "use strict";
     var SemVer = require_semver();
     var parse = require_parse();
@@ -1839,13 +1840,13 @@ var require_coerce = __commonJS({
       const build = options.includePrerelease && match[6] ? `+${match[6]}` : "";
       return parse(`${major}.${minor}.${patch}${prerelease}${build}`, options);
     };
-    module2.exports = coerce;
+    module.exports = coerce;
   }
 });
 
 // node_modules/semver/internal/lrucache.js
 var require_lrucache = __commonJS({
-  "node_modules/semver/internal/lrucache.js"(exports2, module2) {
+  "node_modules/semver/internal/lrucache.js"(exports, module) {
     "use strict";
     var LRUCache = class {
       constructor() {
@@ -1877,13 +1878,13 @@ var require_lrucache = __commonJS({
         return this;
       }
     };
-    module2.exports = LRUCache;
+    module.exports = LRUCache;
   }
 });
 
 // node_modules/semver/classes/range.js
 var require_range = __commonJS({
-  "node_modules/semver/classes/range.js"(exports2, module2) {
+  "node_modules/semver/classes/range.js"(exports, module) {
     "use strict";
     var SPACE_CHARACTERS = /\s+/g;
     var Range = class _Range {
@@ -2024,7 +2025,7 @@ var require_range = __commonJS({
         return false;
       }
     };
-    module2.exports = Range;
+    module.exports = Range;
     var LRU = require_lrucache();
     var cache = new LRU();
     var parseOptions = require_parse_options();
@@ -2260,7 +2261,7 @@ var require_range = __commonJS({
 
 // node_modules/semver/classes/comparator.js
 var require_comparator = __commonJS({
-  "node_modules/semver/classes/comparator.js"(exports2, module2) {
+  "node_modules/semver/classes/comparator.js"(exports, module) {
     "use strict";
     var ANY = Symbol("SemVer ANY");
     var Comparator = class _Comparator {
@@ -2361,7 +2362,7 @@ var require_comparator = __commonJS({
         return false;
       }
     };
-    module2.exports = Comparator;
+    module.exports = Comparator;
     var parseOptions = require_parse_options();
     var { safeRe: re, t } = require_re();
     var cmp = require_cmp();
@@ -2373,7 +2374,7 @@ var require_comparator = __commonJS({
 
 // node_modules/semver/functions/satisfies.js
 var require_satisfies = __commonJS({
-  "node_modules/semver/functions/satisfies.js"(exports2, module2) {
+  "node_modules/semver/functions/satisfies.js"(exports, module) {
     "use strict";
     var Range = require_range();
     var satisfies = (version, range, options) => {
@@ -2384,23 +2385,23 @@ var require_satisfies = __commonJS({
       }
       return range.test(version);
     };
-    module2.exports = satisfies;
+    module.exports = satisfies;
   }
 });
 
 // node_modules/semver/ranges/to-comparators.js
 var require_to_comparators = __commonJS({
-  "node_modules/semver/ranges/to-comparators.js"(exports2, module2) {
+  "node_modules/semver/ranges/to-comparators.js"(exports, module) {
     "use strict";
     var Range = require_range();
     var toComparators = (range, options) => new Range(range, options).set.map((comp) => comp.map((c) => c.value).join(" ").trim().split(" "));
-    module2.exports = toComparators;
+    module.exports = toComparators;
   }
 });
 
 // node_modules/semver/ranges/max-satisfying.js
 var require_max_satisfying = __commonJS({
-  "node_modules/semver/ranges/max-satisfying.js"(exports2, module2) {
+  "node_modules/semver/ranges/max-satisfying.js"(exports, module) {
     "use strict";
     var SemVer = require_semver();
     var Range = require_range();
@@ -2423,13 +2424,13 @@ var require_max_satisfying = __commonJS({
       });
       return max;
     };
-    module2.exports = maxSatisfying;
+    module.exports = maxSatisfying;
   }
 });
 
 // node_modules/semver/ranges/min-satisfying.js
 var require_min_satisfying = __commonJS({
-  "node_modules/semver/ranges/min-satisfying.js"(exports2, module2) {
+  "node_modules/semver/ranges/min-satisfying.js"(exports, module) {
     "use strict";
     var SemVer = require_semver();
     var Range = require_range();
@@ -2452,13 +2453,13 @@ var require_min_satisfying = __commonJS({
       });
       return min;
     };
-    module2.exports = minSatisfying;
+    module.exports = minSatisfying;
   }
 });
 
 // node_modules/semver/ranges/min-version.js
 var require_min_version = __commonJS({
-  "node_modules/semver/ranges/min-version.js"(exports2, module2) {
+  "node_modules/semver/ranges/min-version.js"(exports, module) {
     "use strict";
     var SemVer = require_semver();
     var Range = require_range();
@@ -2511,13 +2512,13 @@ var require_min_version = __commonJS({
       }
       return null;
     };
-    module2.exports = minVersion;
+    module.exports = minVersion;
   }
 });
 
 // node_modules/semver/ranges/valid.js
 var require_valid2 = __commonJS({
-  "node_modules/semver/ranges/valid.js"(exports2, module2) {
+  "node_modules/semver/ranges/valid.js"(exports, module) {
     "use strict";
     var Range = require_range();
     var validRange = (range, options) => {
@@ -2527,13 +2528,13 @@ var require_valid2 = __commonJS({
         return null;
       }
     };
-    module2.exports = validRange;
+    module.exports = validRange;
   }
 });
 
 // node_modules/semver/ranges/outside.js
 var require_outside = __commonJS({
-  "node_modules/semver/ranges/outside.js"(exports2, module2) {
+  "node_modules/semver/ranges/outside.js"(exports, module) {
     "use strict";
     var SemVer = require_semver();
     var Comparator = require_comparator();
@@ -2596,33 +2597,33 @@ var require_outside = __commonJS({
       }
       return true;
     };
-    module2.exports = outside;
+    module.exports = outside;
   }
 });
 
 // node_modules/semver/ranges/gtr.js
 var require_gtr = __commonJS({
-  "node_modules/semver/ranges/gtr.js"(exports2, module2) {
+  "node_modules/semver/ranges/gtr.js"(exports, module) {
     "use strict";
     var outside = require_outside();
     var gtr = (version, range, options) => outside(version, range, ">", options);
-    module2.exports = gtr;
+    module.exports = gtr;
   }
 });
 
 // node_modules/semver/ranges/ltr.js
 var require_ltr = __commonJS({
-  "node_modules/semver/ranges/ltr.js"(exports2, module2) {
+  "node_modules/semver/ranges/ltr.js"(exports, module) {
     "use strict";
     var outside = require_outside();
     var ltr = (version, range, options) => outside(version, range, "<", options);
-    module2.exports = ltr;
+    module.exports = ltr;
   }
 });
 
 // node_modules/semver/ranges/intersects.js
 var require_intersects = __commonJS({
-  "node_modules/semver/ranges/intersects.js"(exports2, module2) {
+  "node_modules/semver/ranges/intersects.js"(exports, module) {
     "use strict";
     var Range = require_range();
     var intersects = (r1, r2, options) => {
@@ -2630,17 +2631,17 @@ var require_intersects = __commonJS({
       r2 = new Range(r2, options);
       return r1.intersects(r2, options);
     };
-    module2.exports = intersects;
+    module.exports = intersects;
   }
 });
 
 // node_modules/semver/ranges/simplify.js
 var require_simplify = __commonJS({
-  "node_modules/semver/ranges/simplify.js"(exports2, module2) {
+  "node_modules/semver/ranges/simplify.js"(exports, module) {
     "use strict";
     var satisfies = require_satisfies();
     var compare = require_compare();
-    module2.exports = (versions, range, options) => {
+    module.exports = (versions, range, options) => {
       const set = [];
       let first = null;
       let prev = null;
@@ -2686,7 +2687,7 @@ var require_simplify = __commonJS({
 
 // node_modules/semver/ranges/subset.js
 var require_subset = __commonJS({
-  "node_modules/semver/ranges/subset.js"(exports2, module2) {
+  "node_modules/semver/ranges/subset.js"(exports, module) {
     "use strict";
     var Range = require_range();
     var Comparator = require_comparator();
@@ -2842,13 +2843,13 @@ var require_subset = __commonJS({
       const comp = compare(a.semver, b.semver, options);
       return comp < 0 ? a : comp > 0 ? b : b.operator === "<" && a.operator === "<=" ? b : a;
     };
-    module2.exports = subset;
+    module.exports = subset;
   }
 });
 
 // node_modules/semver/index.js
 var require_semver2 = __commonJS({
-  "node_modules/semver/index.js"(exports2, module2) {
+  "node_modules/semver/index.js"(exports, module) {
     "use strict";
     var internalRe = require_re();
     var constants = require_constants();
@@ -2891,7 +2892,7 @@ var require_semver2 = __commonJS({
     var intersects = require_intersects();
     var simplifyRange = require_simplify();
     var subset = require_subset();
-    module2.exports = {
+    module.exports = {
       parse,
       valid,
       clean,
@@ -2943,23 +2944,23 @@ var require_semver2 = __commonJS({
 
 // node_modules/jsonwebtoken/lib/asymmetricKeyDetailsSupported.js
 var require_asymmetricKeyDetailsSupported = __commonJS({
-  "node_modules/jsonwebtoken/lib/asymmetricKeyDetailsSupported.js"(exports2, module2) {
+  "node_modules/jsonwebtoken/lib/asymmetricKeyDetailsSupported.js"(exports, module) {
     var semver = require_semver2();
-    module2.exports = semver.satisfies(process.version, ">=15.7.0");
+    module.exports = semver.satisfies(process.version, ">=15.7.0");
   }
 });
 
 // node_modules/jsonwebtoken/lib/rsaPssKeyDetailsSupported.js
 var require_rsaPssKeyDetailsSupported = __commonJS({
-  "node_modules/jsonwebtoken/lib/rsaPssKeyDetailsSupported.js"(exports2, module2) {
+  "node_modules/jsonwebtoken/lib/rsaPssKeyDetailsSupported.js"(exports, module) {
     var semver = require_semver2();
-    module2.exports = semver.satisfies(process.version, ">=16.9.0");
+    module.exports = semver.satisfies(process.version, ">=16.9.0");
   }
 });
 
 // node_modules/jsonwebtoken/lib/validateAsymmetricKey.js
 var require_validateAsymmetricKey = __commonJS({
-  "node_modules/jsonwebtoken/lib/validateAsymmetricKey.js"(exports2, module2) {
+  "node_modules/jsonwebtoken/lib/validateAsymmetricKey.js"(exports, module) {
     var ASYMMETRIC_KEY_DETAILS_SUPPORTED = require_asymmetricKeyDetailsSupported();
     var RSA_PSS_KEY_DETAILS_SUPPORTED = require_rsaPssKeyDetailsSupported();
     var allowedAlgorithmsForKeys = {
@@ -2972,7 +2973,7 @@ var require_validateAsymmetricKey = __commonJS({
       ES384: "secp384r1",
       ES512: "secp521r1"
     };
-    module2.exports = function(algorithm, key) {
+    module.exports = function(algorithm, key) {
       if (!algorithm || !key) return;
       const keyType = key.asymmetricKeyType;
       if (!keyType) return;
@@ -3012,15 +3013,15 @@ var require_validateAsymmetricKey = __commonJS({
 
 // node_modules/jsonwebtoken/lib/psSupported.js
 var require_psSupported = __commonJS({
-  "node_modules/jsonwebtoken/lib/psSupported.js"(exports2, module2) {
+  "node_modules/jsonwebtoken/lib/psSupported.js"(exports, module) {
     var semver = require_semver2();
-    module2.exports = semver.satisfies(process.version, "^6.12.0 || >=8.0.0");
+    module.exports = semver.satisfies(process.version, "^6.12.0 || >=8.0.0");
   }
 });
 
 // node_modules/jsonwebtoken/verify.js
 var require_verify = __commonJS({
-  "node_modules/jsonwebtoken/verify.js"(exports2, module2) {
+  "node_modules/jsonwebtoken/verify.js"(exports, module) {
     var JsonWebTokenError = require_JsonWebTokenError();
     var NotBeforeError = require_NotBeforeError();
     var TokenExpiredError = require_TokenExpiredError();
@@ -3029,7 +3030,7 @@ var require_verify = __commonJS({
     var validateAsymmetricKey = require_validateAsymmetricKey();
     var PS_SUPPORTED = require_psSupported();
     var jws = require_jws();
-    var { KeyObject, createSecretKey, createPublicKey } = require("crypto");
+    var { KeyObject, createSecretKey, createPublicKey } = __require("crypto");
     var PUB_KEY_ALGS = ["RS256", "RS384", "RS512"];
     var EC_KEY_ALGS = ["ES256", "ES384", "ES512"];
     var RSA_KEY_ALGS = ["RS256", "RS384", "RS512"];
@@ -3038,7 +3039,7 @@ var require_verify = __commonJS({
       PUB_KEY_ALGS.splice(PUB_KEY_ALGS.length, 0, "PS256", "PS384", "PS512");
       RSA_KEY_ALGS.splice(RSA_KEY_ALGS.length, 0, "PS256", "PS384", "PS512");
     }
-    module2.exports = function(jwtString, secretOrPublicKey, options, callback) {
+    module.exports = function(jwtString, secretOrPublicKey, options, callback) {
       if (typeof options === "function" && !callback) {
         callback = options;
         options = {};
@@ -3235,7 +3236,7 @@ var require_verify = __commonJS({
 
 // node_modules/lodash.includes/index.js
 var require_lodash = __commonJS({
-  "node_modules/lodash.includes/index.js"(exports2, module2) {
+  "node_modules/lodash.includes/index.js"(exports, module) {
     var INFINITY = 1 / 0;
     var MAX_SAFE_INTEGER = 9007199254740991;
     var MAX_INTEGER = 17976931348623157e292;
@@ -3413,13 +3414,13 @@ var require_lodash = __commonJS({
     function values(object) {
       return object ? baseValues(object, keys(object)) : [];
     }
-    module2.exports = includes;
+    module.exports = includes;
   }
 });
 
 // node_modules/lodash.isboolean/index.js
 var require_lodash2 = __commonJS({
-  "node_modules/lodash.isboolean/index.js"(exports2, module2) {
+  "node_modules/lodash.isboolean/index.js"(exports, module) {
     var boolTag = "[object Boolean]";
     var objectProto = Object.prototype;
     var objectToString = objectProto.toString;
@@ -3429,13 +3430,13 @@ var require_lodash2 = __commonJS({
     function isObjectLike(value) {
       return !!value && typeof value == "object";
     }
-    module2.exports = isBoolean;
+    module.exports = isBoolean;
   }
 });
 
 // node_modules/lodash.isinteger/index.js
 var require_lodash3 = __commonJS({
-  "node_modules/lodash.isinteger/index.js"(exports2, module2) {
+  "node_modules/lodash.isinteger/index.js"(exports, module) {
     var INFINITY = 1 / 0;
     var MAX_INTEGER = 17976931348623157e292;
     var NAN = 0 / 0;
@@ -3493,13 +3494,13 @@ var require_lodash3 = __commonJS({
       var isBinary = reIsBinary.test(value);
       return isBinary || reIsOctal.test(value) ? freeParseInt(value.slice(2), isBinary ? 2 : 8) : reIsBadHex.test(value) ? NAN : +value;
     }
-    module2.exports = isInteger;
+    module.exports = isInteger;
   }
 });
 
 // node_modules/lodash.isnumber/index.js
 var require_lodash4 = __commonJS({
-  "node_modules/lodash.isnumber/index.js"(exports2, module2) {
+  "node_modules/lodash.isnumber/index.js"(exports, module) {
     var numberTag = "[object Number]";
     var objectProto = Object.prototype;
     var objectToString = objectProto.toString;
@@ -3509,13 +3510,13 @@ var require_lodash4 = __commonJS({
     function isNumber(value) {
       return typeof value == "number" || isObjectLike(value) && objectToString.call(value) == numberTag;
     }
-    module2.exports = isNumber;
+    module.exports = isNumber;
   }
 });
 
 // node_modules/lodash.isplainobject/index.js
 var require_lodash5 = __commonJS({
-  "node_modules/lodash.isplainobject/index.js"(exports2, module2) {
+  "node_modules/lodash.isplainobject/index.js"(exports, module) {
     var objectTag = "[object Object]";
     function isHostObject(value) {
       var result = false;
@@ -3553,13 +3554,13 @@ var require_lodash5 = __commonJS({
       var Ctor = hasOwnProperty.call(proto, "constructor") && proto.constructor;
       return typeof Ctor == "function" && Ctor instanceof Ctor && funcToString.call(Ctor) == objectCtorString;
     }
-    module2.exports = isPlainObject;
+    module.exports = isPlainObject;
   }
 });
 
 // node_modules/lodash.isstring/index.js
 var require_lodash6 = __commonJS({
-  "node_modules/lodash.isstring/index.js"(exports2, module2) {
+  "node_modules/lodash.isstring/index.js"(exports, module) {
     var stringTag = "[object String]";
     var objectProto = Object.prototype;
     var objectToString = objectProto.toString;
@@ -3570,13 +3571,13 @@ var require_lodash6 = __commonJS({
     function isString(value) {
       return typeof value == "string" || !isArray(value) && isObjectLike(value) && objectToString.call(value) == stringTag;
     }
-    module2.exports = isString;
+    module.exports = isString;
   }
 });
 
 // node_modules/lodash.once/index.js
 var require_lodash7 = __commonJS({
-  "node_modules/lodash.once/index.js"(exports2, module2) {
+  "node_modules/lodash.once/index.js"(exports, module) {
     var FUNC_ERROR_TEXT = "Expected a function";
     var INFINITY = 1 / 0;
     var MAX_INTEGER = 17976931348623157e292;
@@ -3651,13 +3652,13 @@ var require_lodash7 = __commonJS({
       var isBinary = reIsBinary.test(value);
       return isBinary || reIsOctal.test(value) ? freeParseInt(value.slice(2), isBinary ? 2 : 8) : reIsBadHex.test(value) ? NAN : +value;
     }
-    module2.exports = once;
+    module.exports = once;
   }
 });
 
 // node_modules/jsonwebtoken/sign.js
 var require_sign = __commonJS({
-  "node_modules/jsonwebtoken/sign.js"(exports2, module2) {
+  "node_modules/jsonwebtoken/sign.js"(exports, module) {
     var timespan = require_timespan();
     var PS_SUPPORTED = require_psSupported();
     var validateAsymmetricKey = require_validateAsymmetricKey();
@@ -3669,7 +3670,7 @@ var require_sign = __commonJS({
     var isPlainObject = require_lodash5();
     var isString = require_lodash6();
     var once = require_lodash7();
-    var { KeyObject, createSecretKey, createPrivateKey } = require("crypto");
+    var { KeyObject, createSecretKey, createPrivateKey } = __require("crypto");
     var SUPPORTED_ALGS = ["RS256", "RS384", "RS512", "ES256", "ES384", "ES512", "HS256", "HS384", "HS512", "none"];
     if (PS_SUPPORTED) {
       SUPPORTED_ALGS.splice(3, 0, "PS256", "PS384", "PS512");
@@ -3739,7 +3740,7 @@ var require_sign = __commonJS({
       "subject",
       "jwtid"
     ];
-    module2.exports = function(payload, secretOrPrivateKey, options, callback) {
+    module.exports = function(payload, secretOrPrivateKey, options, callback) {
       if (typeof options === "function") {
         callback = options;
         options = {};
@@ -3882,8 +3883,8 @@ var require_sign = __commonJS({
 
 // node_modules/jsonwebtoken/index.js
 var require_jsonwebtoken = __commonJS({
-  "node_modules/jsonwebtoken/index.js"(exports2, module2) {
-    module2.exports = {
+  "node_modules/jsonwebtoken/index.js"(exports, module) {
+    module.exports = {
       decode: require_decode(),
       verify: require_verify(),
       sign: require_sign(),
@@ -3894,844 +3895,448 @@ var require_jsonwebtoken = __commonJS({
   }
 });
 
-// src/functions/content.mts
-var content_exports = {};
-__export(content_exports, {
-  config: () => config,
-  default: () => content_default
-});
-module.exports = __toCommonJS(content_exports);
-
 // src/functions/lib/blobs.mjs
-var NF_ERROR = "x-nf-error";
-var NF_REQUEST_ID = "x-nf-request-id";
-var BlobsInternalError = class extends Error {
-  constructor(res) {
-    let details = res.headers.get(NF_ERROR) || `${res.status} status code`;
-    if (res.headers.has(NF_REQUEST_ID)) {
-      details += `, ID: ${res.headers.get(NF_REQUEST_ID)}`;
-    }
-    super(`Netlify Blobs has generated an internal error (${details})`);
-    this.name = "BlobsInternalError";
-  }
-};
-var collectIterator = async (iterator) => {
-  const result = [];
-  for await (const item of iterator) {
-    result.push(item);
-  }
-  return result;
-};
-var base64Decode = (input) => {
-  const { Buffer: Buffer2 } = globalThis;
-  if (Buffer2) {
-    return Buffer2.from(input, "base64").toString();
-  }
-  return atob(input);
-};
-var base64Encode = (input) => {
-  const { Buffer: Buffer2 } = globalThis;
-  if (Buffer2) {
-    return Buffer2.from(input).toString("base64");
-  }
-  return btoa(input);
-};
-var getEnvironment = () => {
-  const { Deno, Netlify, process: process2 } = globalThis;
-  return Netlify?.env ?? Deno?.env ?? {
-    delete: (key) => delete process2?.env[key],
-    get: (key) => process2?.env[key],
-    has: (key) => Boolean(process2?.env[key]),
-    set: (key, value) => {
-      if (process2?.env) {
-        process2.env[key] = value;
-      }
-    },
-    toObject: () => process2?.env ?? {}
-  };
-};
-var getEnvironmentContext = () => {
-  const context = globalThis.netlifyBlobsContext || getEnvironment().get("NETLIFY_BLOBS_CONTEXT");
-  if (typeof context !== "string" || !context) {
-    return {};
-  }
-  const data = base64Decode(context);
-  try {
-    return JSON.parse(data);
-  } catch {
-  }
-  return {};
-};
-var MissingBlobsEnvironmentError = class extends Error {
-  constructor(requiredProperties) {
-    super(
-      `The environment has not been configured to use Netlify Blobs. To use it manually, supply the following properties when creating a store: ${requiredProperties.join(
-        ", "
-      )}`
-    );
-    this.name = "MissingBlobsEnvironmentError";
-  }
-};
-var BASE64_PREFIX = "b64;";
+var SITE_STORE_PREFIX = "site:";
+var SIGNED_URL_ACCEPT = "application/json;type=signed-url";
 var METADATA_HEADER_INTERNAL = "x-amz-meta-user";
 var METADATA_HEADER_EXTERNAL = "netlify-blobs-metadata";
-var METADATA_MAX_SIZE = 2 * 1024;
-var encodeMetadata = (metadata) => {
-  if (!metadata) {
-    return null;
-  }
-  const encodedObject = base64Encode(JSON.stringify(metadata));
-  const payload = `b64;${encodedObject}`;
-  if (METADATA_HEADER_EXTERNAL.length + payload.length > METADATA_MAX_SIZE) {
-    throw new Error("Metadata object exceeds the maximum size");
-  }
-  return payload;
-};
-var decodeMetadata = (header) => {
-  if (!header || !header.startsWith(BASE64_PREFIX)) {
-    return {};
-  }
-  const encodedData = header.slice(BASE64_PREFIX.length);
-  const decodedData = base64Decode(encodedData);
-  const metadata = JSON.parse(decodedData);
-  return metadata;
-};
-var getMetadataFromResponse = (response) => {
-  if (!response.headers) {
-    return {};
-  }
-  const value = response.headers.get(METADATA_HEADER_EXTERNAL) || response.headers.get(METADATA_HEADER_INTERNAL);
-  try {
-    return decodeMetadata(value);
-  } catch {
-    throw new Error(
-      "An internal error occurred while trying to retrieve the metadata for an entry. Please try updating to the latest version of the Netlify Blobs client."
-    );
-  }
-};
-var BlobsConsistencyError = class extends Error {
-  constructor() {
-    super(
-      `Netlify Blobs has failed to perform a read using strong consistency because the environment has not been configured with a 'uncachedEdgeURL' property`
-    );
-    this.name = "BlobsConsistencyError";
-  }
-};
-var regions = {
-  "us-east-1": true,
-  "us-east-2": true,
-  "eu-central-1": true,
-  "ap-southeast-1": true,
-  "ap-southeast-2": true
-};
-var isValidRegion = (input) => Object.keys(regions).includes(input);
-var InvalidBlobsRegionError = class extends Error {
-  constructor(region) {
-    super(
-      `${region} is not a supported Netlify Blobs region. Supported values are: ${Object.keys(regions).join(", ")}.`
-    );
-    this.name = "InvalidBlobsRegionError";
-  }
-};
-var DEFAULT_RETRY_DELAY = getEnvironment().get("NODE_ENV") === "test" ? 1 : 5e3;
-var MIN_RETRY_DELAY = 1e3;
 var MAX_RETRY = 5;
-var RATE_LIMIT_HEADER = "X-RateLimit-Reset";
-var fetchAndRetry = async (fetch, url, options, attemptsLeft = MAX_RETRY) => {
+var RETRY_DELAY = 5e3;
+function b64decode(s) {
+  return Buffer.from(s, "base64").toString();
+}
+function b64encode(s) {
+  return Buffer.from(s).toString("base64");
+}
+function getContext() {
+  const raw = globalThis.netlifyBlobsContext || process.env.NETLIFY_BLOBS_CONTEXT;
+  if (!raw) return {};
   try {
-    const res = await fetch(url, options);
-    if (attemptsLeft > 0 && (res.status === 429 || res.status >= 500)) {
-      const delay = getDelay(res.headers.get(RATE_LIMIT_HEADER));
-      await sleep(delay);
-      return fetchAndRetry(fetch, url, options, attemptsLeft - 1);
+    return JSON.parse(b64decode(raw));
+  } catch {
+    return {};
+  }
+}
+async function fetchRetry(url, opts, retries = MAX_RETRY) {
+  try {
+    const res = await fetch(url, opts);
+    if (retries > 0 && (res.status === 429 || res.status >= 500)) {
+      const delay = res.headers.get("X-RateLimit-Reset") ? Math.max(Number(res.headers.get("X-RateLimit-Reset")) * 1e3 - Date.now(), 1e3) : RETRY_DELAY;
+      await new Promise((r) => setTimeout(r, delay));
+      return fetchRetry(url, opts, retries - 1);
     }
     return res;
-  } catch (error) {
-    if (attemptsLeft === 0) {
-      throw error;
-    }
-    const delay = getDelay();
-    await sleep(delay);
-    return fetchAndRetry(fetch, url, options, attemptsLeft - 1);
+  } catch (err) {
+    if (retries === 0) throw err;
+    await new Promise((r) => setTimeout(r, RETRY_DELAY));
+    return fetchRetry(url, opts, retries - 1);
   }
-};
-var getDelay = (rateLimitReset) => {
-  if (!rateLimitReset) {
-    return DEFAULT_RETRY_DELAY;
-  }
-  return Math.max(Number(rateLimitReset) * 1e3 - Date.now(), MIN_RETRY_DELAY);
-};
-var sleep = (ms) => new Promise((resolve) => {
-  setTimeout(resolve, ms);
-});
-var SIGNED_URL_ACCEPT_HEADER = "application/json;type=signed-url";
-var Client = class {
-  constructor({ apiURL, consistency, edgeURL, fetch, region, siteID, token, uncachedEdgeURL }) {
+}
+var BlobClient = class {
+  constructor({ apiURL, edgeURL, uncachedEdgeURL, siteID, token }) {
     this.apiURL = apiURL;
-    this.consistency = consistency ?? "eventual";
     this.edgeURL = edgeURL;
-    this.fetch = fetch ?? globalThis.fetch;
-    this.region = region;
+    this.uncachedEdgeURL = uncachedEdgeURL;
     this.siteID = siteID;
     this.token = token;
-    this.uncachedEdgeURL = uncachedEdgeURL;
-    if (!this.fetch) {
-      throw new Error(
-        "Netlify Blobs could not find a `fetch` client in the global scope. You can either update your runtime to a version that includes `fetch` (like Node.js 18.0.0 or above), or you can supply your own implementation using the `fetch` property."
-      );
-    }
   }
-  async getFinalRequest({
-    consistency: opConsistency,
-    key,
-    metadata,
-    method,
-    parameters = {},
-    storeName
-  }) {
-    const encodedMetadata = encodeMetadata(metadata);
-    const consistency = opConsistency ?? this.consistency;
+  async _getRequestInfo({ method, storeName, key, metadata }) {
+    const encodedMeta = metadata ? "b64;" + b64encode(JSON.stringify(metadata)) : null;
     let urlPath = `/${this.siteID}`;
-    if (storeName) {
-      urlPath += `/${storeName}`;
-    }
-    if (key) {
-      urlPath += `/${key}`;
-    }
+    if (storeName) urlPath += `/${storeName}`;
+    if (key) urlPath += `/${key}`;
     if (this.edgeURL) {
-      if (consistency === "strong" && !this.uncachedEdgeURL) {
-        throw new BlobsConsistencyError();
-      }
-      const headers = {
-        authorization: `Bearer ${this.token}`
-      };
-      if (encodedMetadata) {
-        headers[METADATA_HEADER_INTERNAL] = encodedMetadata;
-      }
-      if (this.region) {
-        urlPath = `/region:${this.region}${urlPath}`;
-      }
-      const url2 = new URL(urlPath, consistency === "strong" ? this.uncachedEdgeURL : this.edgeURL);
-      for (const key2 in parameters) {
-        url2.searchParams.set(key2, parameters[key2]);
-      }
-      return {
-        headers,
-        url: url2.toString()
-      };
+      const headers = { authorization: `Bearer ${this.token}` };
+      if (encodedMeta) headers[METADATA_HEADER_INTERNAL] = encodedMeta;
+      return { headers, url: new URL(urlPath, this.edgeURL).toString() };
     }
     const apiHeaders = { authorization: `Bearer ${this.token}` };
-    const url = new URL(`/api/v1/blobs${urlPath}`, this.apiURL ?? "https://api.netlify.com");
-    for (const key2 in parameters) {
-      url.searchParams.set(key2, parameters[key2]);
-    }
-    if (this.region) {
-      url.searchParams.set("region", this.region);
-    }
+    const url = new URL(`/api/v1/blobs${urlPath}`, this.apiURL || "https://api.netlify.com");
     if (storeName === void 0 || key === void 0) {
-      return {
-        headers: apiHeaders,
-        url: url.toString()
-      };
+      return { headers: apiHeaders, url: url.toString() };
     }
-    if (encodedMetadata) {
-      apiHeaders[METADATA_HEADER_EXTERNAL] = encodedMetadata;
-    }
+    if (encodedMeta) apiHeaders[METADATA_HEADER_EXTERNAL] = encodedMeta;
     if (method === "head" || method === "delete") {
-      return {
-        headers: apiHeaders,
-        url: url.toString()
-      };
+      return { headers: apiHeaders, url: url.toString() };
     }
-    const res = await this.fetch(url.toString(), {
-      headers: { ...apiHeaders, accept: SIGNED_URL_ACCEPT_HEADER },
+    const res = await fetch(url.toString(), {
+      headers: { ...apiHeaders, accept: SIGNED_URL_ACCEPT },
       method
     });
-    if (res.status !== 200) {
-      throw new BlobsInternalError(res);
-    }
+    if (res.status !== 200) throw new Error(`Blobs API error: ${res.status}`);
     const { url: signedURL } = await res.json();
-    const userHeaders = encodedMetadata ? { [METADATA_HEADER_INTERNAL]: encodedMetadata } : void 0;
-    return {
-      headers: userHeaders,
-      url: signedURL
-    };
+    const userHeaders = encodedMeta ? { [METADATA_HEADER_INTERNAL]: encodedMeta } : void 0;
+    return { headers: userHeaders, url: signedURL };
   }
-  async makeRequest({
-    body,
-    consistency,
-    headers: extraHeaders,
-    key,
-    metadata,
-    method,
-    parameters,
-    storeName
-  }) {
-    const { headers: baseHeaders = {}, url } = await this.getFinalRequest({
-      consistency,
-      key,
-      metadata,
-      method,
-      parameters,
-      storeName
-    });
-    const headers = {
-      ...baseHeaders,
-      ...extraHeaders
-    };
-    if (method === "put") {
-      headers["cache-control"] = "max-age=0, stale-while-revalidate=60";
-    }
-    const options = {
-      body,
-      headers,
-      method
-    };
-    if (body instanceof ReadableStream) {
-      options.duplex = "half";
-    }
-    return fetchAndRetry(this.fetch, url, options);
-  }
-};
-var getClientOptions = (options, contextOverride) => {
-  const context = contextOverride ?? getEnvironmentContext();
-  const siteID = context.siteID ?? options.siteID;
-  const token = context.token ?? options.token;
-  if (!siteID || !token) {
-    throw new MissingBlobsEnvironmentError(["siteID", "token"]);
-  }
-  if (options.region !== void 0 && !isValidRegion(options.region)) {
-    throw new InvalidBlobsRegionError(options.region);
-  }
-  const clientOptions = {
-    apiURL: context.apiURL ?? options.apiURL,
-    consistency: options.consistency,
-    edgeURL: context.edgeURL ?? options.edgeURL,
-    fetch: options.fetch,
-    region: options.region,
-    siteID,
-    token,
-    uncachedEdgeURL: context.uncachedEdgeURL ?? options.uncachedEdgeURL
-  };
-  return clientOptions;
-};
-var DEPLOY_STORE_PREFIX = "deploy:";
-var LEGACY_STORE_INTERNAL_PREFIX = "netlify-internal/legacy-namespace/";
-var SITE_STORE_PREFIX = "site:";
-var Store = class _Store {
-  constructor(options) {
-    this.client = options.client;
-    if ("deployID" in options) {
-      _Store.validateDeployID(options.deployID);
-      let name = DEPLOY_STORE_PREFIX + options.deployID;
-      if (options.name) {
-        name += `:${options.name}`;
+  async request({ body, key, method, storeName, metadata, headers: extra, parameters }) {
+    let url, headers;
+    if (parameters && Object.keys(parameters).length) {
+      let urlPath = `/${this.siteID}`;
+      if (storeName) urlPath += `/${storeName}`;
+      if (this.edgeURL) {
+        const u = new URL(urlPath, this.edgeURL);
+        for (const [k, v] of Object.entries(parameters)) u.searchParams.set(k, v);
+        headers = { authorization: `Bearer ${this.token}` };
+        url = u.toString();
+      } else {
+        const u = new URL(`/api/v1/blobs${urlPath}`, this.apiURL || "https://api.netlify.com");
+        for (const [k, v] of Object.entries(parameters)) u.searchParams.set(k, v);
+        headers = { authorization: `Bearer ${this.token}` };
+        url = u.toString();
       }
-      this.name = name;
-    } else if (options.name.startsWith(LEGACY_STORE_INTERNAL_PREFIX)) {
-      const storeName = options.name.slice(LEGACY_STORE_INTERNAL_PREFIX.length);
-      _Store.validateStoreName(storeName);
-      this.name = storeName;
     } else {
-      _Store.validateStoreName(options.name);
-      this.name = SITE_STORE_PREFIX + options.name;
+      const info = await this._getRequestInfo({ method, storeName, key, metadata });
+      url = info.url;
+      headers = info.headers || {};
     }
+    const opts = { method, headers: { ...headers, ...extra } };
+    if (body !== void 0) {
+      opts.body = body;
+      if (method === "put") opts.headers["cache-control"] = "max-age=0, stale-while-revalidate=60";
+    }
+    return fetchRetry(url, opts);
   }
-  async delete(key) {
-    const res = await this.client.makeRequest({ key, method: "delete", storeName: this.name });
-    if (![200, 204, 404].includes(res.status)) {
-      throw new BlobsInternalError(res);
-    }
+};
+var Store = class {
+  constructor(client, name) {
+    this.client = client;
+    this.name = SITE_STORE_PREFIX + name;
   }
   async get(key, options) {
-    const { consistency, type } = options ?? {};
-    const res = await this.client.makeRequest({ consistency, key, method: "get", storeName: this.name });
-    if (res.status === 404) {
-      return null;
-    }
-    if (res.status !== 200) {
-      throw new BlobsInternalError(res);
-    }
-    if (type === void 0 || type === "text") {
-      return res.text();
-    }
-    if (type === "arrayBuffer") {
-      return res.arrayBuffer();
-    }
-    if (type === "blob") {
-      return res.blob();
-    }
-    if (type === "json") {
-      return res.json();
-    }
-    if (type === "stream") {
-      return res.body;
-    }
-    throw new BlobsInternalError(res);
-  }
-  async getMetadata(key, { consistency } = {}) {
-    const res = await this.client.makeRequest({ consistency, key, method: "head", storeName: this.name });
-    if (res.status === 404) {
-      return null;
-    }
-    if (res.status !== 200 && res.status !== 304) {
-      throw new BlobsInternalError(res);
-    }
-    const etag = res?.headers.get("etag") ?? void 0;
-    const metadata = getMetadataFromResponse(res);
-    const result = {
-      etag,
-      metadata
-    };
-    return result;
-  }
-  async getWithMetadata(key, options) {
-    const { consistency, etag: requestETag, type } = options ?? {};
-    const headers = requestETag ? { "if-none-match": requestETag } : void 0;
-    const res = await this.client.makeRequest({
-      consistency,
-      headers,
-      key,
-      method: "get",
-      storeName: this.name
-    });
-    if (res.status === 404) {
-      return null;
-    }
-    if (res.status !== 200 && res.status !== 304) {
-      throw new BlobsInternalError(res);
-    }
-    const responseETag = res?.headers.get("etag") ?? void 0;
-    const metadata = getMetadataFromResponse(res);
-    const result = {
-      etag: responseETag,
-      metadata
-    };
-    if (res.status === 304 && requestETag) {
-      return { data: null, ...result };
-    }
-    if (type === void 0 || type === "text") {
-      return { data: await res.text(), ...result };
-    }
-    if (type === "arrayBuffer") {
-      return { data: await res.arrayBuffer(), ...result };
-    }
-    if (type === "blob") {
-      return { data: await res.blob(), ...result };
-    }
-    if (type === "json") {
-      return { data: await res.json(), ...result };
-    }
-    if (type === "stream") {
-      return { data: res.body, ...result };
-    }
-    throw new Error(`Invalid 'type' property: ${type}. Expected: arrayBuffer, blob, json, stream, or text.`);
-  }
-  list(options = {}) {
-    const iterator = this.getListIterator(options);
-    if (options.paginate) {
-      return iterator;
-    }
-    return collectIterator(iterator).then(
-      (items) => items.reduce(
-        (acc, item) => ({
-          blobs: [...acc.blobs, ...item.blobs],
-          directories: [...acc.directories, ...item.directories]
-        }),
-        { blobs: [], directories: [] }
-      )
-    );
+    const res = await this.client.request({ key, method: "get", storeName: this.name });
+    if (res.status === 404) return null;
+    if (res.status !== 200) throw new Error(`Blobs get error: ${res.status}`);
+    const type = options?.type;
+    if (type === "json") return res.json();
+    if (type === "arrayBuffer") return res.arrayBuffer();
+    if (type === "stream") return res.body;
+    return res.text();
   }
   async set(key, data, { metadata } = {}) {
-    _Store.validateKey(key);
-    const res = await this.client.makeRequest({
-      body: data,
-      key,
-      metadata,
-      method: "put",
-      storeName: this.name
-    });
-    if (res.status !== 200) {
-      throw new BlobsInternalError(res);
-    }
+    const res = await this.client.request({ body: data, key, metadata, method: "put", storeName: this.name });
+    if (res.status !== 200) throw new Error(`Blobs set error: ${res.status}`);
   }
   async setJSON(key, data, { metadata } = {}) {
-    _Store.validateKey(key);
     const payload = JSON.stringify(data);
-    const headers = {
-      "content-type": "application/json"
-    };
-    const res = await this.client.makeRequest({
+    const res = await this.client.request({
       body: payload,
-      headers,
+      headers: { "content-type": "application/json" },
       key,
       metadata,
       method: "put",
       storeName: this.name
     });
-    if (res.status !== 200) {
-      throw new BlobsInternalError(res);
-    }
+    if (res.status !== 200) throw new Error(`Blobs setJSON error: ${res.status}`);
   }
-  static formatListResultBlob(result) {
-    if (!result.key) {
-      return null;
-    }
-    return {
-      etag: result.etag,
-      key: result.key
-    };
+  async delete(key) {
+    const res = await this.client.request({ key, method: "delete", storeName: this.name });
+    if (![200, 204, 404].includes(res.status)) throw new Error(`Blobs delete error: ${res.status}`);
   }
-  static validateKey(key) {
-    if (key === "") {
-      throw new Error("Blob key must not be empty.");
-    }
-    if (key.startsWith("/") || key.startsWith("%2F")) {
-      throw new Error("Blob key must not start with forward slash (/).");
-    }
-    if (new TextEncoder().encode(key).length > 600) {
-      throw new Error(
-        "Blob key must be a sequence of Unicode characters whose UTF-8 encoding is at most 600 bytes long."
-      );
-    }
-  }
-  static validateDeployID(deployID) {
-    if (!/^\w{1,24}$/.test(deployID)) {
-      throw new Error(`'${deployID}' is not a valid Netlify deploy ID.`);
-    }
-  }
-  static validateStoreName(name) {
-    if (name.includes("/") || name.includes("%2F")) {
-      throw new Error("Store name must not contain forward slashes (/).");
-    }
-    if (new TextEncoder().encode(name).length > 64) {
-      throw new Error(
-        "Store name must be a sequence of Unicode characters whose UTF-8 encoding is at most 64 bytes long."
-      );
-    }
-  }
-  getListIterator(options) {
-    const { client, name: storeName } = this;
+  async list(options = {}) {
     const parameters = {};
-    if (options?.prefix) {
-      parameters.prefix = options.prefix;
-    }
-    if (options?.directories) {
-      parameters.directories = "true";
-    }
-    return {
-      [Symbol.asyncIterator]() {
-        let currentCursor = null;
-        let done = false;
-        return {
-          async next() {
-            if (done) {
-              return { done: true, value: void 0 };
-            }
-            const nextParameters = { ...parameters };
-            if (currentCursor !== null) {
-              nextParameters.cursor = currentCursor;
-            }
-            const res = await client.makeRequest({
-              method: "get",
-              parameters: nextParameters,
-              storeName
-            });
-            let blobs = [];
-            let directories = [];
-            if (![200, 204, 404].includes(res.status)) {
-              throw new BlobsInternalError(res);
-            }
-            if (res.status === 404) {
-              done = true;
-            } else {
-              const page = await res.json();
-              if (page.next_cursor) {
-                currentCursor = page.next_cursor;
-              } else {
-                done = true;
-              }
-              blobs = (page.blobs ?? []).map(_Store.formatListResultBlob).filter(Boolean);
-              directories = page.directories ?? [];
-            }
-            return {
-              done: false,
-              value: {
-                blobs,
-                directories
-              }
-            };
-          }
-        };
+    if (options.prefix) parameters.prefix = options.prefix;
+    if (options.directories) parameters.directories = "true";
+    let allBlobs = [];
+    let allDirs = [];
+    let cursor = null;
+    do {
+      const params = { ...parameters };
+      if (cursor) params.cursor = cursor;
+      const res = await this.client.request({ method: "get", parameters: params, storeName: this.name });
+      if (res.status === 404) break;
+      if (![200, 204].includes(res.status)) throw new Error(`Blobs list error: ${res.status}`);
+      if (res.status === 204) break;
+      const page = await res.json();
+      allBlobs = allBlobs.concat((page.blobs || []).filter((b) => b.key).map((b) => ({ etag: b.etag, key: b.key })));
+      allDirs = allDirs.concat(page.directories || []);
+      cursor = page.next_cursor || null;
+    } while (cursor);
+    return { blobs: allBlobs, directories: allDirs };
+  }
+  async getMetadata(key) {
+    const res = await this.client.request({ key, method: "head", storeName: this.name });
+    if (res.status === 404) return null;
+    const etag = res.headers?.get("etag") || void 0;
+    const metaHeader = res.headers?.get(METADATA_HEADER_EXTERNAL) || res.headers?.get(METADATA_HEADER_INTERNAL);
+    let metadata = {};
+    if (metaHeader && metaHeader.startsWith("b64;")) {
+      try {
+        metadata = JSON.parse(b64decode(metaHeader.slice(4)));
+      } catch {
       }
-    };
+    }
+    return { etag, metadata };
   }
 };
-var getStore = (input) => {
-  if (typeof input === "string") {
-    const clientOptions = getClientOptions({});
-    const client = new Client(clientOptions);
-    return new Store({ client, name: input });
+function getStore(input) {
+  const ctx = getContext();
+  const siteID = ctx.siteID;
+  const token = ctx.token;
+  if (!siteID || !token) {
+    throw new Error("Blobs environment not configured. Missing siteID or token.");
   }
-  if (typeof input?.name === "string" && typeof input?.siteID === "string" && typeof input?.token === "string") {
-    const { name, siteID, token } = input;
-    const clientOptions = getClientOptions(input, { siteID, token });
-    if (!name || !siteID || !token) {
-      throw new MissingBlobsEnvironmentError(["name", "siteID", "token"]);
-    }
-    const client = new Client(clientOptions);
-    return new Store({ client, name });
-  }
-  if (typeof input?.name === "string") {
-    const { name } = input;
-    const clientOptions = getClientOptions(input);
-    if (!name) {
-      throw new MissingBlobsEnvironmentError(["name"]);
-    }
-    const client = new Client(clientOptions);
-    return new Store({ client, name });
-  }
-  if (typeof input?.deployID === "string") {
-    const clientOptions = getClientOptions(input);
-    const { deployID } = input;
-    if (!deployID) {
-      throw new MissingBlobsEnvironmentError(["deployID"]);
-    }
-    const client = new Client(clientOptions);
-    return new Store({ client, deployID });
-  }
-  throw new Error(
-    "The `getStore` method requires the name of the store as a string or as the `name` property of an options object"
-  );
-};
+  const name = typeof input === "string" ? input : input.name;
+  const client = new BlobClient({
+    apiURL: ctx.apiURL,
+    edgeURL: ctx.edgeURL,
+    uncachedEdgeURL: ctx.uncachedEdgeURL,
+    siteID,
+    token
+  });
+  return new Store(client, name);
+}
 
-// src/functions/content.mts
+// src/functions/creator-config.mts
 var import_jsonwebtoken = __toESM(require_jsonwebtoken(), 1);
 var CORS = {
   "Content-Type": "application/json",
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "Content-Type, Authorization",
-  "Access-Control-Allow-Methods": "GET, POST, OPTIONS"
+  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS"
 };
 function getSecret() {
   return process.env.JWT_SECRET || "inkedmayhem-dev-secret-change-me";
 }
 function verifyAdmin(req) {
   const auth = req.headers.get("authorization");
-  if (!auth) return false;
-  try {
-    const d = import_jsonwebtoken.default.verify(auth.replace("Bearer ", ""), getSecret());
-    return d.isAdmin === true;
-  } catch {
-    return false;
-  }
-}
-function verifyUser(req) {
-  const auth = req.headers.get("authorization");
   if (!auth) return null;
   try {
-    return import_jsonwebtoken.default.verify(auth.replace("Bearer ", ""), getSecret());
+    const token = auth.replace("Bearer ", "");
+    const decoded = import_jsonwebtoken.default.verify(token, getSecret());
+    if (!decoded.isAdmin) return null;
+    return decoded;
   } catch {
     return null;
   }
 }
-var content_default = async (req, context) => {
-  if (req.method === "OPTIONS") return new Response("", { headers: CORS });
+function getDefaultConfig() {
+  return {
+    id: "",
+    name: "",
+    handle: "",
+    domain: "",
+    creatorTier: "A",
+    brand: {
+      colors: { primary: "#060606", accent: "#c22020", text: "#e8e4df", gold: "#c9a84c" },
+      fonts: { display: "Bebas Neue", serif: "Cormorant Garamond", mono: "Space Mono" },
+      ctaText: "Join Now",
+      tagline: ""
+    },
+    features: {
+      blog: false,
+      membership: false,
+      unlockPosts: false,
+      contact: true,
+      ageGate: false,
+      faq: false,
+      bookings: false,
+      galleryFilters: true
+    },
+    membership: {
+      tiers: {
+        free: { name: "Free", price: 0, description: "Public gallery access" },
+        vip: { name: "VIP", price: 9.99, description: "Exclusive content" },
+        elite: { name: "Elite", price: 24.99, description: "Full access + perks" }
+      }
+    },
+    socials: {},
+    contentRules: {
+      allowedFileTypes: ["jpg", "jpeg", "png", "webp", "mp4"],
+      maxImageSizeMB: 25,
+      maxVideoSizeMB: 500,
+      autoWatermark: false,
+      stripExif: true,
+      compressImages: true,
+      generateThumbnails: true,
+      explicitAllowed: false,
+      categories: ["photos", "selfies", "lifestyle"]
+    },
+    postingSchedule: { enabled: false, slots: [], autoFillSlots: false },
+    telegram: {
+      creatorBot: { enabled: false, token: "", chatId: "" },
+      fanBot: { enabled: false, token: "", username: "" }
+    },
+    faq: {
+      botTone: "professional",
+      bannedPhrases: [],
+      escalationKeywords: ["refund", "chargeback", "address", "meet", "minor"],
+      templates: []
+    },
+    moderation: {
+      level: "manual",
+      autoApproveAfterChecks: false,
+      notifyOnUpload: true,
+      notifyOnPublish: true
+    },
+    createdAt: (/* @__PURE__ */ new Date()).toISOString(),
+    updatedAt: (/* @__PURE__ */ new Date()).toISOString()
+  };
+}
+var creator_config_default = async (req, context) => {
+  if (req.method === "OPTIONS") {
+    return new Response("", { headers: CORS });
+  }
   const url = new URL(req.url);
-  const path = url.pathname.replace("/api/content", "").replace(/\/$/, "") || "";
-  const store = getStore("content");
-  if (path === "" && req.method === "GET") {
-    const search = (url.searchParams.get("search") || "").toLowerCase().trim();
-    const category = (url.searchParams.get("category") || "").toLowerCase().trim();
-    const sort = url.searchParams.get("sort") || "newest";
-    const jwtUser = verifyUser(req);
-    let userTier = "free";
-    let userPurchases = [];
-    if (jwtUser?.email) {
-      try {
-        const userStore = getStore("users");
-        const userKey = jwtUser.email.toLowerCase().replace(/[^a-z0-9@._-]/g, "");
-        const freshUser = await userStore.get(userKey, { type: "json" });
-        if (freshUser) {
-          userTier = freshUser.tier || "free";
-          userPurchases = (freshUser.purchases || []).map((p) => p.postId);
-        }
-      } catch (err) {
-        console.error("User lookup for content access:", err);
-      }
-    }
+  const path = url.pathname.replace("/api/creator-config", "").replace(/\/$/, "") || "";
+  const store = getStore("creator-configs");
+  if (path === "/features" && req.method === "GET") {
     try {
-      const { blobs } = await store.list();
-      const items = [];
-      for (const blob of blobs) {
-        try {
-          const item = await store.get(blob.key, { type: "json" });
-          if (item && !item.draft) items.push({ ...item, key: blob.key });
-        } catch (err) {
-          console.error("Content item read error:", err);
-        }
+      const id = url.searchParams.get("id") || "inkedmayhem";
+      const config2 = await store.get(id, { type: "json" });
+      if (!config2) {
+        return new Response(JSON.stringify({ success: true, features: {} }), { headers: CORS });
       }
-      const tierOrder = { free: 0, vip: 1, elite: 2 };
-      const userLevel = tierOrder[userTier] || 0;
-      let filtered = items.map((i) => {
-        const itemLevel = tierOrder[i.tier] || 0;
-        if (userLevel >= itemLevel || userPurchases.includes(i.key)) return i;
-        return { key: i.key, title: i.title, tier: i.tier, type: i.type, createdAt: i.createdAt, price: i.price, category: i.category, locked: true };
-      });
-      if (search) {
-        filtered = filtered.filter(
-          (i) => (i.title || "").toLowerCase().includes(search) || (i.body || "").toLowerCase().includes(search) || (i.category || "").toLowerCase().includes(search)
-        );
-      }
-      if (category) {
-        filtered = filtered.filter((i) => (i.category || "").toLowerCase() === category);
-      }
-      if (sort === "oldest") {
-        filtered.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
-      } else if (sort === "title") {
-        filtered.sort((a, b) => (a.title || "").localeCompare(b.title || ""));
-      } else {
-        filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-      }
-      const page = Math.max(1, parseInt(url.searchParams.get("page") || "1"));
-      const limit = Math.min(100, Math.max(1, parseInt(url.searchParams.get("limit") || "50")));
-      const total = filtered.length;
-      const paginated = filtered.slice((page - 1) * limit, page * limit);
       return new Response(JSON.stringify({
         success: true,
-        content: paginated,
-        total,
-        page,
-        limit,
-        pages: Math.ceil(total / limit)
+        features: config2.features || {},
+        brand: {
+          name: config2.name || "",
+          tagline: config2.brand?.tagline || "",
+          ctaText: config2.brand?.ctaText || ""
+        },
+        membership: config2.membership || {}
       }), { headers: CORS });
-    } catch (err) {
-      return new Response(JSON.stringify({ error: "Failed to load content" }), { status: 500, headers: CORS });
+    } catch {
+      return new Response(JSON.stringify({ success: true, features: {} }), { headers: CORS });
     }
   }
-  if (path.startsWith("/view/") && req.method === "GET") {
-    const key = path.replace("/view/", "");
+  if (!verifyAdmin(req)) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: CORS });
+  }
+  if (path === "/list" && req.method === "GET") {
     try {
-      const item = await store.get(key, { type: "json" });
-      if (!item) return new Response(JSON.stringify({ error: "Not found" }), { status: 404, headers: CORS });
-      const jwtUser = verifyUser(req);
-      let userTier = "free";
-      let purchased = false;
-      if (jwtUser?.email) {
+      const { blobs } = await store.list();
+      const creators = [];
+      for (const blob of blobs) {
         try {
-          const userStore = getStore("users");
-          const userKey = jwtUser.email.toLowerCase().replace(/[^a-z0-9@._-]/g, "");
-          const freshUser = await userStore.get(userKey, { type: "json" });
-          if (freshUser) {
-            userTier = freshUser.tier || "free";
-            purchased = (freshUser.purchases || []).some((p) => p.postId === key);
+          const config2 = await store.get(blob.key, { type: "json" });
+          if (config2) {
+            creators.push({
+              id: config2.id,
+              name: config2.name,
+              handle: config2.handle,
+              domain: config2.domain,
+              creatorTier: config2.creatorTier,
+              features: config2.features,
+              moderation: config2.moderation,
+              createdAt: config2.createdAt
+            });
           }
-        } catch (err) {
-          console.error("User lookup for view access:", err);
+        } catch {
         }
       }
-      if (!purchased) {
-        if (item.tier === "vip" && userTier === "free") {
-          return new Response(JSON.stringify({ error: "VIP content", locked: true, tier: "vip" }), { status: 403, headers: CORS });
-        }
-        if (item.tier === "elite" && userTier !== "elite") {
-          return new Response(JSON.stringify({ error: "Elite content", locked: true, tier: "elite" }), { status: 403, headers: CORS });
-        }
-      }
-      return new Response(JSON.stringify({ success: true, content: item }), { headers: CORS });
+      return new Response(JSON.stringify({ success: true, creators }), { headers: CORS });
     } catch (err) {
-      return new Response(JSON.stringify({ error: "Failed" }), { status: 500, headers: CORS });
+      return new Response(JSON.stringify({ error: "List failed" }), { status: 500, headers: CORS });
+    }
+  }
+  if (path === "/get" && req.method === "GET") {
+    try {
+      const id = url.searchParams.get("id");
+      if (!id) return new Response(JSON.stringify({ error: "id required" }), { status: 400, headers: CORS });
+      const config2 = await store.get(id, { type: "json" });
+      if (!config2) return new Response(JSON.stringify({ error: "Creator not found" }), { status: 404, headers: CORS });
+      return new Response(JSON.stringify({ success: true, config: config2 }), { headers: CORS });
+    } catch (err) {
+      return new Response(JSON.stringify({ error: "Get failed" }), { status: 500, headers: CORS });
     }
   }
   if (path === "/save" && req.method === "POST") {
-    if (!verifyAdmin(req)) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: CORS });
     try {
-      const { key, title, body, tier, type, imageUrl, draft, price } = await req.json();
-      if (!title || !body) return new Response(JSON.stringify({ error: "Title and body required" }), { status: 400, headers: CORS });
-      const contentKey = key || `content-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`;
+      const { config: inputConfig } = await req.json();
+      if (!inputConfig?.id) {
+        return new Response(JSON.stringify({ error: "config.id required" }), { status: 400, headers: CORS });
+      }
       let existing = null;
       try {
-        existing = await store.get(contentKey, { type: "json" });
-      } catch (err) {
-        console.error("Content lookup:", err);
+        existing = await store.get(inputConfig.id, { type: "json" });
+      } catch {
       }
-      const item = {
-        title,
-        body,
-        tier: tier || "free",
-        type: type || "post",
-        // post, gallery, announcement
-        imageUrl: imageUrl || "",
-        price: price ? parseFloat(price) : null,
-        draft: draft || false,
-        createdAt: existing?.createdAt || (/* @__PURE__ */ new Date()).toISOString(),
-        updatedAt: (/* @__PURE__ */ new Date()).toISOString()
-      };
-      await store.setJSON(contentKey, item);
-      return new Response(JSON.stringify({ success: true, key: contentKey }), { headers: CORS });
+      const base = existing || getDefaultConfig();
+      const merged = deepMerge(base, inputConfig);
+      merged.updatedAt = (/* @__PURE__ */ new Date()).toISOString();
+      if (!existing) merged.createdAt = (/* @__PURE__ */ new Date()).toISOString();
+      await store.setJSON(inputConfig.id, merged);
+      return new Response(JSON.stringify({ success: true, config: merged }), { headers: CORS });
     } catch (err) {
       return new Response(JSON.stringify({ error: "Save failed" }), { status: 500, headers: CORS });
     }
   }
   if (path === "/delete" && req.method === "POST") {
-    if (!verifyAdmin(req)) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: CORS });
     try {
-      const { key } = await req.json();
-      await store.delete(key);
+      const { id } = await req.json();
+      if (!id) return new Response(JSON.stringify({ error: "id required" }), { status: 400, headers: CORS });
+      await store.delete(id);
       return new Response(JSON.stringify({ success: true }), { headers: CORS });
     } catch (err) {
       return new Response(JSON.stringify({ error: "Delete failed" }), { status: 500, headers: CORS });
     }
   }
-  if (path === "/admin-list" && req.method === "GET") {
-    if (!verifyAdmin(req)) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: CORS });
+  if (path === "/onboard" && req.method === "POST") {
     try {
-      const { blobs } = await store.list();
-      const items = [];
-      for (const blob of blobs) {
-        try {
-          const item = await store.get(blob.key, { type: "json" });
-          if (item) items.push({ ...item, key: blob.key });
-        } catch (err) {
-          console.error("Admin content read error:", err);
-        }
+      const input = await req.json();
+      if (!input.name) {
+        return new Response(JSON.stringify({ error: "name required" }), { status: 400, headers: CORS });
       }
-      items.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-      return new Response(JSON.stringify({ success: true, content: items }), { headers: CORS });
+      const id = (input.handle || input.name).toLowerCase().replace(/[^a-z0-9]/g, "");
+      const config2 = getDefaultConfig();
+      config2.id = id;
+      config2.name = input.name;
+      config2.handle = input.handle || `@${id}`;
+      config2.domain = input.domain || `${id}.netlify.app`;
+      config2.brand.tagline = input.tagline || "";
+      if (input.membership) {
+        config2.features.membership = true;
+        config2.features.unlockPosts = true;
+      }
+      if (input.faq) config2.features.faq = true;
+      if (input.blog) config2.features.blog = true;
+      if (input.schedule) {
+        config2.postingSchedule.enabled = true;
+        config2.postingSchedule.slots = input.schedule.slots || [];
+      }
+      if (input.boundaries) {
+        config2.contentRules.explicitAllowed = input.boundaries.explicitAllowed || false;
+      }
+      await store.setJSON(id, config2);
+      return new Response(JSON.stringify({
+        success: true,
+        creatorId: id,
+        config: config2,
+        nextSteps: [
+          "Upload logo and brand assets",
+          "Share the creator's Google Drive/Dropbox folder",
+          "Configure Telegram bots (optional)",
+          "Deploy the site",
+          "Run a test upload through the pipeline"
+        ]
+      }), { headers: CORS });
     } catch (err) {
-      return new Response(JSON.stringify({ error: "Failed" }), { status: 500, headers: CORS });
+      return new Response(JSON.stringify({ error: "Onboard failed" }), { status: 500, headers: CORS });
     }
   }
   return new Response(JSON.stringify({ error: "Not found" }), { status: 404, headers: CORS });
 };
+function deepMerge(target, source) {
+  const output = { ...target };
+  for (const key of Object.keys(source)) {
+    if (source[key] && typeof source[key] === "object" && !Array.isArray(source[key])) {
+      output[key] = deepMerge(target[key] || {}, source[key]);
+    } else {
+      output[key] = source[key];
+    }
+  }
+  return output;
+}
 var config = {
-  path: ["/api/content", "/api/content/*"]
+  path: ["/api/creator-config", "/api/creator-config/*"]
 };
-// Annotate the CommonJS export names for ESM import in node:
-0 && (module.exports = {
-  config
-});
+export {
+  config,
+  creator_config_default as default
+};
 /*! Bundled license information:
 
 safe-buffer/index.js:
   (*! safe-buffer. MIT License. Feross Aboukhadijeh <https://feross.org/opensource> *)
 */
-
-;(function() {
-  var _orig = module.exports.default;
-  if (typeof _orig !== 'function') return;
-  module.exports.handler = async function(event, context) {
-    var url = event.rawUrl || ('https://' + ((event.headers && event.headers.host) || 'localhost') + (event.path || '/'));
-    var init = { method: event.httpMethod || 'GET', headers: event.headers || {} };
-    if (event.body) {
-      init.body = event.isBase64Encoded ? Buffer.from(event.body, 'base64').toString() : event.body;
-    }
-    var req = new Request(url, init);
-    var res = await _orig(req, context);
-    var body = await res.text();
-    var responseHeaders = {};
-    res.headers.forEach(function(v, k) { responseHeaders[k] = v; });
-    return { statusCode: res.status, headers: responseHeaders, body: body };
-  };
-})();
-
