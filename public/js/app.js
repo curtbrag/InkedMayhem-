@@ -370,10 +370,15 @@ function initPaymentPicker() {
 }
 
 function showPaymentPicker(type, tierOrPostId) {
-    pendingPaymentType = type;
     const modal = document.getElementById('paymentPickerModal');
     const desc = document.getElementById('paymentPickerDesc');
     const title = document.getElementById('paymentPickerTitle');
+    if (!modal || !desc || !title) {
+        showToast('Venmo checkout is temporarily unavailable. Please try again.', 'error');
+        return;
+    }
+
+    pendingPaymentType = type;
 
     if (type === 'subscription') {
         pendingPaymentTier = tierOrPostId;
@@ -394,7 +399,7 @@ function showPaymentPicker(type, tierOrPostId) {
 
 function closePaymentPicker() {
     const modal = document.getElementById('paymentPickerModal');
-    modal.classList.remove('active');
+    if (modal) modal.classList.remove('active');
     document.body.style.overflow = '';
     pendingPaymentType = null;
     pendingPaymentTier = null;
