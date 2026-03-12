@@ -411,7 +411,7 @@ function payWithStripe() {
     showToast('Card payments are not live yet. Please use Venmo for now.', 'error');
 }
 
-function payWithVenmo() {
+async function payWithVenmo() {
     const token = localStorage.getItem('im_token');
     const user = JSON.parse(localStorage.getItem('im_user') || '{}');
     const email = user.email || '';
@@ -419,6 +419,12 @@ function payWithVenmo() {
     const tier = pendingPaymentTier;
     const postId = pendingPaymentPostId;
     closePaymentPicker();
+
+    if (!token || !email) {
+        showToast('Please sign in before paying with Venmo.', 'error');
+        return;
+    }
+
     let amount, note, requestBody;
 
     if (type === 'subscription' && tier) {
@@ -430,20 +436,27 @@ function payWithVenmo() {
         note = `InkedMayhem unlock ${postId} - ${email}`;
         requestBody = { type: 'single', postId: postId, amount };
     } else {
+        showToast('Could not prepare Venmo payment. Please try again.', 'error');
         return;
     }
 
-    // Record the pending Venmo payment request
-    if (token) {
-        fetch('/api/venmo-request', {
+    try {
+        const res = await fetch('/api/venmo-request', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             body: JSON.stringify(requestBody)
-        }).catch(() => {});
+        });
+        if (!res.ok) {
+            showToast('Could not save your payment request. Please retry.', 'error');
+            return;
+        }
+    } catch {
+        showToast('Network error while saving request. Please retry.', 'error');
+        return;
     }
 
-    const venmoUrl = `https://account.venmo.com/u/${VENMO_HANDLE}?txn=pay&amount=${amount}&note=${encodeURIComponent(note)}`;
-    window.open(venmoUrl, '_blank');
+    const venmoUrl = `https://account.venmo.com/u/${VENMO_HANDLE}?txn=pay&amount=${amount.toFixed(2)}&note=${encodeURIComponent(note)}`;
+    window.open(venmoUrl, '_blank', 'noopener');
 }
 
 async function applyPromoCode() {
