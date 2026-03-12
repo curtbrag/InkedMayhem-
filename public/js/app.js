@@ -662,6 +662,7 @@ async function handleUnlock(postId) {
 // ==================== CONTACT FORM ====================
 function initContactForm() {
     const form = document.getElementById('contactForm');
+    if (!form) return;
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -806,9 +807,10 @@ function initTestimonialsCarousel() {
     const dotsContainer = document.getElementById('testimonialDots');
     const prevBtn = document.getElementById('testimonialPrev');
     const nextBtn = document.getElementById('testimonialNext');
-    if (!track) return;
+    if (!track || !dotsContainer || !prevBtn || !nextBtn) return;
 
     const cards = track.querySelectorAll('.testimonial-card');
+    if (!cards.length) return;
     let currentSlide = 0;
     let touchStartX = 0;
 
@@ -869,11 +871,13 @@ function initTestimonialsCarousel() {
     function resumeAutoPlay() { clearInterval(autoPlay); autoPlay = setInterval(nextSlide, 5000); }
 
     const section = track.closest('.testimonials-section');
-    section.addEventListener('mouseenter', pauseAutoPlay);
-    section.addEventListener('mouseleave', resumeAutoPlay);
-    // Pause on touch too (mobile)
-    section.addEventListener('touchstart', pauseAutoPlay, { passive: true });
-    section.addEventListener('touchend', () => { setTimeout(resumeAutoPlay, 3000); }, { passive: true });
+    if (section) {
+        section.addEventListener('mouseenter', pauseAutoPlay);
+        section.addEventListener('mouseleave', resumeAutoPlay);
+        // Pause on touch too (mobile)
+        section.addEventListener('touchstart', pauseAutoPlay, { passive: true });
+        section.addEventListener('touchend', () => { setTimeout(resumeAutoPlay, 3000); }, { passive: true });
+    }
 
     buildDots();
     window.addEventListener('resize', () => goToSlide(currentSlide));
