@@ -452,15 +452,6 @@ function showPaymentPicker(type, tierOrPostId) {
         failPaymentPicker('Venmo checkout is temporarily unavailable. Please try again.');
         return;
     }
-        resetPendingPaymentState();
-        showToast('Venmo checkout is temporarily unavailable. Please try again.', 'error');
-        return;
-    }
-        showToast('Venmo checkout is temporarily unavailable. Please try again.', 'error');
-        return;
-    }
-
-    pendingPaymentType = type;
 
     if (type === 'subscription') {
         const price = TIER_PRICES[tierOrPostId];
@@ -470,14 +461,6 @@ function showPaymentPicker(type, tierOrPostId) {
             return;
         }
         pendingPaymentType = 'subscription';
-            resetPendingPaymentState();
-            showToast('Invalid membership tier. Please refresh and try again.', 'error');
-            return;
-        }
-        pendingPaymentType = 'subscription';
-            showToast('Invalid membership tier. Please refresh and try again.', 'error');
-            return;
-        }
         pendingPaymentTier = tierOrPostId;
         pendingPaymentPostId = null;
         title.textContent = 'Venmo Payment';
@@ -488,24 +471,12 @@ function showPaymentPicker(type, tierOrPostId) {
             return;
         }
         pendingPaymentType = 'single';
-            resetPendingPaymentState();
-            showToast('Invalid unlock request. Please try again.', 'error');
-            return;
-        }
-        pendingPaymentType = 'single';
-    } else {
-        if (!tierOrPostId) {
-            showToast('Invalid unlock request. Please try again.', 'error');
-            return;
-        }
         pendingPaymentPostId = tierOrPostId;
         pendingPaymentTier = null;
         title.textContent = 'Venmo Payment';
         desc.textContent = `Unlock content — $${DEFAULT_POST_PRICE.toFixed(2)}`;
     } else {
         failPaymentPicker('Invalid payment request. Please try again.');
-        resetPendingPaymentState();
-        showToast('Invalid payment request. Please try again.', 'error');
         return;
     }
 
@@ -536,7 +507,6 @@ async function payWithVenmo() {
 
     if (!token || !email) {
         promptSignInForPayment('Please sign in before paying with Venmo.');
-        showToast('Please sign in before paying with Venmo.', 'error');
         return;
     }
 
@@ -589,13 +559,6 @@ async function payWithVenmo() {
         showToast('Popup blocked — opening Venmo in this tab.', 'error');
         window.location.href = venmoUrl;
     }
-    const venmoUrl = `https://account.venmo.com/u/${VENMO_HANDLE}?txn=pay&amount=${amount.toFixed(2)}&note=${encodeURIComponent(note)}`;
-    const venmoWindow = window.open(venmoUrl, '_blank', 'noopener');
-    if (!venmoWindow) {
-        showToast('Popup blocked — opening Venmo in this tab.', 'error');
-        window.location.href = venmoUrl;
-    }
-    window.open(venmoUrl, '_blank', 'noopener');
 }
 
 async function applyPromoCode() {
