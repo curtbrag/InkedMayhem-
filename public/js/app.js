@@ -370,33 +370,36 @@ function initPaymentPicker() {
 }
 
 function showPaymentPicker(type, tierOrPostId) {
-    pendingPaymentType = type;
     const modal = document.getElementById('paymentPickerModal');
     const desc = document.getElementById('paymentPickerDesc');
     const title = document.getElementById('paymentPickerTitle');
-    const venmoNote = document.getElementById('venmoNote');
+    if (!modal || !desc || !title) {
+        showToast('Venmo checkout is temporarily unavailable. Please try again.', 'error');
+        return;
+    }
+
+    pendingPaymentType = type;
 
     if (type === 'subscription') {
         pendingPaymentTier = tierOrPostId;
         pendingPaymentPostId = null;
         const price = TIER_PRICES[tierOrPostId];
-        title.textContent = 'Choose Payment';
+        title.textContent = 'Venmo Payment';
         desc.textContent = `${TIER_NAMES[tierOrPostId]} — $${price.toFixed(2)}/mo`;
     } else {
         pendingPaymentPostId = tierOrPostId;
         pendingPaymentTier = null;
-        title.textContent = 'Choose Payment';
+        title.textContent = 'Venmo Payment';
         desc.textContent = `Unlock content — $${DEFAULT_POST_PRICE.toFixed(2)}`;
     }
 
-    venmoNote.style.display = 'none';
     modal.classList.add('active');
     document.body.style.overflow = 'hidden';
 }
 
 function closePaymentPicker() {
     const modal = document.getElementById('paymentPickerModal');
-    modal.classList.remove('active');
+    if (modal) modal.classList.remove('active');
     document.body.style.overflow = '';
     pendingPaymentType = null;
     pendingPaymentTier = null;
@@ -404,15 +407,8 @@ function closePaymentPicker() {
 }
 
 function payWithStripe() {
-    const type = pendingPaymentType;
-    const tier = pendingPaymentTier;
-    const postId = pendingPaymentPostId;
     closePaymentPicker();
-    if (type === 'subscription' && tier) {
-        proceedStripeSubscribe(tier);
-    } else if (type === 'single' && postId) {
-        proceedStripeUnlock(postId);
-    }
+    showToast('Card payments are not live yet. Please use Venmo for now.', 'error');
 }
 
 function payWithVenmo() {
@@ -445,9 +441,6 @@ function payWithVenmo() {
             body: JSON.stringify(requestBody)
         }).catch(() => {});
     }
-
-    // Show the note about including email
-    document.getElementById('venmoNote').style.display = 'block';
 
     const venmoUrl = `https://account.venmo.com/u/${VENMO_HANDLE}?txn=pay&amount=${amount}&note=${encodeURIComponent(note)}`;
     window.open(venmoUrl, '_blank');
@@ -516,32 +509,6 @@ async function handleSubscribe(tier) {
     showPaymentPicker('subscription', tier);
 }
 
-async function proceedStripeSubscribe(tier) {
-    const token = localStorage.getItem('im_token');
-    try {
-        const body = { tier, type: 'subscription' };
-        if (activePromoCode) body.promoCode = activePromoCode;
-
-        const res = await fetch('/api/create-checkout', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify(body)
-        });
-
-        const data = await res.json();
-
-        if (data.url) {
-            window.location.href = data.url;
-        } else {
-            showToast(data.error || 'Payment setup failed', 'error');
-        }
-    } catch (err) {
-        showToast('Connection error — try again', 'error');
-    }
-}
 
 async function handleUnlock(postId) {
     const token = localStorage.getItem('im_token');
@@ -568,30 +535,6 @@ async function handleUnlock(postId) {
 
     // Show payment method picker
     showPaymentPicker('single', postId);
-}
-
-async function proceedStripeUnlock(postId) {
-    const token = localStorage.getItem('im_token');
-    try {
-        const res = await fetch('/api/create-checkout', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({ postId, type: 'single' })
-        });
-
-        const data = await res.json();
-
-        if (data.url) {
-            window.location.href = data.url;
-        } else {
-            showToast(data.error || 'Payment setup failed', 'error');
-        }
-    } catch (err) {
-        showToast('Connection error — try again', 'error');
-    }
 }
 
 // ==================== CONTACT FORM ====================
