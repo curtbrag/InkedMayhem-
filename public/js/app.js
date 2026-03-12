@@ -358,6 +358,16 @@ const TIER_PRICES = { vip: 9.99, elite: 24.99 };
 const TIER_NAMES = { vip: 'Ink Insider (VIP)', elite: 'Mayhem Circle (Elite)' };
 const DEFAULT_POST_PRICE = 4.99;
 
+
+function getStoredUser() {
+    try {
+        const raw = localStorage.getItem('im_user');
+        return raw ? JSON.parse(raw) : {};
+    } catch {
+        return {};
+    }
+}
+
 function initPaymentPicker() {
     const modal = document.getElementById('paymentPickerModal');
     if (!modal) return;
@@ -413,8 +423,8 @@ function payWithStripe() {
 
 async function payWithVenmo() {
     const token = localStorage.getItem('im_token');
-    const user = JSON.parse(localStorage.getItem('im_user') || '{}');
-    const email = user.email || '';
+    const user = getStoredUser();
+    const email = (user.email || '').trim();
     const type = pendingPaymentType;
     const tier = pendingPaymentTier;
     const postId = pendingPaymentPostId;
