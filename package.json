@@ -4,7 +4,8 @@
   "description": "InkedMayhem - Independent creator platform",
   "scripts": {
     "dev": "netlify dev",
-    "build": "echo 'Static site - no build needed'"
+    "build": "echo 'Static site - no build needed'",
+    "lint": "node -e \"console.log('Lint check: no ESLint config present; static checks only.')\""
   },
   "dependencies": {
     "@netlify/blobs": "^8.0.0",
