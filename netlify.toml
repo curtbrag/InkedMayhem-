@@ -1,4 +1,5 @@
 [build]
+  command = "node build-functions.cjs"
   publish = "public"
   functions = "netlify/functions"
 
@@ -52,7 +53,7 @@
     Cache-Control = "no-cache"
 
 # ─── Redirects ─────────────────────────────────────────
-# NOTE: No /api/* redirect needed — all functions use config.path (Functions v2)
+# NOTE: Functions use v2 config.path for routing — no /api/* redirects needed
 
 # SPA-style fallback for members area
 [[redirects]]
