@@ -7,6 +7,11 @@ const outDir = path.join(__dirname, "netlify", "functions");
 
 fs.mkdirSync(outDir, { recursive: true });
 
+// Clean old built files
+for (const old of fs.readdirSync(outDir).filter((f) => f.endsWith(".mjs") || f.endsWith(".js"))) {
+  fs.unlinkSync(path.join(outDir, old));
+}
+
 const files = fs.readdirSync(srcDir).filter((f) => f.endsWith(".mts"));
 
 console.log(`Building ${files.length} functions...`);
