@@ -504,32 +504,6 @@ async function handleSubscribe(tier) {
     showPaymentPicker('subscription', tier);
 }
 
-async function proceedStripeSubscribe(tier) {
-    const token = localStorage.getItem('im_token');
-    try {
-        const body = { tier, type: 'subscription' };
-        if (activePromoCode) body.promoCode = activePromoCode;
-
-        const res = await fetch('/api/create-checkout', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify(body)
-        });
-
-        const data = await res.json();
-
-        if (data.url) {
-            window.location.href = data.url;
-        } else {
-            showToast(data.error || 'Payment setup failed', 'error');
-        }
-    } catch (err) {
-        showToast('Connection error — try again', 'error');
-    }
-}
 
 async function handleUnlock(postId) {
     const token = localStorage.getItem('im_token');
@@ -556,30 +530,6 @@ async function handleUnlock(postId) {
 
     // Show payment method picker
     showPaymentPicker('single', postId);
-}
-
-async function proceedStripeUnlock(postId) {
-    const token = localStorage.getItem('im_token');
-    try {
-        const res = await fetch('/api/create-checkout', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({ postId, type: 'single' })
-        });
-
-        const data = await res.json();
-
-        if (data.url) {
-            window.location.href = data.url;
-        } else {
-            showToast(data.error || 'Payment setup failed', 'error');
-        }
-    } catch (err) {
-        showToast('Connection error — try again', 'error');
-    }
 }
 
 // ==================== CONTACT FORM ====================
