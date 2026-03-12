@@ -136,9 +136,10 @@ function initLightbox() {
     const lightboxPrev = document.getElementById('lightboxPrev');
     const lightboxNext = document.getElementById('lightboxNext');
     const lightboxCounter = document.getElementById('lightboxCounter');
-    if (!lightbox) return;
+    if (!lightbox || !lightboxImg || !lightboxClose || !lightboxPrev || !lightboxNext || !lightboxCounter) return;
 
     const galleryImages = Array.from(document.querySelectorAll('.gallery-item img'));
+    if (!galleryImages.length) return;
     let currentIndex = 0;
     let touchStartX = 0;
     let touchEndX = 0;
@@ -157,13 +158,18 @@ function initLightbox() {
 
     function updateLightbox() {
         const visibleImages = galleryImages.filter(img => img.closest('.gallery-item').style.display !== 'none');
+        if (!visibleImages.length) return;
         const idx = visibleImages.indexOf(galleryImages[currentIndex]);
-        lightboxImg.src = galleryImages[currentIndex].src;
-        lightboxCounter.textContent = `${idx + 1} / ${visibleImages.length}`;
+        const safeIndex = idx >= 0 ? idx : 0;
+        const activeImg = visibleImages[safeIndex];
+        currentIndex = galleryImages.indexOf(activeImg);
+        lightboxImg.src = activeImg.src;
+        lightboxCounter.textContent = `${safeIndex + 1} / ${visibleImages.length}`;
     }
 
     function navigate(dir) {
         const visibleImages = galleryImages.filter(img => img.closest('.gallery-item').style.display !== 'none');
+        if (!visibleImages.length) return;
         const currentVisible = visibleImages.indexOf(galleryImages[currentIndex]);
         let nextVisible = currentVisible + dir;
         if (nextVisible < 0) nextVisible = visibleImages.length - 1;
