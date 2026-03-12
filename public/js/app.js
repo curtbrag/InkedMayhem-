@@ -553,20 +553,8 @@ async function handleSubscribe(tier) {
 
     if (!token) {
         pendingSubscribeTier = tier;
-        // Switch modal to Sign Up mode for new subscribers
-        isSignUp = true;
-        const modalTitle = document.getElementById('modalTitle');
-        const authSubmit = document.getElementById('authSubmit');
-        const toggleText = document.getElementById('toggleText');
-        const toggleAuth = document.getElementById('toggleAuth');
-        const nameGroup = document.getElementById('nameGroup');
-        if (modalTitle) modalTitle.textContent = 'Create Account';
-        if (authSubmit) authSubmit.textContent = 'Sign Up';
-        if (toggleText) toggleText.textContent = 'Already have an account?';
-        if (toggleAuth) toggleAuth.textContent = 'Sign In';
-        if (nameGroup) nameGroup.style.display = 'block';
-        document.getElementById('authModal').classList.add('active');
-        document.body.style.overflow = 'hidden';
+        setAuthModalMode(true);
+        openAuthModal();
         showToast('Create an account to subscribe');
         return;
     }
@@ -581,20 +569,8 @@ async function handleUnlock(postId) {
 
     if (!token) {
         pendingUnlockPostId = postId;
-        // Switch modal to Sign Up mode for new users
-        isSignUp = true;
-        const modalTitle = document.getElementById('modalTitle');
-        const authSubmit = document.getElementById('authSubmit');
-        const toggleText = document.getElementById('toggleText');
-        const toggleAuth = document.getElementById('toggleAuth');
-        const nameGroup = document.getElementById('nameGroup');
-        if (modalTitle) modalTitle.textContent = 'Create Account';
-        if (authSubmit) authSubmit.textContent = 'Sign Up';
-        if (toggleText) toggleText.textContent = 'Already have an account?';
-        if (toggleAuth) toggleAuth.textContent = 'Sign In';
-        if (nameGroup) nameGroup.style.display = 'block';
-        document.getElementById('authModal').classList.add('active');
-        document.body.style.overflow = 'hidden';
+        setAuthModalMode(true);
+        openAuthModal();
         showToast('Create an account to unlock content');
         return;
     }
