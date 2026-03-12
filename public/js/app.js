@@ -504,6 +504,34 @@ async function handleSubscribe(tier) {
     showPaymentPicker('subscription', tier);
 }
 
+
+async function handleUnlock(postId) {
+    const token = localStorage.getItem('im_token');
+
+    if (!token) {
+        pendingUnlockPostId = postId;
+        // Switch modal to Sign Up mode for new users
+        isSignUp = true;
+        const modalTitle = document.getElementById('modalTitle');
+        const authSubmit = document.getElementById('authSubmit');
+        const toggleText = document.getElementById('toggleText');
+        const toggleAuth = document.getElementById('toggleAuth');
+        const nameGroup = document.getElementById('nameGroup');
+        if (modalTitle) modalTitle.textContent = 'Create Account';
+        if (authSubmit) authSubmit.textContent = 'Sign Up';
+        if (toggleText) toggleText.textContent = 'Already have an account?';
+        if (toggleAuth) toggleAuth.textContent = 'Sign In';
+        if (nameGroup) nameGroup.style.display = 'block';
+        document.getElementById('authModal').classList.add('active');
+        document.body.style.overflow = 'hidden';
+        showToast('Create an account to unlock content');
+        return;
+    }
+
+    // Show payment method picker
+    showPaymentPicker('single', postId);
+}
+
 // ==================== CONTACT FORM ====================
 function initContactForm() {
     const form = document.getElementById('contactForm');
