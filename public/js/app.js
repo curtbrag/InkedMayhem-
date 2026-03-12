@@ -485,6 +485,7 @@ async function payWithVenmo() {
         showToast('Popup blocked — opening Venmo in this tab.', 'error');
         window.location.href = venmoUrl;
     }
+    window.open(venmoUrl, '_blank', 'noopener');
 }
 
 async function applyPromoCode() {
