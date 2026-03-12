@@ -28,6 +28,7 @@ function initNavigation() {
 
     // Scroll effect
     window.addEventListener('scroll', () => {
+        if (!navbar) return;
         if (window.scrollY > 50) {
             navbar.classList.add('scrolled');
         } else {
@@ -36,20 +37,22 @@ function initNavigation() {
     });
 
     // Mobile menu toggle
-    hamburger.addEventListener('click', () => {
-        hamburger.classList.toggle('active');
-        mobileMenu.classList.toggle('active');
-        document.body.style.overflow = mobileMenu.classList.contains('active') ? 'hidden' : '';
-    });
-
-    // Close mobile menu on link click
-    mobileMenu.querySelectorAll('a').forEach(link => {
-        link.addEventListener('click', () => {
-            hamburger.classList.remove('active');
-            mobileMenu.classList.remove('active');
-            document.body.style.overflow = '';
+    if (hamburger && mobileMenu) {
+        hamburger.addEventListener('click', () => {
+            hamburger.classList.toggle('active');
+            mobileMenu.classList.toggle('active');
+            document.body.style.overflow = mobileMenu.classList.contains('active') ? 'hidden' : '';
         });
-    });
+
+        // Close mobile menu on link click
+        mobileMenu.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                hamburger.classList.remove('active');
+                mobileMenu.classList.remove('active');
+                document.body.style.overflow = '';
+            });
+        });
+    }
 }
 
 // ==================== SCROLL EFFECTS ====================
@@ -220,6 +223,10 @@ function initAuthModal() {
     const nameGroup = document.getElementById('nameGroup');
     const authForm = document.getElementById('authForm');
 
+    if (!modal || !btnLogin || !btnClose || !toggleAuth || !toggleText || !modalTitle || !authSubmit || !nameGroup || !authForm) {
+        return;
+    }
+
     function openModal() {
         modal.classList.add('active');
         document.body.style.overflow = 'hidden';
@@ -326,6 +333,7 @@ function initAuthModal() {
 
 function updateAuthUI(user) {
     const btnLogin = document.getElementById('btnLogin');
+    if (!btnLogin) return;
     if (user) {
         const tierLabels = { free: '', vip: ' [VIP]', elite: ' [ELITE]' };
         btnLogin.textContent = (user.name || 'Account') + (tierLabels[user.tier] || '');
@@ -336,7 +344,7 @@ function updateAuthUI(user) {
                 localStorage.removeItem('im_user');
                 btnLogin.textContent = 'Sign In';
                 btnLogin.style.fontSize = '';
-                btnLogin.onclick = () => document.getElementById('authModal').classList.add('active');
+                btnLogin.onclick = () => openAuthModal();
                 showToast('Signed out');
             }
         };
@@ -368,10 +376,55 @@ function getStoredUser() {
     }
 }
 
+function setAuthModalMode(signUp) {
+    isSignUp = !!signUp;
+    const modalTitle = document.getElementById('modalTitle');
+    const authSubmit = document.getElementById('authSubmit');
+    const toggleText = document.getElementById('toggleText');
+    const toggleAuth = document.getElementById('toggleAuth');
+    const nameGroup = document.getElementById('nameGroup');
+
+    if (isSignUp) {
+        if (modalTitle) modalTitle.textContent = 'Create Account';
+        if (authSubmit) authSubmit.textContent = 'Sign Up';
+        if (toggleText) toggleText.textContent = 'Already have an account?';
+        if (toggleAuth) toggleAuth.textContent = 'Sign In';
+        if (nameGroup) nameGroup.style.display = 'block';
+    } else {
+        if (modalTitle) modalTitle.textContent = 'Sign In';
+        if (authSubmit) authSubmit.textContent = 'Sign In';
+        if (toggleText) toggleText.textContent = "Don't have an account?";
+        if (toggleAuth) toggleAuth.textContent = 'Sign Up';
+        if (nameGroup) nameGroup.style.display = 'none';
+    }
+}
+
+function openAuthModal() {
+    const authModal = document.getElementById('authModal');
+    if (!authModal) return;
+    authModal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
 function resetPendingPaymentState() {
     pendingPaymentType = null;
     pendingPaymentTier = null;
     pendingPaymentPostId = null;
+}
+
+function failPaymentPicker(message) {
+    const modal = document.getElementById('paymentPickerModal');
+    if (modal) modal.classList.remove('active');
+    document.body.style.overflow = '';
+    resetPendingPaymentState();
+    if (message) showToast(message, 'error');
+}
+
+
+function promptSignInForPayment(message = 'Please sign in to continue payment.') {
+    setAuthModalMode(false);
+    openAuthModal();
+    showToast(message, 'error');
 }
 
 function initPaymentPicker() {
@@ -390,6 +443,9 @@ function showPaymentPicker(type, tierOrPostId) {
     const desc = document.getElementById('paymentPickerDesc');
     const title = document.getElementById('paymentPickerTitle');
     if (!modal || !desc || !title) {
+        failPaymentPicker('Venmo checkout is temporarily unavailable. Please try again.');
+        return;
+    }
         resetPendingPaymentState();
         showToast('Venmo checkout is temporarily unavailable. Please try again.', 'error');
         return;
@@ -404,6 +460,10 @@ function showPaymentPicker(type, tierOrPostId) {
         const price = TIER_PRICES[tierOrPostId];
         const tierName = TIER_NAMES[tierOrPostId];
         if (!tierName || typeof price !== 'number') {
+            failPaymentPicker('Invalid membership tier. Please refresh and try again.');
+            return;
+        }
+        pendingPaymentType = 'subscription';
             resetPendingPaymentState();
             showToast('Invalid membership tier. Please refresh and try again.', 'error');
             return;
@@ -418,6 +478,10 @@ function showPaymentPicker(type, tierOrPostId) {
         desc.textContent = `${tierName} — $${price.toFixed(2)}/mo`;
     } else if (type === 'single') {
         if (!tierOrPostId) {
+            failPaymentPicker('Invalid unlock request. Please try again.');
+            return;
+        }
+        pendingPaymentType = 'single';
             resetPendingPaymentState();
             showToast('Invalid unlock request. Please try again.', 'error');
             return;
@@ -433,6 +497,7 @@ function showPaymentPicker(type, tierOrPostId) {
         title.textContent = 'Venmo Payment';
         desc.textContent = `Unlock content — $${DEFAULT_POST_PRICE.toFixed(2)}`;
     } else {
+        failPaymentPicker('Invalid payment request. Please try again.');
         resetPendingPaymentState();
         showToast('Invalid payment request. Please try again.', 'error');
         return;
@@ -464,6 +529,7 @@ async function payWithVenmo() {
     closePaymentPicker();
 
     if (!token || !email) {
+        promptSignInForPayment('Please sign in before paying with Venmo.');
         showToast('Please sign in before paying with Venmo.', 'error');
         return;
     }
@@ -488,6 +554,12 @@ async function payWithVenmo() {
         return;
     }
 
+    const venmoUrl = `https://account.venmo.com/u/${VENMO_HANDLE}?txn=pay&amount=${amount.toFixed(2)}&note=${encodeURIComponent(note)}`;
+
+    // Open a blank tab synchronously (user gesture) so popup blockers are less likely
+    // to block the Venmo redirect after the async API request completes.
+    let venmoWindow = window.open('', '_blank', 'noopener');
+
     try {
         const res = await fetch('/api/venmo-request', {
             method: 'POST',
@@ -495,14 +567,22 @@ async function payWithVenmo() {
             body: JSON.stringify(requestBody)
         });
         if (!res.ok) {
+            if (venmoWindow) venmoWindow.close();
             showToast('Could not save your payment request. Please retry.', 'error');
             return;
         }
     } catch {
+        if (venmoWindow) venmoWindow.close();
         showToast('Network error while saving request. Please retry.', 'error');
         return;
     }
 
+    if (venmoWindow) {
+        venmoWindow.location.href = venmoUrl;
+    } else {
+        showToast('Popup blocked — opening Venmo in this tab.', 'error');
+        window.location.href = venmoUrl;
+    }
     const venmoUrl = `https://account.venmo.com/u/${VENMO_HANDLE}?txn=pay&amount=${amount.toFixed(2)}&note=${encodeURIComponent(note)}`;
     const venmoWindow = window.open(venmoUrl, '_blank', 'noopener');
     if (!venmoWindow) {
