@@ -394,6 +394,11 @@ function showPaymentPicker(type, tierOrPostId) {
         showToast('Venmo checkout is temporarily unavailable. Please try again.', 'error');
         return;
     }
+        showToast('Venmo checkout is temporarily unavailable. Please try again.', 'error');
+        return;
+    }
+
+    pendingPaymentType = type;
 
     if (type === 'subscription') {
         const price = TIER_PRICES[tierOrPostId];
@@ -404,6 +409,9 @@ function showPaymentPicker(type, tierOrPostId) {
             return;
         }
         pendingPaymentType = 'subscription';
+            showToast('Invalid membership tier. Please refresh and try again.', 'error');
+            return;
+        }
         pendingPaymentTier = tierOrPostId;
         pendingPaymentPostId = null;
         title.textContent = 'Venmo Payment';
@@ -415,6 +423,11 @@ function showPaymentPicker(type, tierOrPostId) {
             return;
         }
         pendingPaymentType = 'single';
+    } else {
+        if (!tierOrPostId) {
+            showToast('Invalid unlock request. Please try again.', 'error');
+            return;
+        }
         pendingPaymentPostId = tierOrPostId;
         pendingPaymentTier = null;
         title.textContent = 'Venmo Payment';
@@ -496,6 +509,7 @@ async function payWithVenmo() {
         showToast('Popup blocked — opening Venmo in this tab.', 'error');
         window.location.href = venmoUrl;
     }
+    window.open(venmoUrl, '_blank', 'noopener');
 }
 
 async function applyPromoCode() {
