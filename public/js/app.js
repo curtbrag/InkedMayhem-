@@ -379,12 +379,12 @@ function showPaymentPicker(type, tierOrPostId) {
         pendingPaymentTier = tierOrPostId;
         pendingPaymentPostId = null;
         const price = TIER_PRICES[tierOrPostId];
-        title.textContent = 'Choose Payment';
+        title.textContent = 'Venmo Payment';
         desc.textContent = `${TIER_NAMES[tierOrPostId]} — $${price.toFixed(2)}/mo`;
     } else {
         pendingPaymentPostId = tierOrPostId;
         pendingPaymentTier = null;
-        title.textContent = 'Choose Payment';
+        title.textContent = 'Venmo Payment';
         desc.textContent = `Unlock content — $${DEFAULT_POST_PRICE.toFixed(2)}`;
     }
 
