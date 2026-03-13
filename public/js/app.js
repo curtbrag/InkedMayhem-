@@ -388,6 +388,7 @@ let pendingUnlockPostId = null;
 let pendingPaymentType = null; // 'subscription' or 'single'
 let pendingPaymentTier = null;
 let pendingPaymentPostId = null;
+let venmoSubmitting = false;
 
 const VENMO_HANDLE = 'Christina-Dipietro-6';
 const TIER_PRICES = { vip: 9.99, elite: 24.99 };
@@ -519,6 +520,8 @@ function payWithStripe() {
 }
 
 async function payWithVenmo() {
+    if (venmoSubmitting) return;
+    venmoSubmitting = true;
     const token = localStorage.getItem('im_token');
     const user = getStoredUser();
     const email = (user.email || '').trim();
@@ -528,6 +531,7 @@ async function payWithVenmo() {
     closePaymentPicker();
 
     if (!token || !email) {
+        venmoSubmitting = false;
         // Preserve intent so auth success can resume the same payment flow.
         if (type === 'subscription' && tier) {
             pendingSubscribeTier = tier;
@@ -549,11 +553,13 @@ async function payWithVenmo() {
         note = `InkedMayhem unlock ${postId} - ${email}`;
         requestBody = { type: 'single', postId: postId, amount };
     } else {
+        venmoSubmitting = false;
         showToast('Could not prepare Venmo payment. Please try again.', 'error');
         return;
     }
 
     if (typeof amount !== 'number' || Number.isNaN(amount) || amount <= 0) {
+        venmoSubmitting = false;
         showToast('Invalid payment amount. Please refresh and try again.', 'error');
         return;
     }
@@ -571,18 +577,22 @@ async function payWithVenmo() {
             body: JSON.stringify(requestBody)
         });
         if (!res.ok) {
+            venmoSubmitting = false;
             if (venmoWindow) venmoWindow.close();
             showToast('Could not save your payment request. Please retry.', 'error');
             return;
         }
     } catch {
+        venmoSubmitting = false;
         if (venmoWindow) venmoWindow.close();
         showToast('Network error while saving request. Please retry.', 'error');
         return;
     }
 
+    venmoSubmitting = false;
     if (venmoWindow) {
         venmoWindow.location.href = venmoUrl;
+        showToast('Venmo opened — include your email in the note so we can activate your access.', 'success');
     } else {
         showToast('Popup blocked — opening Venmo in this tab.', 'error');
         window.location.href = venmoUrl;
