@@ -666,8 +666,13 @@ function initContactForm() {
         const formData = new FormData(form);
         const data = Object.fromEntries(formData);
 
+        const btn = form.querySelector('button[type="submit"]');
+        if (!btn) {
+            showToast('Form is unavailable right now. Please try again later.', 'error');
+            return;
+        }
+
         try {
-            const btn = form.querySelector('button[type="submit"]');
             btn.textContent = 'Sending...';
             btn.disabled = true;
 
