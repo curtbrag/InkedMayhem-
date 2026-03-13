@@ -537,6 +537,7 @@ function payWithStripe() {
 async function payWithVenmo() {
     if (venmoSubmitting) return;
     venmoSubmitting = true;
+    const venmoSubmitTimeout = setTimeout(() => { venmoSubmitting = false; }, 30_000);
     const token = localStorage.getItem('im_token');
     const user = getStoredUser();
     const email = (user.email || '').trim();
@@ -546,6 +547,7 @@ async function payWithVenmo() {
     closePaymentPicker();
 
     if (!token || !email) {
+        clearTimeout(venmoSubmitTimeout);
         venmoSubmitting = false;
         // Preserve intent so auth success can resume the same payment flow.
         if (type === 'subscription' && tier) {
@@ -568,12 +570,14 @@ async function payWithVenmo() {
         note = `InkedMayhem unlock ${postId} - ${email}`;
         requestBody = { type: 'single', postId: postId, amount };
     } else {
+        clearTimeout(venmoSubmitTimeout);
         venmoSubmitting = false;
         showToast('Could not prepare Venmo payment. Please try again.', 'error');
         return;
     }
 
     if (typeof amount !== 'number' || Number.isNaN(amount) || amount <= 0) {
+        clearTimeout(venmoSubmitTimeout);
         venmoSubmitting = false;
         showToast('Invalid payment amount. Please refresh and try again.', 'error');
         return;
@@ -592,18 +596,21 @@ async function payWithVenmo() {
             body: JSON.stringify(requestBody)
         });
         if (!res.ok) {
+            clearTimeout(venmoSubmitTimeout);
             venmoSubmitting = false;
             if (venmoWindow) venmoWindow.close();
             showToast('Could not save your payment request. Please retry.', 'error');
             return;
         }
     } catch {
+        clearTimeout(venmoSubmitTimeout);
         venmoSubmitting = false;
         if (venmoWindow) venmoWindow.close();
         showToast('Network error while saving request. Please retry.', 'error');
         return;
     }
 
+    clearTimeout(venmoSubmitTimeout);
     venmoSubmitting = false;
     if (venmoWindow) {
         venmoWindow.location.href = venmoUrl;
