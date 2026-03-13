@@ -8,8 +8,6 @@
     "lint": "node -e \"const fs=require('fs');const {join}=require('path');const {execFileSync}=require('child_process');const files=['public/sw.js',...fs.readdirSync('public/js').filter(f=>f.endsWith('.js')).map(f=>join('public/js',f))];for(const f of files){execFileSync(process.execPath,['--check',f],{stdio:'inherit'});}\""
   },
   "dependencies": {
-    "@netlify/blobs": "^8.0.0",
-    "@netlify/functions": "^2.0.0",
     "bcryptjs": "^2.4.3",
     "esbuild": "^0.24.0",
     "jsonwebtoken": "^9.0.0",
