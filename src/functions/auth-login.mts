@@ -88,12 +88,14 @@ export default async (req, context) => {
         await store.setJSON(userKey, user);
 
         const secret = process.env.JWT_SECRET || "inkedmayhem-dev-secret-change-me";
-        const token = jwt.sign({ email: user.email, tier: user.tier }, secret, { expiresIn: "30d" });
+        const payload: any = { email: user.email, tier: user.tier };
+        if (user.isAdmin) payload.isAdmin = true;
+        const token = jwt.sign(payload, secret, { expiresIn: "30d" });
 
         return new Response(JSON.stringify({
             success: true,
             token,
-            user: { email: user.email, name: user.name, tier: user.tier }
+            user: { email: user.email, name: user.name, tier: user.tier, isAdmin: user.isAdmin || false }
         }), { headers: CORS });
 
     } catch (err) {
