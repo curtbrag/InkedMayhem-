@@ -1274,12 +1274,20 @@ if (TOKEN) {
 }
 
 // ─── TABS ────────────────────────────────────
+let venmoRefreshTimer = null;
+
 document.querySelectorAll('.tab').forEach(tab => {
     tab.addEventListener('click', () => {
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
         tab.classList.add('active');
         document.getElementById(`tab-${tab.dataset.tab}`).classList.add('active');
+
+        // Auto-refresh Venmo queue every 60s while tab is active
+        clearInterval(venmoRefreshTimer);
+        if (tab.dataset.tab === 'venmo') {
+            venmoRefreshTimer = setInterval(loadVenmo, 60_000);
+        }
 
         // Load data for tab
         if (tab.dataset.tab === 'venmo') loadVenmo();
