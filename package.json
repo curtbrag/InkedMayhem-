@@ -4,7 +4,7 @@
   "description": "InkedMayhem - Independent creator platform",
   "scripts": {
     "dev": "netlify dev",
-    "build": "echo 'Static site - no build needed'",
+    "build": "for f in src/functions/*.mts; do name=$(basename \"$f\" .mts); node_modules/.bin/esbuild \"$f\" --bundle --platform=node --format=esm --outfile=\"netlify/functions/${name}.mjs\" --log-level=warning; done",
     "lint": "node -e \"const fs=require('fs');const {join}=require('path');const {execFileSync}=require('child_process');const files=['public/sw.js',...fs.readdirSync('public/js').filter(f=>f.endsWith('.js')).map(f=>join('public/js',f))];for(const f of files){execFileSync(process.execPath,['--check',f],{stdio:'inherit'});}\""
   },
   "dependencies": {

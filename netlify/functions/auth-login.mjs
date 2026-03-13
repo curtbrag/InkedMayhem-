@@ -5974,11 +5974,13 @@ var auth_login_default = async (req, context) => {
     user.lastLogin = (/* @__PURE__ */ new Date()).toISOString();
     await store.setJSON(userKey, user);
     const secret = process.env.JWT_SECRET || "inkedmayhem-dev-secret-change-me";
-    const token = import_jsonwebtoken.default.sign({ email: user.email, tier: user.tier }, secret, { expiresIn: "30d" });
+    const payload = { email: user.email, tier: user.tier };
+    if (user.isAdmin) payload.isAdmin = true;
+    const token = import_jsonwebtoken.default.sign(payload, secret, { expiresIn: "30d" });
     return new Response(JSON.stringify({
       success: true,
       token,
-      user: { email: user.email, name: user.name, tier: user.tier }
+      user: { email: user.email, name: user.name, tier: user.tier, isAdmin: user.isAdmin || false }
     }), { headers: CORS });
   } catch (err) {
     console.error("Login error:", err);
