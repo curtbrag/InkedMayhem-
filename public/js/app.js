@@ -260,6 +260,8 @@ function initAuthModal() {
             pendingSubscribeTier = null;
             pendingUnlockPostId = null;
         }
+        pendingSubscribeTier = null;
+        pendingUnlockPostId = null;
     }
 
     btnLogin.addEventListener('click', openModal);
