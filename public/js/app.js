@@ -518,12 +518,6 @@ async function payWithVenmo() {
     closePaymentPicker();
 
     if (!token || !email) {
-        // Preserve intent so auth success can resume the same payment flow.
-        if (type === 'subscription' && tier) {
-            pendingSubscribeTier = tier;
-        } else if (type === 'single' && postId) {
-            pendingUnlockPostId = postId;
-        }
         promptSignInForPayment('Please sign in before paying with Venmo.');
         return;
     }
