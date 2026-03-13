@@ -392,17 +392,19 @@ export default async (req, context) => {
             request.approvedAt = new Date().toISOString();
             await venmoStore.setJSON(requestKey, request);
 
-            // Notify both the subscriber and admin when a subscription is approved.
-            if (request.type === "subscription" && request.tier) {
-                const siteUrl = process.env.URL || "https://inkedmayhem.netlify.app";
-                const notifyBase = { method: "POST", headers: { "Content-Type": "application/json", "x-internal-key": getSecret() } };
-                try {
+            // Notify subscriber and admin after approval.
+            const siteUrl = process.env.URL || "https://inkedmayhem.netlify.app";
+            const notifyBase = { method: "POST" as const, headers: { "Content-Type": "application/json", "x-internal-key": getSecret() } };
+            try {
+                if (request.type === "subscription" && request.tier) {
                     await Promise.all([
                         fetch(`${siteUrl}/api/notify`, { ...notifyBase, body: JSON.stringify({ type: "subscriber_welcome", data: { email: user.email, name: user.name, tier: request.tier } }) }),
                         fetch(`${siteUrl}/api/notify`, { ...notifyBase, body: JSON.stringify({ type: "new_subscription", data: { email: user.email, tier: request.tier, amount: request.amount } }) })
                     ]);
-                } catch (err) { console.error("Notify error after Venmo approve:", err); }
-            }
+                } else if (request.type === "single" && request.postId) {
+                    await fetch(`${siteUrl}/api/notify`, { ...notifyBase, body: JSON.stringify({ type: "post_unlocked", data: { email: user.email, name: user.name, postId: request.postId } }) });
+                }
+            } catch (err) { console.error("Notify error after Venmo approve:", err); }
 
             return new Response(JSON.stringify({ success: true, user: { email: user.email, tier: user.tier } }), { headers: CORS });
         } catch (err) {
@@ -423,6 +425,19 @@ export default async (req, context) => {
             request.status = "rejected";
             request.rejectedAt = new Date().toISOString();
             await venmoStore.setJSON(requestKey, request);
+
+            // Notify user so they know the payment wasn't verified.
+            const siteUrl = process.env.URL || "https://inkedmayhem.netlify.app";
+            const label = request.type === "subscription"
+                ? `${request.tier?.toUpperCase()} subscription`
+                : `post unlock`;
+            try {
+                await fetch(`${siteUrl}/api/notify`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json", "x-internal-key": getSecret() },
+                    body: JSON.stringify({ type: "payment_rejected", data: { email: request.email, label } })
+                });
+            } catch (err) { console.error("Notify error after Venmo reject:", err); }
 
             return new Response(JSON.stringify({ success: true }), { headers: CORS });
         } catch (err) {
