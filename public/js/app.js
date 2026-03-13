@@ -28,6 +28,7 @@ function initNavigation() {
 
     // Scroll effect
     window.addEventListener('scroll', () => {
+        if (!navbar) return;
         if (window.scrollY > 50) {
             navbar.classList.add('scrolled');
         } else {
@@ -36,24 +37,38 @@ function initNavigation() {
     });
 
     // Mobile menu toggle
-    hamburger.addEventListener('click', () => {
-        hamburger.classList.toggle('active');
-        mobileMenu.classList.toggle('active');
-        document.body.style.overflow = mobileMenu.classList.contains('active') ? 'hidden' : '';
-    });
-
-    // Close mobile menu on link click
-    mobileMenu.querySelectorAll('a').forEach(link => {
-        link.addEventListener('click', () => {
-            hamburger.classList.remove('active');
-            mobileMenu.classList.remove('active');
-            document.body.style.overflow = '';
+    if (hamburger && mobileMenu) {
+        hamburger.addEventListener('click', () => {
+            hamburger.classList.toggle('active');
+            mobileMenu.classList.toggle('active');
+            document.body.style.overflow = mobileMenu.classList.contains('active') ? 'hidden' : '';
         });
-    });
+
+        // Close mobile menu on link click
+        mobileMenu.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                hamburger.classList.remove('active');
+                mobileMenu.classList.remove('active');
+                document.body.style.overflow = '';
+            });
+        });
+    }
 }
 
 // ==================== SCROLL EFFECTS ====================
 function initScrollEffects() {
+    const targets = document.querySelectorAll('.section-header, .gallery-item, .tier-card, .blog-card, .ppv-card, .testimonial-card, .faq-item, .countdown-card, .newsletter-card');
+
+    // Fallback for older browsers/environments without IntersectionObserver
+    if (typeof window.IntersectionObserver !== 'function') {
+        targets.forEach(el => {
+            el.classList.add('visible');
+            el.style.opacity = '1';
+            el.style.transform = 'translateY(0)';
+        });
+        return;
+    }
+
     // Fade in sections on scroll
     const observerOptions = {
         threshold: 0.1,
@@ -70,7 +85,7 @@ function initScrollEffects() {
     }, observerOptions);
 
     // Observe sections
-    document.querySelectorAll('.section-header, .gallery-item, .tier-card, .blog-card, .ppv-card, .testimonial-card, .faq-item, .countdown-card, .newsletter-card').forEach(el => {
+    targets.forEach(el => {
         el.style.opacity = '0';
         el.style.transform = 'translateY(20px)';
         el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
@@ -133,9 +148,10 @@ function initLightbox() {
     const lightboxPrev = document.getElementById('lightboxPrev');
     const lightboxNext = document.getElementById('lightboxNext');
     const lightboxCounter = document.getElementById('lightboxCounter');
-    if (!lightbox) return;
+    if (!lightbox || !lightboxImg || !lightboxClose || !lightboxPrev || !lightboxNext || !lightboxCounter) return;
 
     const galleryImages = Array.from(document.querySelectorAll('.gallery-item img'));
+    if (!galleryImages.length) return;
     let currentIndex = 0;
     let touchStartX = 0;
     let touchEndX = 0;
@@ -154,13 +170,18 @@ function initLightbox() {
 
     function updateLightbox() {
         const visibleImages = galleryImages.filter(img => img.closest('.gallery-item').style.display !== 'none');
+        if (!visibleImages.length) return;
         const idx = visibleImages.indexOf(galleryImages[currentIndex]);
-        lightboxImg.src = galleryImages[currentIndex].src;
-        lightboxCounter.textContent = `${idx + 1} / ${visibleImages.length}`;
+        const safeIndex = idx >= 0 ? idx : 0;
+        const activeImg = visibleImages[safeIndex];
+        currentIndex = galleryImages.indexOf(activeImg);
+        lightboxImg.src = activeImg.src;
+        lightboxCounter.textContent = `${safeIndex + 1} / ${visibleImages.length}`;
     }
 
     function navigate(dir) {
         const visibleImages = galleryImages.filter(img => img.closest('.gallery-item').style.display !== 'none');
+        if (!visibleImages.length) return;
         const currentVisible = visibleImages.indexOf(galleryImages[currentIndex]);
         let nextVisible = currentVisible + dir;
         if (nextVisible < 0) nextVisible = visibleImages.length - 1;
@@ -220,14 +241,25 @@ function initAuthModal() {
     const nameGroup = document.getElementById('nameGroup');
     const authForm = document.getElementById('authForm');
 
+    if (!modal || !btnLogin || !btnClose || !toggleAuth || !toggleText || !modalTitle || !authSubmit || !nameGroup || !authForm) {
+        return;
+    }
+
     function openModal() {
         modal.classList.add('active');
         document.body.style.overflow = 'hidden';
     }
 
-    function closeModal() {
+    function closeModal(options = {}) {
+        const { clearPendingIntent = true } = options;
         modal.classList.remove('active');
         document.body.style.overflow = '';
+        // User dismissed auth; clear any queued payment intent so old actions
+        // don't auto-resume unexpectedly on a later unrelated sign-in.
+        if (clearPendingIntent) {
+            pendingSubscribeTier = null;
+            pendingUnlockPostId = null;
+        }
     }
 
     btnLogin.addEventListener('click', openModal);
@@ -238,7 +270,7 @@ function initAuthModal() {
     });
 
     document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') closeModal();
+        if (e.key === 'Escape' && modal.classList.contains('active')) closeModal();
     });
 
     toggleAuth.addEventListener('click', (e) => {
@@ -285,7 +317,7 @@ function initAuthModal() {
             if (data.success) {
                 localStorage.setItem('im_token', data.token);
                 localStorage.setItem('im_user', JSON.stringify(data.user));
-                closeModal();
+                closeModal({ clearPendingIntent: false });
                 updateAuthUI(data.user);
                 // If user was trying to subscribe or unlock, continue that flow
                 if (pendingSubscribeTier) {
@@ -326,6 +358,7 @@ function initAuthModal() {
 
 function updateAuthUI(user) {
     const btnLogin = document.getElementById('btnLogin');
+    if (!btnLogin) return;
     if (user) {
         const tierLabels = { free: '', vip: ' [VIP]', elite: ' [ELITE]' };
         btnLogin.textContent = (user.name || 'Account') + (tierLabels[user.tier] || '');
@@ -336,7 +369,7 @@ function updateAuthUI(user) {
                 localStorage.removeItem('im_user');
                 btnLogin.textContent = 'Sign In';
                 btnLogin.style.fontSize = '';
-                btnLogin.onclick = () => document.getElementById('authModal').classList.add('active');
+                btnLogin.onclick = () => openAuthModal();
                 showToast('Signed out');
             }
         };
@@ -358,6 +391,67 @@ const TIER_PRICES = { vip: 9.99, elite: 24.99 };
 const TIER_NAMES = { vip: 'Ink Insider (VIP)', elite: 'Mayhem Circle (Elite)' };
 const DEFAULT_POST_PRICE = 4.99;
 
+
+function getStoredUser() {
+    try {
+        const raw = localStorage.getItem('im_user');
+        return raw ? JSON.parse(raw) : {};
+    } catch {
+        return {};
+    }
+}
+
+function setAuthModalMode(signUp) {
+    isSignUp = !!signUp;
+    const modalTitle = document.getElementById('modalTitle');
+    const authSubmit = document.getElementById('authSubmit');
+    const toggleText = document.getElementById('toggleText');
+    const toggleAuth = document.getElementById('toggleAuth');
+    const nameGroup = document.getElementById('nameGroup');
+
+    if (isSignUp) {
+        if (modalTitle) modalTitle.textContent = 'Create Account';
+        if (authSubmit) authSubmit.textContent = 'Sign Up';
+        if (toggleText) toggleText.textContent = 'Already have an account?';
+        if (toggleAuth) toggleAuth.textContent = 'Sign In';
+        if (nameGroup) nameGroup.style.display = 'block';
+    } else {
+        if (modalTitle) modalTitle.textContent = 'Sign In';
+        if (authSubmit) authSubmit.textContent = 'Sign In';
+        if (toggleText) toggleText.textContent = "Don't have an account?";
+        if (toggleAuth) toggleAuth.textContent = 'Sign Up';
+        if (nameGroup) nameGroup.style.display = 'none';
+    }
+}
+
+function openAuthModal() {
+    const authModal = document.getElementById('authModal');
+    if (!authModal) return;
+    authModal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function resetPendingPaymentState() {
+    pendingPaymentType = null;
+    pendingPaymentTier = null;
+    pendingPaymentPostId = null;
+}
+
+function failPaymentPicker(message) {
+    const modal = document.getElementById('paymentPickerModal');
+    if (modal) modal.classList.remove('active');
+    document.body.style.overflow = '';
+    resetPendingPaymentState();
+    if (message) showToast(message, 'error');
+}
+
+
+function promptSignInForPayment(message = 'Please sign in to continue payment.') {
+    setAuthModalMode(false);
+    openAuthModal();
+    showToast(message, 'error');
+}
+
 function initPaymentPicker() {
     const modal = document.getElementById('paymentPickerModal');
     if (!modal) return;
@@ -370,59 +464,77 @@ function initPaymentPicker() {
 }
 
 function showPaymentPicker(type, tierOrPostId) {
-    pendingPaymentType = type;
     const modal = document.getElementById('paymentPickerModal');
     const desc = document.getElementById('paymentPickerDesc');
     const title = document.getElementById('paymentPickerTitle');
-    const venmoNote = document.getElementById('venmoNote');
-
-    if (type === 'subscription') {
-        pendingPaymentTier = tierOrPostId;
-        pendingPaymentPostId = null;
-        const price = TIER_PRICES[tierOrPostId];
-        title.textContent = 'Choose Payment';
-        desc.textContent = `${TIER_NAMES[tierOrPostId]} — $${price.toFixed(2)}/mo`;
-    } else {
-        pendingPaymentPostId = tierOrPostId;
-        pendingPaymentTier = null;
-        title.textContent = 'Choose Payment';
-        desc.textContent = `Unlock content — $${DEFAULT_POST_PRICE.toFixed(2)}`;
+    if (!modal || !desc || !title) {
+        failPaymentPicker('Venmo checkout is temporarily unavailable. Please try again.');
+        return;
     }
 
-    venmoNote.style.display = 'none';
+    if (type === 'subscription') {
+        const price = TIER_PRICES[tierOrPostId];
+        const tierName = TIER_NAMES[tierOrPostId];
+        if (!tierName || typeof price !== 'number') {
+            failPaymentPicker('Invalid membership tier. Please refresh and try again.');
+            return;
+        }
+        pendingPaymentType = 'subscription';
+        pendingPaymentTier = tierOrPostId;
+        pendingPaymentPostId = null;
+        title.textContent = 'Venmo Payment';
+        desc.textContent = `${tierName} — $${price.toFixed(2)}/mo`;
+    } else if (type === 'single') {
+        if (!tierOrPostId) {
+            failPaymentPicker('Invalid unlock request. Please try again.');
+            return;
+        }
+        pendingPaymentType = 'single';
+        pendingPaymentPostId = tierOrPostId;
+        pendingPaymentTier = null;
+        title.textContent = 'Venmo Payment';
+        desc.textContent = `Unlock content — $${DEFAULT_POST_PRICE.toFixed(2)}`;
+    } else {
+        failPaymentPicker('Invalid payment request. Please try again.');
+        return;
+    }
+
     modal.classList.add('active');
     document.body.style.overflow = 'hidden';
 }
 
 function closePaymentPicker() {
     const modal = document.getElementById('paymentPickerModal');
-    modal.classList.remove('active');
+    if (modal) modal.classList.remove('active');
     document.body.style.overflow = '';
-    pendingPaymentType = null;
-    pendingPaymentTier = null;
-    pendingPaymentPostId = null;
+    resetPendingPaymentState();
 }
 
 function payWithStripe() {
-    const type = pendingPaymentType;
-    const tier = pendingPaymentTier;
-    const postId = pendingPaymentPostId;
     closePaymentPicker();
-    if (type === 'subscription' && tier) {
-        proceedStripeSubscribe(tier);
-    } else if (type === 'single' && postId) {
-        proceedStripeUnlock(postId);
-    }
+    showToast('Card payments are not live yet. Please use Venmo for now.', 'error');
 }
 
-function payWithVenmo() {
+async function payWithVenmo() {
     const token = localStorage.getItem('im_token');
-    const user = JSON.parse(localStorage.getItem('im_user') || '{}');
-    const email = user.email || '';
+    const user = getStoredUser();
+    const email = (user.email || '').trim();
     const type = pendingPaymentType;
     const tier = pendingPaymentTier;
     const postId = pendingPaymentPostId;
     closePaymentPicker();
+
+    if (!token || !email) {
+        // Preserve intent so auth success can resume the same payment flow.
+        if (type === 'subscription' && tier) {
+            pendingSubscribeTier = tier;
+        } else if (type === 'single' && postId) {
+            pendingUnlockPostId = postId;
+        }
+        promptSignInForPayment('Please sign in before paying with Venmo.');
+        return;
+    }
+
     let amount, note, requestBody;
 
     if (type === 'subscription' && tier) {
@@ -434,23 +546,44 @@ function payWithVenmo() {
         note = `InkedMayhem unlock ${postId} - ${email}`;
         requestBody = { type: 'single', postId: postId, amount };
     } else {
+        showToast('Could not prepare Venmo payment. Please try again.', 'error');
         return;
     }
 
-    // Record the pending Venmo payment request
-    if (token) {
-        fetch('/api/venmo-request', {
+    if (typeof amount !== 'number' || Number.isNaN(amount) || amount <= 0) {
+        showToast('Invalid payment amount. Please refresh and try again.', 'error');
+        return;
+    }
+
+    const venmoUrl = `https://account.venmo.com/u/${VENMO_HANDLE}?txn=pay&amount=${amount.toFixed(2)}&note=${encodeURIComponent(note)}`;
+
+    // Open a blank tab synchronously (user gesture) so popup blockers are less likely
+    // to block the Venmo redirect after the async API request completes.
+    let venmoWindow = window.open('', '_blank', 'noopener');
+
+    try {
+        const res = await fetch('/api/venmo-request', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             body: JSON.stringify(requestBody)
-        }).catch(() => {});
+        });
+        if (!res.ok) {
+            if (venmoWindow) venmoWindow.close();
+            showToast('Could not save your payment request. Please retry.', 'error');
+            return;
+        }
+    } catch {
+        if (venmoWindow) venmoWindow.close();
+        showToast('Network error while saving request. Please retry.', 'error');
+        return;
     }
 
-    // Show the note about including email
-    document.getElementById('venmoNote').style.display = 'block';
-
-    const venmoUrl = `https://account.venmo.com/u/${VENMO_HANDLE}?txn=pay&amount=${amount}&note=${encodeURIComponent(note)}`;
-    window.open(venmoUrl, '_blank');
+    if (venmoWindow) {
+        venmoWindow.location.href = venmoUrl;
+    } else {
+        showToast('Popup blocked — opening Venmo in this tab.', 'error');
+        window.location.href = venmoUrl;
+    }
 }
 
 async function applyPromoCode() {
@@ -494,20 +627,8 @@ async function handleSubscribe(tier) {
 
     if (!token) {
         pendingSubscribeTier = tier;
-        // Switch modal to Sign Up mode for new subscribers
-        isSignUp = true;
-        const modalTitle = document.getElementById('modalTitle');
-        const authSubmit = document.getElementById('authSubmit');
-        const toggleText = document.getElementById('toggleText');
-        const toggleAuth = document.getElementById('toggleAuth');
-        const nameGroup = document.getElementById('nameGroup');
-        if (modalTitle) modalTitle.textContent = 'Create Account';
-        if (authSubmit) authSubmit.textContent = 'Sign Up';
-        if (toggleText) toggleText.textContent = 'Already have an account?';
-        if (toggleAuth) toggleAuth.textContent = 'Sign In';
-        if (nameGroup) nameGroup.style.display = 'block';
-        document.getElementById('authModal').classList.add('active');
-        document.body.style.overflow = 'hidden';
+        setAuthModalMode(true);
+        openAuthModal();
         showToast('Create an account to subscribe');
         return;
     }
@@ -516,52 +637,14 @@ async function handleSubscribe(tier) {
     showPaymentPicker('subscription', tier);
 }
 
-async function proceedStripeSubscribe(tier) {
-    const token = localStorage.getItem('im_token');
-    try {
-        const body = { tier, type: 'subscription' };
-        if (activePromoCode) body.promoCode = activePromoCode;
-
-        const res = await fetch('/api/create-checkout', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify(body)
-        });
-
-        const data = await res.json();
-
-        if (data.url) {
-            window.location.href = data.url;
-        } else {
-            showToast(data.error || 'Payment setup failed', 'error');
-        }
-    } catch (err) {
-        showToast('Connection error — try again', 'error');
-    }
-}
 
 async function handleUnlock(postId) {
     const token = localStorage.getItem('im_token');
 
     if (!token) {
         pendingUnlockPostId = postId;
-        // Switch modal to Sign Up mode for new users
-        isSignUp = true;
-        const modalTitle = document.getElementById('modalTitle');
-        const authSubmit = document.getElementById('authSubmit');
-        const toggleText = document.getElementById('toggleText');
-        const toggleAuth = document.getElementById('toggleAuth');
-        const nameGroup = document.getElementById('nameGroup');
-        if (modalTitle) modalTitle.textContent = 'Create Account';
-        if (authSubmit) authSubmit.textContent = 'Sign Up';
-        if (toggleText) toggleText.textContent = 'Already have an account?';
-        if (toggleAuth) toggleAuth.textContent = 'Sign In';
-        if (nameGroup) nameGroup.style.display = 'block';
-        document.getElementById('authModal').classList.add('active');
-        document.body.style.overflow = 'hidden';
+        setAuthModalMode(true);
+        openAuthModal();
         showToast('Create an account to unlock content');
         return;
     }
@@ -570,33 +653,10 @@ async function handleUnlock(postId) {
     showPaymentPicker('single', postId);
 }
 
-async function proceedStripeUnlock(postId) {
-    const token = localStorage.getItem('im_token');
-    try {
-        const res = await fetch('/api/create-checkout', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({ postId, type: 'single' })
-        });
-
-        const data = await res.json();
-
-        if (data.url) {
-            window.location.href = data.url;
-        } else {
-            showToast(data.error || 'Payment setup failed', 'error');
-        }
-    } catch (err) {
-        showToast('Connection error — try again', 'error');
-    }
-}
-
 // ==================== CONTACT FORM ====================
 function initContactForm() {
     const form = document.getElementById('contactForm');
+    if (!form) return;
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -604,8 +664,13 @@ function initContactForm() {
         const formData = new FormData(form);
         const data = Object.fromEntries(formData);
 
+        const btn = form.querySelector('button[type="submit"]');
+        if (!btn) {
+            showToast('Form is unavailable right now. Please try again later.', 'error');
+            return;
+        }
+
         try {
-            const btn = form.querySelector('button[type="submit"]');
             btn.textContent = 'Sending...';
             btn.disabled = true;
 
@@ -741,9 +806,10 @@ function initTestimonialsCarousel() {
     const dotsContainer = document.getElementById('testimonialDots');
     const prevBtn = document.getElementById('testimonialPrev');
     const nextBtn = document.getElementById('testimonialNext');
-    if (!track) return;
+    if (!track || !dotsContainer || !prevBtn || !nextBtn) return;
 
     const cards = track.querySelectorAll('.testimonial-card');
+    if (!cards.length) return;
     let currentSlide = 0;
     let touchStartX = 0;
 
@@ -804,11 +870,13 @@ function initTestimonialsCarousel() {
     function resumeAutoPlay() { clearInterval(autoPlay); autoPlay = setInterval(nextSlide, 5000); }
 
     const section = track.closest('.testimonials-section');
-    section.addEventListener('mouseenter', pauseAutoPlay);
-    section.addEventListener('mouseleave', resumeAutoPlay);
-    // Pause on touch too (mobile)
-    section.addEventListener('touchstart', pauseAutoPlay, { passive: true });
-    section.addEventListener('touchend', () => { setTimeout(resumeAutoPlay, 3000); }, { passive: true });
+    if (section) {
+        section.addEventListener('mouseenter', pauseAutoPlay);
+        section.addEventListener('mouseleave', resumeAutoPlay);
+        // Pause on touch too (mobile)
+        section.addEventListener('touchstart', pauseAutoPlay, { passive: true });
+        section.addEventListener('touchend', () => { setTimeout(resumeAutoPlay, 3000); }, { passive: true });
+    }
 
     buildDots();
     window.addEventListener('resize', () => goToSlide(currentSlide));
@@ -820,7 +888,7 @@ function initCountdown() {
     const hoursEl = document.getElementById('cdHours');
     const minsEl = document.getElementById('cdMins');
     const secsEl = document.getElementById('cdSecs');
-    if (!daysEl) return;
+    if (!daysEl || !hoursEl || !minsEl || !secsEl) return;
 
     // Calculate next Tuesday or Thursday at 8pm ET using UTC offsets
     function getNextDropMs() {
@@ -913,10 +981,17 @@ function initNewsletterForm() {
     const form = document.getElementById('newsletterForm');
     if (!form) return;
 
+    const emailInput = form.querySelector('input[name="email"]');
+    const btn = form.querySelector('.newsletter-btn');
+    if (!emailInput || !btn) return;
+
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const email = form.querySelector('input[name="email"]').value;
-        const btn = form.querySelector('.newsletter-btn');
+        const email = emailInput.value.trim();
+        if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
+            showToast('Enter a valid email address.', 'error');
+            return;
+        }
         const origText = btn.textContent;
 
         try {
