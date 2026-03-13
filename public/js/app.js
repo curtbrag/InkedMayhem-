@@ -858,7 +858,7 @@ function initCountdown() {
     const hoursEl = document.getElementById('cdHours');
     const minsEl = document.getElementById('cdMins');
     const secsEl = document.getElementById('cdSecs');
-    if (!daysEl) return;
+    if (!daysEl || !hoursEl || !minsEl || !secsEl) return;
 
     // Calculate next Tuesday or Thursday at 8pm ET using UTC offsets
     function getNextDropMs() {
@@ -951,10 +951,13 @@ function initNewsletterForm() {
     const form = document.getElementById('newsletterForm');
     if (!form) return;
 
+    const emailInput = form.querySelector('input[name="email"]');
+    const btn = form.querySelector('.newsletter-btn');
+    if (!emailInput || !btn) return;
+
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const email = form.querySelector('input[name="email"]').value;
-        const btn = form.querySelector('.newsletter-btn');
+        const email = emailInput.value;
         const origText = btn.textContent;
 
         try {
