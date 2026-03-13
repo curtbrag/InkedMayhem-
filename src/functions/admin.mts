@@ -507,6 +507,60 @@ export default async (req, context) => {
         }
     }
 
+    // ─── SEED ADMIN ACCOUNTS ─────────────────────
+    // Idempotent: skips accounts that already exist. Call once after deploy.
+    if (path === "/seed-users" && req.method === "POST") {
+        if (!verifyAdmin(req)) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: CORS });
+        try {
+            const bcrypt = (await import("bcryptjs")).default;
+            const userStore = getStore("users");
+
+            const accounts = [
+                {
+                    email: "curtbrag@yahoo.com",
+                    name: "Curt",
+                    password: "073588",
+                    tier: "elite",
+                    isAdmin: true
+                },
+                {
+                    email: "christinadipietro3@gmail.com",
+                    name: "Christina",
+                    password: "073588",
+                    tier: "elite",
+                    isAdmin: true
+                }
+            ];
+
+            const results: any[] = [];
+            for (const account of accounts) {
+                const userKey = account.email.toLowerCase().replace(/[^a-z0-9@._-]/g, '');
+                const existing = await userStore.get(userKey, { type: "json" });
+                if (existing) {
+                    results.push({ email: account.email, status: "skipped — already exists" });
+                    continue;
+                }
+                const hash = await bcrypt.hash(account.password, 10);
+                const now = new Date().toISOString();
+                await userStore.setJSON(userKey, {
+                    email: account.email,
+                    name: account.name,
+                    hash,
+                    tier: account.tier,
+                    isAdmin: account.isAdmin,
+                    status: "active",
+                    paymentMethod: "venmo",
+                    createdAt: now,
+                    updatedAt: now
+                });
+                results.push({ email: account.email, status: "created" });
+            }
+            return new Response(JSON.stringify({ success: true, results }), { headers: CORS });
+        } catch (err) {
+            return new Response(JSON.stringify({ error: "Seed failed", detail: String(err) }), { status: 500, headers: CORS });
+        }
+    }
+
     return new Response(JSON.stringify({ error: "Not found" }), { status: 404, headers: CORS });
 };
 
