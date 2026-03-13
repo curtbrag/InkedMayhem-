@@ -253,6 +253,10 @@ function initAuthModal() {
     function closeModal() {
         modal.classList.remove('active');
         document.body.style.overflow = '';
+        // User dismissed auth; clear any queued payment intent so old actions
+        // don't auto-resume unexpectedly on a later unrelated sign-in.
+        pendingSubscribeTier = null;
+        pendingUnlockPostId = null;
     }
 
     btnLogin.addEventListener('click', openModal);
