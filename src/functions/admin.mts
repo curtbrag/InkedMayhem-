@@ -392,6 +392,18 @@ export default async (req, context) => {
             request.approvedAt = new Date().toISOString();
             await venmoStore.setJSON(requestKey, request);
 
+            // Notify the subscriber by email when a subscription is approved.
+            if (request.type === "subscription" && request.tier) {
+                const siteUrl = process.env.URL || "https://inkedmayhem.netlify.app";
+                try {
+                    await fetch(`${siteUrl}/api/notify`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json", "x-internal-key": getSecret() },
+                        body: JSON.stringify({ type: "subscriber_welcome", data: { email: user.email, name: user.name, tier: request.tier } })
+                    });
+                } catch (err) { console.error("Notify error after Venmo approve:", err); }
+            }
+
             return new Response(JSON.stringify({ success: true, user: { email: user.email, tier: user.tier } }), { headers: CORS });
         } catch (err) {
             return new Response(JSON.stringify({ error: "Approve failed" }), { status: 500, headers: CORS });
