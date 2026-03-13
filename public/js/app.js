@@ -693,7 +693,6 @@ function initContactForm() {
         } catch (err) {
             showToast('Connection error', 'error');
         } finally {
-            const btn = form.querySelector('button[type="submit"]');
             btn.textContent = 'Send It →';
             btn.disabled = false;
         }
