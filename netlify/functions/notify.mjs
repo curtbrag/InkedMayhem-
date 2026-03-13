@@ -53,6 +53,48 @@ var notify_default = async (req, context) => {
   try {
     const { type, data } = await req.json();
     const adminEmail = getAdminEmail();
+    if (type === "post_unlocked") {
+      if (!data.email) {
+        return new Response(JSON.stringify({ skipped: true, reason: "No subscriber email" }));
+      }
+      const subject2 = `Your content is unlocked!`;
+      const html2 = emailTemplate("Content Unlocked!", `
+                <p style="font-size: 1.1rem; color: #e8e4df;">Hey ${data.name || "there"},</p>
+                <p>Your Venmo payment has been verified and your content is now unlocked.</p>
+                <p style="margin-top: 1.5rem;">
+                    <a href="https://inkedmayhem.netlify.app/members" style="display:inline-block;background:#c41230;color:#fff;padding:0.75rem 2rem;text-decoration:none;font-family:'Space Mono',monospace;font-size:0.75rem;letter-spacing:2px;text-transform:uppercase;">
+                        View Content &rarr;
+                    </a>
+                </p>
+                <p style="color: #666; font-size: 0.8rem; margin-top: 1.5rem;">
+                    Questions? Message through the members area.
+                </p>
+            `);
+      const sent2 = await sendEmail(data.email, subject2, html2);
+      return new Response(JSON.stringify({ success: true, sent: sent2 }));
+    }
+    if (type === "payment_rejected") {
+      if (!data.email) {
+        return new Response(JSON.stringify({ skipped: true, reason: "No subscriber email" }));
+      }
+      const subject2 = `Payment not verified \u2014 InkedMayhem`;
+      const html2 = emailTemplate("Payment Not Verified", `
+                <p style="font-size: 1.1rem; color: #e8e4df;">Hey ${data.name || "there"},</p>
+                <p>We weren't able to verify your recent Venmo payment for <strong>${data.label || "your request"}</strong>.</p>
+                <p>This can happen if:</p>
+                <ul style="color: #bbb; line-height: 2;">
+                    <li>The payment note didn't include your email address</li>
+                    <li>The payment amount didn't match the listed price</li>
+                    <li>The payment was sent to the wrong handle</li>
+                </ul>
+                <p>Please try again and make sure to include your email in the Venmo note, or reply to this email for help.</p>
+                <p style="color: #666; font-size: 0.8rem; margin-top: 1.5rem;">
+                    Venmo handle: <strong>@Christina-Dipietro-6</strong>
+                </p>
+            `);
+      const sent2 = await sendEmail(data.email, subject2, html2);
+      return new Response(JSON.stringify({ success: true, sent: sent2 }));
+    }
     if (type === "subscriber_welcome") {
       if (!data.email) {
         return new Response(JSON.stringify({ skipped: true, reason: "No subscriber email" }));

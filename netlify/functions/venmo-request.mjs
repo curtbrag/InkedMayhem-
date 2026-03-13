@@ -4134,21 +4134,49 @@ var venmo_request_default = async (req) => {
     if (!email || !type) {
       return new Response(JSON.stringify({ error: "Missing required fields" }), { status: 400, headers: CORS });
     }
+    const TIER_PRICES = { vip: 9.99, elite: 24.99 };
+    const SINGLE_PRICE = 4.99;
+    let expectedAmount;
+    if (type === "subscription") {
+      if (!tier || !TIER_PRICES[tier]) {
+        return new Response(JSON.stringify({ error: "Invalid tier" }), { status: 400, headers: CORS });
+      }
+      expectedAmount = TIER_PRICES[tier];
+    } else if (type === "single") {
+      if (!postId) {
+        return new Response(JSON.stringify({ error: "Missing postId" }), { status: 400, headers: CORS });
+      }
+      expectedAmount = SINGLE_PRICE;
+    } else {
+      return new Response(JSON.stringify({ error: "Invalid request type" }), { status: 400, headers: CORS });
+    }
+    if (typeof amount !== "number" || Math.abs(amount - expectedAmount) > 0.01) {
+      return new Response(JSON.stringify({ error: "Invalid amount" }), { status: 400, headers: CORS });
+    }
     const store = getStore("venmo-pending");
+    const { blobs } = await store.list();
+    const now = Date.now();
+    for (const blob of blobs) {
+      const r = await store.get(blob.key, { type: "json" });
+      if (r && r.email === email && r.status === "pending") {
+        const age = now - new Date(r.requestedAt).getTime();
+        if (age < 6e4) {
+          return new Response(JSON.stringify({ error: "Duplicate request \u2014 please wait before retrying." }), { status: 429, headers: CORS });
+        }
+      }
+    }
     const key = `venmo-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     const request = {
       email,
       type,
-      amount: amount || 0,
+      amount: expectedAmount,
       status: "pending",
       requestedAt: (/* @__PURE__ */ new Date()).toISOString()
     };
-    if (type === "subscription" && tier) {
+    if (type === "subscription") {
       request.tier = tier;
-    } else if (type === "single" && postId) {
-      request.postId = postId;
     } else {
-      return new Response(JSON.stringify({ error: "Invalid request type" }), { status: 400, headers: CORS });
+      request.postId = postId;
     }
     await store.setJSON(key, request);
     const label = type === "subscription" ? `${tier?.toUpperCase()} subscription ($${amount})` : `Post unlock: ${postId} ($${amount})`;
