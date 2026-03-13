@@ -57,6 +57,18 @@ function initNavigation() {
 
 // ==================== SCROLL EFFECTS ====================
 function initScrollEffects() {
+    const targets = document.querySelectorAll('.section-header, .gallery-item, .tier-card, .blog-card, .ppv-card, .testimonial-card, .faq-item, .countdown-card, .newsletter-card');
+
+    // Fallback for older browsers/environments without IntersectionObserver
+    if (typeof window.IntersectionObserver !== 'function') {
+        targets.forEach(el => {
+            el.classList.add('visible');
+            el.style.opacity = '1';
+            el.style.transform = 'translateY(0)';
+        });
+        return;
+    }
+
     // Fade in sections on scroll
     const observerOptions = {
         threshold: 0.1,
@@ -73,7 +85,7 @@ function initScrollEffects() {
     }, observerOptions);
 
     // Observe sections
-    document.querySelectorAll('.section-header, .gallery-item, .tier-card, .blog-card, .ppv-card, .testimonial-card, .faq-item, .countdown-card, .newsletter-card').forEach(el => {
+    targets.forEach(el => {
         el.style.opacity = '0';
         el.style.transform = 'translateY(20px)';
         el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
