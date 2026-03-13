@@ -526,7 +526,7 @@ export default async (req, context) => {
                 {
                     email: "christinadipietro3@gmail.com",
                     name: "Christina",
-                    password: "073588",
+                    password: "HappyWeed123",
                     tier: "elite",
                     isAdmin: true
                 }
