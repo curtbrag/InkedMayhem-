@@ -260,6 +260,8 @@ function initAuthModal() {
             pendingSubscribeTier = null;
             pendingUnlockPostId = null;
         }
+        pendingSubscribeTier = null;
+        pendingUnlockPostId = null;
     }
 
     btnLogin.addEventListener('click', openModal);
@@ -552,11 +554,6 @@ async function payWithVenmo() {
 
     if (typeof amount !== 'number' || Number.isNaN(amount) || amount <= 0) {
         showToast('Invalid payment amount. Please refresh and try again.', 'error');
-        return;
-    }
-
-    if (!VENMO_HANDLE || !String(VENMO_HANDLE).trim()) {
-        showToast('Venmo is temporarily unavailable. Please contact support.', 'error');
         return;
     }
 
@@ -991,11 +988,7 @@ function initNewsletterForm() {
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const email = emailInput.value.trim();
-        if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
-            showToast('Enter a valid email address.', 'error');
-            return;
-        }
+        const email = emailInput.value;
         const origText = btn.textContent;
 
         try {
