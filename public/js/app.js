@@ -259,9 +259,10 @@ function initAuthModal() {
         if (clearPendingIntent) {
             pendingSubscribeTier = null;
             pendingUnlockPostId = null;
+            pendingPaymentType = null;
+            pendingPaymentTier = null;
+            pendingPaymentPostId = null;
         }
-        pendingSubscribeTier = null;
-        pendingUnlockPostId = null;
     }
 
     btnLogin.addEventListener('click', openModal);
