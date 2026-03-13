@@ -357,6 +357,21 @@ function initAuthModal() {
             localStorage.removeItem('im_user');
         }
     }
+
+    // Silently refresh user tier/purchases from server so approval changes
+    // are visible without requiring a sign-out/sign-in cycle.
+    const savedToken = localStorage.getItem('im_token');
+    if (savedToken) {
+        fetch('/api/me', { headers: { 'Authorization': `Bearer ${savedToken}` } })
+            .then(r => r.ok ? r.json() : null)
+            .then(data => {
+                if (data && data.user) {
+                    localStorage.setItem('im_user', JSON.stringify(data.user));
+                    updateAuthUI(data.user);
+                }
+            })
+            .catch(() => {});
+    }
 }
 
 function updateAuthUI(user) {
