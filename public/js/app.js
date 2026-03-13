@@ -250,11 +250,16 @@ function initAuthModal() {
         document.body.style.overflow = 'hidden';
     }
 
-    function closeModal() {
+    function closeModal(options = {}) {
+        const { clearPendingIntent = true } = options;
         modal.classList.remove('active');
         document.body.style.overflow = '';
         // User dismissed auth; clear any queued payment intent so old actions
         // don't auto-resume unexpectedly on a later unrelated sign-in.
+        if (clearPendingIntent) {
+            pendingSubscribeTier = null;
+            pendingUnlockPostId = null;
+        }
         pendingSubscribeTier = null;
         pendingUnlockPostId = null;
     }
@@ -267,7 +272,7 @@ function initAuthModal() {
     });
 
     document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') closeModal();
+        if (e.key === 'Escape' && modal.classList.contains('active')) closeModal();
     });
 
     toggleAuth.addEventListener('click', (e) => {
@@ -314,7 +319,7 @@ function initAuthModal() {
             if (data.success) {
                 localStorage.setItem('im_token', data.token);
                 localStorage.setItem('im_user', JSON.stringify(data.user));
-                closeModal();
+                closeModal({ clearPendingIntent: false });
                 updateAuthUI(data.user);
                 // If user was trying to subscribe or unlock, continue that flow
                 if (pendingSubscribeTier) {
@@ -522,6 +527,12 @@ async function payWithVenmo() {
     closePaymentPicker();
 
     if (!token || !email) {
+        // Preserve intent so auth success can resume the same payment flow.
+        if (type === 'subscription' && tier) {
+            pendingSubscribeTier = tier;
+        } else if (type === 'single' && postId) {
+            pendingUnlockPostId = postId;
+        }
         promptSignInForPayment('Please sign in before paying with Venmo.');
         return;
     }
