@@ -1,4 +1,4 @@
-// src/functions/notify.mts
+// _src/functions/notify.mts
 async function sendEmail(to, subject, html) {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {

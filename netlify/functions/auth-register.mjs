@@ -5713,7 +5713,7 @@ var require_jsonwebtoken = __commonJS({
   }
 });
 
-// src/functions/lib/blobs.mjs
+// _src/functions/lib/blobs.mjs
 var SITE_STORE_PREFIX = "site:";
 var SIGNED_URL_ACCEPT = "application/json;type=signed-url";
 var METADATA_HEADER_INTERNAL = "x-amz-meta-user";
@@ -5904,7 +5904,7 @@ function getStore(input) {
   return new Store(client, name);
 }
 
-// src/functions/auth-register.mts
+// _src/functions/auth-register.mts
 var import_bcryptjs = __toESM(require_bcryptjs(), 1);
 var import_jsonwebtoken = __toESM(require_jsonwebtoken(), 1);
 var CORS = {

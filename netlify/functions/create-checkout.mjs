@@ -10886,7 +10886,7 @@ function createStripe(platformFunctions, requestSender = defaultRequestSenderFac
 var Stripe = createStripe(new NodePlatformFunctions());
 var stripe_esm_node_default = Stripe;
 
-// src/functions/lib/blobs.mjs
+// _src/functions/lib/blobs.mjs
 var SITE_STORE_PREFIX = "site:";
 var SIGNED_URL_ACCEPT = "application/json;type=signed-url";
 var METADATA_HEADER_INTERNAL = "x-amz-meta-user";
@@ -11077,7 +11077,7 @@ function getStore(input) {
   return new Store(client, name);
 }
 
-// src/functions/create-checkout.mts
+// _src/functions/create-checkout.mts
 var import_jsonwebtoken = __toESM(require_jsonwebtoken(), 1);
 var CORS = {
   "Content-Type": "application/json",
