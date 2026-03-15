@@ -9255,10 +9255,10 @@ var require_jsonwebtoken = __commonJS({
   }
 });
 
-// src/functions/media-processor.mts
+// _src/functions/media-processor.mts
 var import_sharp = __toESM(require_lib(), 1);
 
-// src/functions/lib/blobs.mjs
+// _src/functions/lib/blobs.mjs
 var SITE_STORE_PREFIX = "site:";
 var SIGNED_URL_ACCEPT = "application/json;type=signed-url";
 var METADATA_HEADER_INTERNAL = "x-amz-meta-user";
@@ -9449,7 +9449,7 @@ function getStore(input) {
   return new Store(client, name);
 }
 
-// src/functions/media-processor.mts
+// _src/functions/media-processor.mts
 var CORS = {
   "Content-Type": "application/json",
   "Access-Control-Allow-Origin": "*",

@@ -1,4 +1,4 @@
-// src/functions/health.mts
+// _src/functions/health.mts
 var DEPLOY_ID = "2026-03-12-blobs-rewrite-v2";
 var health_default = async (req) => {
   return new Response(JSON.stringify({

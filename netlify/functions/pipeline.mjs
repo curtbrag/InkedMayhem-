@@ -9255,7 +9255,7 @@ var require_lib = __commonJS({
   }
 });
 
-// src/functions/lib/blobs.mjs
+// _src/functions/lib/blobs.mjs
 var SITE_STORE_PREFIX = "site:";
 var SIGNED_URL_ACCEPT = "application/json;type=signed-url";
 var METADATA_HEADER_INTERNAL = "x-amz-meta-user";
@@ -9446,10 +9446,10 @@ function getStore(input) {
   return new Store(client, name);
 }
 
-// src/functions/pipeline.mts
+// _src/functions/pipeline.mts
 var import_jsonwebtoken = __toESM(require_jsonwebtoken(), 1);
 
-// src/functions/media-processor.mts
+// _src/functions/media-processor.mts
 var import_sharp = __toESM(require_lib(), 1);
 var IMAGE_EXTENSIONS = ["jpg", "jpeg", "png", "webp", "gif"];
 var THUMBNAIL_WIDTH = 400;
@@ -9576,7 +9576,7 @@ function escapeXml(str) {
   return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&apos;");
 }
 
-// src/functions/pipeline.mts
+// _src/functions/pipeline.mts
 var CORS = {
   "Content-Type": "application/json",
   "Access-Control-Allow-Origin": "*",

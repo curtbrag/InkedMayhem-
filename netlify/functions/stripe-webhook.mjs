@@ -7021,7 +7021,7 @@ function createStripe(platformFunctions, requestSender = defaultRequestSenderFac
 var Stripe = createStripe(new NodePlatformFunctions());
 var stripe_esm_node_default = Stripe;
 
-// src/functions/lib/blobs.mjs
+// _src/functions/lib/blobs.mjs
 var SITE_STORE_PREFIX = "site:";
 var SIGNED_URL_ACCEPT = "application/json;type=signed-url";
 var METADATA_HEADER_INTERNAL = "x-amz-meta-user";
@@ -7212,7 +7212,7 @@ function getStore(input) {
   return new Store(client, name);
 }
 
-// src/functions/stripe-webhook.mts
+// _src/functions/stripe-webhook.mts
 async function notifyAdmin(type, data) {
   const secret = process.env.JWT_SECRET || "inkedmayhem-dev-secret-change-me";
   const siteUrl = process.env.URL || "https://inkedmayhem.netlify.app";

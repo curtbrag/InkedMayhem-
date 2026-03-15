@@ -1,4 +1,4 @@
-// src/functions/lib/blobs.mjs
+// _src/functions/lib/blobs.mjs
 var SITE_STORE_PREFIX = "site:";
 var SIGNED_URL_ACCEPT = "application/json;type=signed-url";
 var METADATA_HEADER_INTERNAL = "x-amz-meta-user";
@@ -189,7 +189,7 @@ function getStore(input) {
   return new Store(client, name);
 }
 
-// src/functions/scheduled-publish.mts
+// _src/functions/scheduled-publish.mts
 var scheduled_publish_default = async (req) => {
   const now = /* @__PURE__ */ new Date();
   const nowISO = now.toISOString();
