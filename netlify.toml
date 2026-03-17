@@ -7,7 +7,7 @@
   NODE_VERSION = "18"
 
 [functions]
-  # Pre-compiled .mjs files — no bundler needed
+  node_bundler = "nft"
 
 # Scheduled function: auto-publish content on schedule (every 15 min)
 [functions."scheduled-publish"]
