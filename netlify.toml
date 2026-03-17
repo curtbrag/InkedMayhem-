@@ -7,7 +7,7 @@
   NODE_VERSION = "18"
 
 [functions]
-  node_bundler = "esbuild"
+  # Pre-compiled .mjs files — no bundler needed
 
 # Scheduled function: auto-publish content on schedule (every 15 min)
 [functions."scheduled-publish"]
