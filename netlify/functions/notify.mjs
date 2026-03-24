@@ -10,7 +10,7 @@ async function sendEmail(to, subject, html) {
       method: "POST",
       headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        from: "InkedMayhem <notifications@resend.dev>",
+        from: process.env.RESEND_FROM_EMAIL || "InkedMayhem <onboarding@resend.dev>",
         to: [to],
         subject,
         html
