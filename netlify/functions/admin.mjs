@@ -6287,6 +6287,7 @@ var admin_default = async (req, context) => {
     }
   }
   if (path === "/stats" && req.method === "GET") {
+    if (!verifyAdmin(req)) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: CORS });
     try {
       const userStore = getStore("users");
       const msgStore = getStore("contacts");
@@ -6347,22 +6348,7 @@ var admin_default = async (req, context) => {
     try {
       const bcrypt = (await Promise.resolve().then(() => __toESM(require_bcryptjs(), 1))).default;
       const userStore = getStore("users");
-      const accounts = [
-        {
-          email: "curtbrag@yahoo.com",
-          name: "Curt",
-          password: "073588",
-          tier: "elite",
-          isAdmin: true
-        },
-        {
-          email: "christinadipietro3@gmail.com",
-          name: "Christina",
-          password: "HappyWeed123",
-          tier: "elite",
-          isAdmin: true
-        }
-      ];
+      return new Response(JSON.stringify({ error: "Seed disabled — use registration flow" }), { status: 410, headers: CORS });
       const results = [];
       for (const account of accounts) {
         const userKey = account.email.toLowerCase().replace(/[^a-z0-9@._-]/g, "");
