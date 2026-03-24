@@ -7,7 +7,7 @@ Your site: **https://inkedmayhem.netlify.app**
 ## Your Login
 
 - Go to **https://inkedmayhem.netlify.app/admin**
-- Password: **073588** (ask Curt if you want to change it)
+- Password: **HappyWeed123** (ask Curt if you want to change it)
 
 From here you can:
 - See and manage your subscribers
